@@ -20,4 +20,10 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    files: ['**/*.setup.ts'],
+    rules: {
+      'playwright/expect-expect': 'off',
+    },
+  },
 ];
