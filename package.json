@@ -1,0 +1,33 @@
+{
+  "name": "playwright-ia-framework",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:standard": "playwright test --project=standard",
+    "test:no-auth": "playwright test --project=no-auth",
+    "test:problem": "playwright test --project=problem",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --project=standard --debug",
+    "test:headed": "playwright test --project=standard --headed",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://www.saucedemo.com",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^22.19.18",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "dotenv": "^16.6.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-playwright": "^2.10.2",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  }
+}

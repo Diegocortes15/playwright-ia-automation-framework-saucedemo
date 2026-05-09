@@ -1,0 +1,11 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+auth/*.json
+!auth/.gitkeep
+
+.env
+.env.local
