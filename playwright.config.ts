@@ -41,6 +41,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         storageState: `auth/${u}.json`,
+        ...(u === 'performance_glitch' ? { navigationTimeout: 30_000 } : {}),
       },
     })),
   ],

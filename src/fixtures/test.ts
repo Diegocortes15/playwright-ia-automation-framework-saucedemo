@@ -16,12 +16,24 @@ type Pages = {
 };
 
 export const test = base.extend<Pages>({
-  loginPage: async ({ page }, use) => use(new LoginPage(page)),
-  inventoryPage: async ({ page }, use) => use(new InventoryPage(page)),
-  cartPage: async ({ page }, use) => use(new CartPage(page)),
-  checkoutInfoPage: async ({ page }, use) => use(new CheckoutInfoPage(page)),
-  checkoutOverviewPage: async ({ page }, use) => use(new CheckoutOverviewPage(page)),
-  checkoutCompletePage: async ({ page }, use) => use(new CheckoutCompletePage(page)),
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
+  },
+  inventoryPage: async ({ page }, use) => {
+    await use(new InventoryPage(page));
+  },
+  cartPage: async ({ page }, use) => {
+    await use(new CartPage(page));
+  },
+  checkoutInfoPage: async ({ page }, use) => {
+    await use(new CheckoutInfoPage(page));
+  },
+  checkoutOverviewPage: async ({ page }, use) => {
+    await use(new CheckoutOverviewPage(page));
+  },
+  checkoutCompletePage: async ({ page }, use) => {
+    await use(new CheckoutCompletePage(page));
+  },
 });
 
 export { expect };
