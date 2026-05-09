@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures/test';
-import { loadInvalidPostal, loadProducts } from '@data/fixtures';
+import { loadInvalidPostal, getProductById } from '@data/fixtures';
+
+const backpack = getProductById('sauce-labs-backpack');
 
 for (const scenario of loadInvalidPostal()) {
   test(`@standard checkout validation — ${scenario.description}`, async ({
@@ -7,9 +9,6 @@ for (const scenario of loadInvalidPostal()) {
     cartPage,
     checkoutInfoPage,
   }) => {
-    const backpack = loadProducts().find((p) => p.id === 'sauce-labs-backpack');
-    if (!backpack) throw new Error('Test data missing: sauce-labs-backpack');
-
     await inventoryPage.goto();
     await inventoryPage.addProductToCart(backpack.name);
     await inventoryPage.header.openCart();

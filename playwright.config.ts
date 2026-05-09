@@ -3,6 +3,9 @@ import 'dotenv/config';
 
 const userProjects = ['standard', 'problem', 'performance_glitch', 'error', 'visual'] as const;
 
+// Saucedemo intentionally breaks the sort dropdown for problem_user and
+// error_user (selections are ignored, list stays in default A-Z order).
+// Only these 3 users opt into @sort-functional tests.
 const sortFunctionalUsers = new Set<string>(['standard', 'performance_glitch', 'visual']);
 
 export default defineConfig({

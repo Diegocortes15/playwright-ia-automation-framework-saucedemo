@@ -3,7 +3,7 @@ import playwrightPlugin from 'eslint-plugin-playwright';
 
 export default [
   {
-    ignores: ['node_modules/', 'test-results/', 'playwright-report/', 'auth/', 'data/**/*.json'],
+    ignores: ['node_modules/', 'test-results/', 'playwright-report/', 'auth/'],
   },
   ...tseslint.configs.recommended,
   {

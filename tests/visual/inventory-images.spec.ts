@@ -13,7 +13,7 @@ test('@problem problem_user inventory images all share one broken src', async ({
 
   const srcs = await Promise.all(
     productNames.map(async (name) => {
-      const card = await inventoryPage.getProductCard(name);
+      const card = inventoryPage.getProductCard(name);
       return card.getImageSrc();
     }),
   );

@@ -44,7 +44,7 @@ export class InventoryPage {
     return this.productGrid.locator('[data-test="inventory-item"]').count();
   }
 
-  async getProductCard(productName: string): Promise<ProductCard> {
+  getProductCard(productName: string): ProductCard {
     return new ProductCard(this.page, productName);
   }
 }

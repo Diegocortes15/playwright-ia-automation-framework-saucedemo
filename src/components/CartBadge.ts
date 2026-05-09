@@ -10,7 +10,11 @@ export class CartBadge {
   }
 
   async getCount(): Promise<number> {
-    if (!(await this.badge.isVisible())) return 0;
+    try {
+      await this.badge.waitFor({ state: 'attached', timeout: 1000 });
+    } catch {
+      return 0;
+    }
     return parseInt((await this.badge.textContent()) ?? '0', 10);
   }
 
