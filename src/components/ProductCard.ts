@@ -9,10 +9,7 @@ export class ProductCard {
   readonly removeButton: Locator;
   readonly image: Locator;
 
-  constructor(
-    page: Page,
-    productName: string,
-  ) {
+  constructor(page: Page, productName: string) {
     this.root = page.locator('[data-test="inventory-item"]', { hasText: productName });
     this.name = this.root.locator('[data-test="inventory-item-name"]');
     this.price = this.root.locator('[data-test="inventory-item-price"]');
