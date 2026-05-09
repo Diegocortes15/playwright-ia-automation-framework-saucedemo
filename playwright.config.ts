@@ -3,6 +3,8 @@ import 'dotenv/config';
 
 const userProjects = ['standard', 'problem', 'performance_glitch', 'error', 'visual'] as const;
 
+const sortFunctionalUsers = new Set<string>(['standard', 'performance_glitch', 'visual']);
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -33,16 +35,20 @@ export default defineConfig({
       grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
     },
-    ...userProjects.map((u) => ({
-      name: u,
-      testIgnore: /.*\.setup\.ts/,
-      grep: new RegExp(`@all-users|@${u}`),
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: `auth/${u}.json`,
-        ...(u === 'performance_glitch' ? { navigationTimeout: 30_000 } : {}),
-      },
-    })),
+    ...userProjects.map((u) => {
+      const tagAlternates = ['@all-users', `@${u}`];
+      if (sortFunctionalUsers.has(u)) tagAlternates.push('@sort-functional');
+      return {
+        name: u,
+        testIgnore: /.*\.setup\.ts/,
+        grep: new RegExp(tagAlternates.join('|')),
+        dependencies: ['setup'],
+        use: {
+          ...devices['Desktop Chrome'],
+          storageState: `auth/${u}.json`,
+          ...(u === 'performance_glitch' ? { navigationTimeout: 30_000 } : {}),
+        },
+      };
+    }),
   ],
 });

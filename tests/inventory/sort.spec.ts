@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures/test';
 import { loadSortOrders } from '@data/fixtures';
 
 for (const option of loadSortOrders()) {
-  test(`@all-users sort by ${option.label} → first=${option.expectedFirst}`, async ({
+  test(`@sort-functional sort by ${option.label} → first=${option.expectedFirst}`, async ({
     inventoryPage,
   }) => {
     await inventoryPage.goto();
