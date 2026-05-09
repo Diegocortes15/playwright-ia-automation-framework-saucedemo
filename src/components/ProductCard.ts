@@ -10,12 +10,14 @@ export class ProductCard {
   readonly image: Locator;
 
   constructor(page: Page, productName: string) {
-    this.root = page.locator('[data-test="inventory-item"]', { hasText: productName });
+    this.root = page
+      .locator('[data-test="inventory-item"]')
+      .filter({ has: page.getByText(productName, { exact: true }) });
     this.name = this.root.locator('[data-test="inventory-item-name"]');
     this.price = this.root.locator('[data-test="inventory-item-price"]');
     this.description = this.root.locator('[data-test="inventory-item-desc"]');
-    this.addToCartButton = this.root.getByRole('button', { name: /Add to cart/i });
-    this.removeButton = this.root.getByRole('button', { name: /Remove/i });
+    this.addToCartButton = this.root.getByRole('button', { name: /^Add to cart$/i });
+    this.removeButton = this.root.getByRole('button', { name: /^Remove$/i });
     this.image = this.root.locator('img.inventory_item_img');
   }
 
