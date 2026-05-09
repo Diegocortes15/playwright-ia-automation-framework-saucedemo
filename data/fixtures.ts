@@ -1,10 +1,12 @@
-import productsJson from './shared/products.json';
-import validCheckoutJson from './scenarios/checkout/valid-checkout.json';
-import invalidPostalJson from './scenarios/checkout/invalid-postalcode.json';
-import sortOrdersJson from './scenarios/sort/sort-orders.json';
+import { createRequire } from 'module';
 import type { Product, CheckoutScenario, SortOption } from './types';
 
-export const loadProducts = (): Product[] => productsJson as Product[];
-export const loadValidCheckouts = (): CheckoutScenario[] => validCheckoutJson as CheckoutScenario[];
-export const loadInvalidPostal = (): CheckoutScenario[] => invalidPostalJson as CheckoutScenario[];
-export const loadSortOrders = (): SortOption[] => sortOrdersJson as SortOption[];
+const require = createRequire(import.meta.url);
+
+export const loadProducts = (): Product[] => require('./shared/products.json') as Product[];
+export const loadValidCheckouts = (): CheckoutScenario[] =>
+  require('./scenarios/checkout/valid-checkout.json') as CheckoutScenario[];
+export const loadInvalidPostal = (): CheckoutScenario[] =>
+  require('./scenarios/checkout/invalid-postalcode.json') as CheckoutScenario[];
+export const loadSortOrders = (): SortOption[] =>
+  require('./scenarios/sort/sort-orders.json') as SortOption[];
