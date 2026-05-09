@@ -1,8 +1,16 @@
 [
-  { "description": "empty postal code",
-    "firstName": "John", "lastName": "Doe", "postalCode": "",
-    "expectError": "Error: Postal Code is required" },
-  { "description": "missing first name",
-    "firstName": "", "lastName": "Doe", "postalCode": "12345",
-    "expectError": "Error: First Name is required" }
+  {
+    "description": "empty postal code",
+    "firstName": "John",
+    "lastName": "Doe",
+    "postalCode": "",
+    "expectError": "Error: Postal Code is required"
+  },
+  {
+    "description": "missing first name",
+    "firstName": "",
+    "lastName": "Doe",
+    "postalCode": "12345",
+    "expectError": "Error: First Name is required"
+  }
 ]

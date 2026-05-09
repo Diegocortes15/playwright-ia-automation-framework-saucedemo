@@ -1,4 +1,9 @@
 [
   { "description": "US address", "firstName": "John", "lastName": "Doe", "postalCode": "12345" },
-  { "description": "international postal code", "firstName": "Anna", "lastName": "Mueller", "postalCode": "10115" }
+  {
+    "description": "international postal code",
+    "firstName": "Anna",
+    "lastName": "Mueller",
+    "postalCode": "10115"
+  }
 ]
