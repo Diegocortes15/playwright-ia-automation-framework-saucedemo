@@ -19,6 +19,7 @@
 ## Task 1: Project init and dependencies
 
 **Files:**
+
 - Create: `package.json`
 - Create: `.gitignore`
 
@@ -31,20 +32,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test":          "playwright test",
+    "test": "playwright test",
     "test:standard": "playwright test --project=standard",
-    "test:no-auth":  "playwright test --project=no-auth",
-    "test:problem":  "playwright test --project=problem",
-    "test:ui":       "playwright test --ui",
-    "test:debug":    "playwright test --project=standard --debug",
-    "test:headed":   "playwright test --project=standard --headed",
-    "report":        "playwright show-report",
-    "codegen":       "playwright codegen https://www.saucedemo.com",
-    "typecheck":     "tsc --noEmit",
-    "lint":          "eslint . --ext .ts",
-    "lint:fix":      "eslint . --ext .ts --fix",
-    "format":        "prettier --write .",
-    "format:check":  "prettier --check ."
+    "test:no-auth": "playwright test --project=no-auth",
+    "test:problem": "playwright test --project=problem",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --project=standard --debug",
+    "test:headed": "playwright test --project=standard --headed",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://www.saucedemo.com",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {}
 }
@@ -53,6 +54,7 @@
 - [ ] **Step 2: Install dev dependencies**
 
 Run:
+
 ```bash
 npm install -D @playwright/test@^1.49.0 @types/node@^22.0.0 typescript@^5.7.0 dotenv@^16.4.0
 npm install -D eslint@^9.0.0 @typescript-eslint/parser@^8.0.0 @typescript-eslint/eslint-plugin@^8.0.0 eslint-plugin-playwright@^2.0.0 prettier@^3.4.0
@@ -102,6 +104,7 @@ git commit -m "chore: bootstrap Node project with Playwright, TS, ESLint, Pretti
 ## Task 2: TypeScript configuration
 
 **Files:**
+
 - Create: `tsconfig.json`
 
 - [ ] **Step 1: Create `tsconfig.json`**
@@ -123,11 +126,11 @@ git commit -m "chore: bootstrap Node project with Playwright, TS, ESLint, Pretti
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@data/*":       ["data/*"],
-      "@pages/*":      ["src/pages/*"],
+      "@data/*": ["data/*"],
+      "@pages/*": ["src/pages/*"],
       "@components/*": ["src/components/*"],
-      "@fixtures/*":   ["src/fixtures/*"],
-      "@utils/*":      ["src/utils/*"]
+      "@fixtures/*": ["src/fixtures/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src", "tests", "data", "playwright.config.ts"]
@@ -151,6 +154,7 @@ git commit -m "chore: add TypeScript strict config with path aliases"
 ## Task 3: ESLint and Prettier configuration
 
 **Files:**
+
 - Create: `.eslintrc.json`
 - Create: `.prettierrc.json`
 - Create: `.prettierignore`
@@ -237,6 +241,7 @@ git commit -m "chore: add ESLint with Playwright rules and Prettier config"
 ## Task 4: Environment config and folder scaffold
 
 **Files:**
+
 - Create: `.env.example`
 - Create: `auth/.gitkeep`
 - Create: `src/utils/env.ts`
@@ -315,6 +320,7 @@ git commit -m "chore: add env config, dotenv loading, logger stub, auth folder s
 ## Task 5: Data types
 
 **Files:**
+
 - Create: `data/types.ts`
 
 - [ ] **Step 1: Create `data/types.ts`**
@@ -361,6 +367,7 @@ git commit -m "feat: add data type definitions"
 ## Task 6: Reference and scenario JSON data
 
 **Files:**
+
 - Create: `data/shared/products.json`
 - Create: `data/scenarios/sort/sort-orders.json`
 - Create: `data/scenarios/checkout/valid-checkout.json`
@@ -498,6 +505,7 @@ git commit -m "feat: add reference products and parameterized test scenarios"
 ## Task 7: Typed data loaders
 
 **Files:**
+
 - Create: `data/fixtures.ts`
 
 - [ ] **Step 1: Create `data/fixtures.ts`**
@@ -537,6 +545,7 @@ git commit -m "feat: add typed data loaders for products and scenarios"
 ## Task 8: CartBadge component (leaf — built first)
 
 **Files:**
+
 - Create: `src/components/CartBadge.ts`
 
 - [ ] **Step 1: Create `src/components/CartBadge.ts`**
@@ -581,6 +590,7 @@ git commit -m "feat(components): add CartBadge component"
 ## Task 9: Header component (composes CartBadge)
 
 **Files:**
+
 - Create: `src/components/Header.ts`
 
 - [ ] **Step 1: Create `src/components/Header.ts`**
@@ -630,6 +640,7 @@ git commit -m "feat(components): add Header composing CartBadge"
 ## Task 10: ProductCard component (scoped to one of many)
 
 **Files:**
+
 - Create: `src/components/ProductCard.ts`
 
 - [ ] **Step 1: Create `src/components/ProductCard.ts`**
@@ -699,6 +710,7 @@ git commit -m "feat(components): add ProductCard scoped by product name"
 ## Task 11: SortDropdown component
 
 **Files:**
+
 - Create: `src/components/SortDropdown.ts`
 
 - [ ] **Step 1: Create `src/components/SortDropdown.ts`**
@@ -741,6 +753,7 @@ git commit -m "feat(components): add SortDropdown using @data/types"
 ## Task 12: LoginPage (page-direct locators only)
 
 **Files:**
+
 - Create: `src/pages/LoginPage.ts`
 
 - [ ] **Step 1: Create `src/pages/LoginPage.ts`**
@@ -796,6 +809,7 @@ git commit -m "feat(pages): add LoginPage with page-direct locators"
 ## Task 13: InventoryPage (composes Header, SortDropdown, ProductCard)
 
 **Files:**
+
 - Create: `src/pages/InventoryPage.ts`
 
 - [ ] **Step 1: Create `src/pages/InventoryPage.ts`**
@@ -870,6 +884,7 @@ git commit -m "feat(pages): add InventoryPage composing Header/Sort/ProductCard"
 ## Task 14: CartPage
 
 **Files:**
+
 - Create: `src/pages/CartPage.ts`
 
 - [ ] **Step 1: Create `src/pages/CartPage.ts`**
@@ -939,6 +954,7 @@ git commit -m "feat(pages): add CartPage"
 ## Task 15: CheckoutInfoPage
 
 **Files:**
+
 - Create: `src/pages/checkout/CheckoutInfoPage.ts`
 
 - [ ] **Step 1: Create `src/pages/checkout/CheckoutInfoPage.ts`**
@@ -1011,6 +1027,7 @@ git commit -m "feat(pages): add CheckoutInfoPage"
 ## Task 16: CheckoutOverviewPage
 
 **Files:**
+
 - Create: `src/pages/checkout/CheckoutOverviewPage.ts`
 
 - [ ] **Step 1: Create `src/pages/checkout/CheckoutOverviewPage.ts`**
@@ -1088,6 +1105,7 @@ git commit -m "feat(pages): add CheckoutOverviewPage"
 ## Task 17: CheckoutCompletePage
 
 **Files:**
+
 - Create: `src/pages/checkout/CheckoutCompletePage.ts`
 
 - [ ] **Step 1: Create `src/pages/checkout/CheckoutCompletePage.ts`**
@@ -1141,6 +1159,7 @@ git commit -m "feat(pages): add CheckoutCompletePage"
 ## Task 18: Test fixture (page injection)
 
 **Files:**
+
 - Create: `src/fixtures/test.ts`
 
 - [ ] **Step 1: Create `src/fixtures/test.ts`**
@@ -1192,6 +1211,7 @@ git commit -m "feat(fixtures): add test fixture injecting all pages"
 ## Task 19: Playwright configuration
 
 **Files:**
+
 - Create: `playwright.config.ts`
 
 - [ ] **Step 1: Create `playwright.config.ts`**
@@ -1268,6 +1288,7 @@ git commit -m "chore: add Playwright config with multi-user projects"
 ## Task 20: Auth setup file
 
 **Files:**
+
 - Create: `tests/auth.setup.ts`
 
 - [ ] **Step 1: Create `tests/auth.setup.ts`**
@@ -1295,6 +1316,7 @@ for (const user of users) {
 
 Run: `npx playwright test --project=setup`
 Expected:
+
 - 5 setup tests pass
 - 5 files created: `auth/standard.json`, `auth/problem.json`, `auth/performance_glitch.json`, `auth/error.json`, `auth/visual.json`
 - Each JSON file contains a `cookies` array with a `session-username` cookie
@@ -1318,6 +1340,7 @@ git commit -m "feat(tests): add auth setup generating storageState per user"
 ## Task 21: Login spec (3 tests, @no-auth)
 
 **Files:**
+
 - Create: `tests/login/login.spec.ts`
 
 - [ ] **Step 1: Create `tests/login/login.spec.ts`**
@@ -1376,6 +1399,7 @@ git commit -m "test(login): add 3 @no-auth login tests"
 ## Task 22: Inventory browse spec (1 test, @all-users)
 
 **Files:**
+
 - Create: `tests/inventory/browse.spec.ts`
 
 - [ ] **Step 1: Create `tests/inventory/browse.spec.ts`**
@@ -1388,7 +1412,9 @@ test('@all-users inventory shows all 6 products with correct names', async ({ in
   await inventoryPage.goto();
   expect(await inventoryPage.getProductCount()).toBe(6);
 
-  const expectedNames = loadProducts().map((p) => p.name).sort();
+  const expectedNames = loadProducts()
+    .map((p) => p.name)
+    .sort();
   const actualNames = (await inventoryPage.getProductNames()).sort();
   expect(actualNames).toEqual(expectedNames);
 });
@@ -1402,7 +1428,7 @@ Expected: 1 test passes (1 instance, since `--project=standard` runs only that u
 - [ ] **Step 3: Run on full matrix (5 user projects)**
 
 Run: `npx playwright test inventory/browse`
-Expected: 5 test instances pass (one per authenticated user). Note: `problem_user` may have visual quirks but the *count* and *names* should still match.
+Expected: 5 test instances pass (one per authenticated user). Note: `problem_user` may have visual quirks but the _count_ and _names_ should still match.
 
 - [ ] **Step 4: Commit**
 
@@ -1416,6 +1442,7 @@ git commit -m "test(inventory): add @all-users browse test verifying 6 products"
 ## Task 23: Inventory sort spec (4 parameterized tests, @all-users)
 
 **Files:**
+
 - Create: `tests/inventory/sort.spec.ts`
 
 - [ ] **Step 1: Create `tests/inventory/sort.spec.ts`**
@@ -1459,6 +1486,7 @@ git commit -m "test(inventory): add @all-users sort tests parameterized by JSON"
 ## Task 24: Cart add/remove spec (2 tests, @all-users)
 
 **Files:**
+
 - Create: `tests/cart/add-remove.spec.ts`
 
 - [ ] **Step 1: Create `tests/cart/add-remove.spec.ts`**
@@ -1521,6 +1549,7 @@ git commit -m "test(cart): add @all-users add/remove tests using cartBadge compo
 ## Task 25: Checkout happy-path spec (2 parameterized tests, @standard)
 
 **Files:**
+
 - Create: `tests/checkout/happy-path.spec.ts`
 
 - [ ] **Step 1: Create `tests/checkout/happy-path.spec.ts`**
@@ -1580,6 +1609,7 @@ git commit -m "test(checkout): add @standard happy-path with parameterized scena
 ## Task 26: Checkout validation spec (2 parameterized tests, @standard)
 
 **Files:**
+
 - Create: `tests/checkout/validation.spec.ts`
 
 - [ ] **Step 1: Create `tests/checkout/validation.spec.ts`**
@@ -1628,6 +1658,7 @@ git commit -m "test(checkout): add @standard validation tests with expectError"
 ## Task 27: Visual inventory-images spec (1 test, @problem)
 
 **Files:**
+
 - Create: `tests/visual/inventory-images.spec.ts`
 
 - [ ] **Step 1: Create `tests/visual/inventory-images.spec.ts`**
@@ -1682,6 +1713,7 @@ git commit -m "test(visual): add @problem image-src test for problem_user"
 - [ ] **Step 1: Clean previous results** (PowerShell on Windows)
 
 Run:
+
 ```powershell
 Remove-Item -Recurse -Force test-results, playwright-report -ErrorAction SilentlyContinue
 Remove-Item auth/*.json -Force -ErrorAction SilentlyContinue
@@ -1710,6 +1742,7 @@ Run report: `npm run report`. Inspect each project's pane.
 - [ ] **Step 3: Verify all Definition-of-Done criteria from the spec**
 
 Run each in turn and confirm exit 0:
+
 ```bash
 npm run typecheck
 npm run lint
@@ -1721,6 +1754,7 @@ npm run test:no-auth
 - [ ] **Step 4: Verify pattern coverage matrix**
 
 Open `docs/superpowers/specs/2026-05-09-phase-a-framework-foundation-design.md` Section 9. Visually confirm each row has the file it claims:
+
 - Page with locators only: `LoginPage`, `CheckoutCompletePage` ✓
 - Page composing components: `InventoryPage`, `CartPage` ✓
 - Component composing component: `Header` → `CartBadge` ✓
@@ -1736,6 +1770,7 @@ Open `docs/superpowers/specs/2026-05-09-phase-a-framework-foundation-design.md` 
 - [ ] **Step 5: Final commit (if any verification scripts produced changes; otherwise skip)**
 
 If nothing changed, skip. Otherwise:
+
 ```bash
 git status
 git add <changed files>
@@ -1745,6 +1780,7 @@ git commit -m "chore: phase A complete — full matrix passing"
 - [ ] **Step 6: Tag the milestone**
 
 Run:
+
 ```bash
 git tag -a phase-a-complete -m "Phase A framework foundation complete"
 ```
@@ -1755,14 +1791,14 @@ git tag -a phase-a-complete -m "Phase A framework foundation complete"
 
 The plan was reviewed against the spec before writing. Coverage check:
 
-| Spec section | Tasks |
-|---|---|
-| §3 Folder structure | Tasks 4, 8–17, 18, 19, 20, 21–27 (every folder has a creator) |
-| §4 Composition rules | Encoded in components/pages tasks (8–17): `readonly` fields, no fluent returns, `root`-scoped components, page-direct locators on LoginPage |
-| §5 Multi-user infra | Task 19 (config), Task 20 (auth.setup), Task 21 (no-auth tag), Tasks 22–27 (all-users + pinned tags) |
-| §6 Data layer | Tasks 5, 6, 7 |
-| §7 Page/Component examples | Tasks 8–17 implement them; canonical example matches Task 13 InventoryPage |
-| §8 Configuration & tooling | Tasks 1, 2, 3, 4, 19 |
-| §9 Initial test scope | Tasks 21–27 (matches table 1:1) |
-| §10 Definition of Done | Task 28 verifies every criterion |
-| §11 Out of scope | Plan contains no CI workflow, no cross-browser config, no AI tooling — confirmed |
+| Spec section               | Tasks                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| §3 Folder structure        | Tasks 4, 8–17, 18, 19, 20, 21–27 (every folder has a creator)                                                                               |
+| §4 Composition rules       | Encoded in components/pages tasks (8–17): `readonly` fields, no fluent returns, `root`-scoped components, page-direct locators on LoginPage |
+| §5 Multi-user infra        | Task 19 (config), Task 20 (auth.setup), Task 21 (no-auth tag), Tasks 22–27 (all-users + pinned tags)                                        |
+| §6 Data layer              | Tasks 5, 6, 7                                                                                                                               |
+| §7 Page/Component examples | Tasks 8–17 implement them; canonical example matches Task 13 InventoryPage                                                                  |
+| §8 Configuration & tooling | Tasks 1, 2, 3, 4, 19                                                                                                                        |
+| §9 Initial test scope      | Tasks 21–27 (matches table 1:1)                                                                                                             |
+| §10 Definition of Done     | Task 28 verifies every criterion                                                                                                            |
+| §11 Out of scope           | Plan contains no CI workflow, no cross-browser config, no AI tooling — confirmed                                                            |

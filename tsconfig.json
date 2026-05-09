@@ -14,11 +14,11 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@data/*":       ["data/*"],
-      "@pages/*":      ["src/pages/*"],
+      "@data/*": ["data/*"],
+      "@pages/*": ["src/pages/*"],
       "@components/*": ["src/components/*"],
-      "@fixtures/*":   ["src/fixtures/*"],
-      "@utils/*":      ["src/utils/*"]
+      "@fixtures/*": ["src/fixtures/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src", "tests", "data", "playwright.config.ts"]
