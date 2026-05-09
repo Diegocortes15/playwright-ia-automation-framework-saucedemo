@@ -1,26 +1,15 @@
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tseslint from 'typescript-eslint';
 import playwrightPlugin from 'eslint-plugin-playwright';
 
 export default [
   {
     ignores: ['node_modules/', 'test-results/', 'playwright-report/', 'auth/', 'data/**/*.json'],
   },
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      playwright: playwrightPlugin,
-    },
+    plugins: { playwright: playwrightPlugin },
     rules: {
-      ...tsPlugin.configs['flat/recommended'].rules,
       ...playwrightPlugin.configs['flat/recommended'].rules,
       'playwright/no-wait-for-timeout': 'error',
       'playwright/no-conditional-in-test': 'warn',

@@ -7,7 +7,13 @@ const enabled: Record<Level, boolean> = {
 };
 
 export const logger = {
-  debug: (msg: string) => enabled.debug && console.log(`[debug] ${msg}`),
-  info: (msg: string) => enabled.info && console.log(`[info] ${msg}`),
-  error: (msg: string) => enabled.error && console.error(`[error] ${msg}`),
+  debug: (msg: string): void => {
+    if (enabled.debug) console.log(`[debug] ${msg}`);
+  },
+  info: (msg: string): void => {
+    if (enabled.info) console.log(`[info] ${msg}`);
+  },
+  error: (msg: string): void => {
+    if (enabled.error) console.error(`[error] ${msg}`);
+  },
 };
