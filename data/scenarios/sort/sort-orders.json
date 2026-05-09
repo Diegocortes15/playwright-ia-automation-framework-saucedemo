@@ -1,0 +1,14 @@
+[
+  { "label": "Name (A to Z)", "value": "az",
+    "expectedFirst": "Sauce Labs Backpack",
+    "expectedLast": "Test.allTheThings() T-Shirt (Red)" },
+  { "label": "Name (Z to A)", "value": "za",
+    "expectedFirst": "Test.allTheThings() T-Shirt (Red)",
+    "expectedLast": "Sauce Labs Backpack" },
+  { "label": "Price (low to high)", "value": "lohi",
+    "expectedFirst": "Sauce Labs Onesie",
+    "expectedLast": "Sauce Labs Fleece Jacket" },
+  { "label": "Price (high to low)", "value": "hilo",
+    "expectedFirst": "Sauce Labs Fleece Jacket",
+    "expectedLast": "Sauce Labs Onesie" }
+]
