@@ -32,15 +32,20 @@ export class CheckoutOverviewPage {
   }
 
   async getSubtotal(): Promise<number> {
-    const text = (await this.subtotalLabel.textContent()) ?? '';
-    const match = text.match(/\$([\d.]+)/);
-    return match ? parseFloat(match[1]) : 0;
+    return this.parsePrice(this.subtotalLabel, 'subtotal');
   }
 
   async getTotal(): Promise<number> {
-    const text = (await this.totalLabel.textContent()) ?? '';
+    return this.parsePrice(this.totalLabel, 'total');
+  }
+
+  private async parsePrice(label: Locator, kind: string): Promise<number> {
+    const text = (await label.textContent()) ?? '';
     const match = text.match(/\$([\d.]+)/);
-    return match ? parseFloat(match[1]) : 0;
+    if (!match) {
+      throw new Error(`Could not parse ${kind} from label text: "${text}"`);
+    }
+    return parseFloat(match[1]);
   }
 
   async finish(): Promise<void> {

@@ -12,6 +12,7 @@ export class LoginPage {
     this.passwordInput = page.locator('[data-test="password"]');
     this.loginButton = page.locator('[data-test="login-button"]');
     this.errorBanner = page.locator('[data-test="error"]');
+    // No data-test attribute on the dismiss-error button — saucedemo's only non-data-test login locator
     this.errorCloseButton = page.locator('.error-button');
   }
 
