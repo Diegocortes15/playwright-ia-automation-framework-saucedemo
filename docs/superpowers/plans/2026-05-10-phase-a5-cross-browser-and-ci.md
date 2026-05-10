@@ -21,6 +21,7 @@
 - [ ] **Step 1: Create and switch to feature branch**
 
 Run:
+
 ```
 git checkout -b phase-a5-bridge
 ```
@@ -42,6 +43,7 @@ If anything fails: STOP and report — Phase A's main is not actually green.
 ## Task 1: createRequire cleanup → import attributes
 
 **Files:**
+
 - Modify: `data/fixtures.ts` (currently uses `createRequire`)
 
 **Risk:** import attributes (`with { type: 'json' }`) may not work in our Playwright/Node 22.x toolchain. If it fails at runtime, we revert and continue with the rest of Phase A.5 — the design spec's Section 6 mitigation plan.
@@ -142,6 +144,7 @@ No commit — these are user-machine binaries, not source code changes.
 ## Task 3: Add firefox-standard and webkit-standard projects
 
 **Files:**
+
 - Modify: `playwright.config.ts` (extend the projects array)
 - Modify: `package.json` (add 2 scripts)
 
@@ -227,6 +230,7 @@ If failures occur on webkit specifically: same capture instructions. webkit on W
 Clean state then run all:
 
 PowerShell:
+
 ```powershell
 Remove-Item -Recurse -Force test-results, playwright-report -ErrorAction SilentlyContinue
 Remove-Item auth/*.json -Force -ErrorAction SilentlyContinue
@@ -235,18 +239,18 @@ npm test
 
 Expected counts:
 
-| Project | Tests |
-|---|---|
-| setup | 5 |
-| no-auth | 3 |
-| standard | 11 |
-| problem | 4 |
-| performance_glitch | 7 |
-| error | 3 |
-| visual | 7 |
-| firefox-standard | 11 |
-| webkit-standard | 11 |
-| **Total** | **62** |
+| Project            | Tests  |
+| ------------------ | ------ |
+| setup              | 5      |
+| no-auth            | 3      |
+| standard           | 11     |
+| problem            | 4      |
+| performance_glitch | 7      |
+| error              | 3      |
+| visual             | 7      |
+| firefox-standard   | 11     |
+| webkit-standard    | 11     |
+| **Total**          | **62** |
 
 - [ ] **Step 9: Commit**
 
@@ -265,6 +269,7 @@ regressions without re-running saucedemo's per-user bugs three times."
 ## Task 4: Create GitHub Actions workflow file
 
 **Files:**
+
 - Create: `.github/workflows/test.yml`
 
 The workflow file lives in the repo before any push to GitHub. Once we push and the secret is set, the workflow runs on every PR and main push.
@@ -272,6 +277,7 @@ The workflow file lives in the repo before any push to GitHub. Once we push and 
 - [ ] **Step 1: Create the workflow directory**
 
 PowerShell:
+
 ```powershell
 New-Item -ItemType Directory -Force -Path .github/workflows | Out-Null
 ```
@@ -424,6 +430,7 @@ Tell the user:
 > "Open the repo on GitHub: `https://github.com/<your-username>/playwright-ia-automation-framework-saucedemo`
 >
 > Then:
+>
 > 1. Click **Settings** (top right of the repo page)
 > 2. Left sidebar: **Secrets and variables → Actions**
 > 3. Click **New repository secret**
@@ -534,13 +541,13 @@ If the user used a PR via GitHub UI: GitHub will offer to delete the branch on P
 
 The plan was reviewed against the spec before writing. Coverage check:
 
-| Spec section | Tasks |
-|---|---|
-| §3 Architecture changes — `playwright.config.ts` 2 new projects | Task 3 Step 2 |
-| §3 — `package.json` 2 new scripts | Task 3 Step 3 |
-| §3 — `data/fixtures.ts` to import attributes | Task 1 |
-| §3 — `.github/workflows/test.yml` | Task 4 |
-| §3 — Repository setup (remote, push, secret, branch protection) | Tasks 5, 6, 7 |
-| §5 DoD all 11 items | Task 8 |
-| §6 Risk mitigation for import attributes | Task 1 Step 4 (explicit fallback) |
-| §7 Out of scope | Plan contains nothing from the deferred lists |
+| Spec section                                                    | Tasks                                         |
+| --------------------------------------------------------------- | --------------------------------------------- |
+| §3 Architecture changes — `playwright.config.ts` 2 new projects | Task 3 Step 2                                 |
+| §3 — `package.json` 2 new scripts                               | Task 3 Step 3                                 |
+| §3 — `data/fixtures.ts` to import attributes                    | Task 1                                        |
+| §3 — `.github/workflows/test.yml`                               | Task 4                                        |
+| §3 — Repository setup (remote, push, secret, branch protection) | Tasks 5, 6, 7                                 |
+| §5 DoD all 11 items                                             | Task 8                                        |
+| §6 Risk mitigation for import attributes                        | Task 1 Step 4 (explicit fallback)             |
+| §7 Out of scope                                                 | Plan contains nothing from the deferred lists |

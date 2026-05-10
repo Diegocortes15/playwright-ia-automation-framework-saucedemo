@@ -15,6 +15,7 @@ Add the three deferred items from Phase A: cross-browser smoke coverage (firefox
 ### Why this exists
 
 Three pieces from the Phase A out-of-scope list have become valuable now that the framework is solid:
+
 - Phase B (AI context layer) and Phase C (workflow automation) will eventually push code via PRs. CI must exist to validate those PRs automatically.
 - Cross-browser coverage protects against framework-level locator/interaction regressions before AI-extended tests start landing.
 - The `createRequire` workaround is a CommonJS escape hatch in an ESM file — a convention-drift trap for AI agents extending `data/fixtures.ts` in Phase C.
@@ -30,17 +31,17 @@ Three pieces from the Phase A out-of-scope list have become valuable now that th
 
 ## 2. Decision log
 
-| # | Decision | Rationale |
-|---|---|---|
-| 1 | **Cross-browser scope: smoke pattern** — chromium runs the full 5-user matrix; firefox and webkit run the standard user only | Catches real browser rendering/locator bugs without re-running saucedemo's intentional per-user bugs three times. 62 test instances total vs ~120 for full matrix. |
-| 2 | **CI platform: GitHub Actions** | Repo is on GitHub. First-class Playwright integration. Free for public repos. |
-| 3 | **CI triggers: `pull_request` to main + `push` to main** | Standard pattern. PRs validated; main verified after merge. |
-| 4 | **CI matrix: single job, all 7 projects** | Playwright already parallelizes within a job. Per-browser-job sharding adds setup overhead unjustified at this scale. |
-| 5 | **CI caching: npm + Playwright browsers** | Browser downloads dominate cold-cache CI time (~2 min). `~/.cache/ms-playwright` keyed on `package-lock.json`. |
-| 6 | **CI secret: `SAUCEDEMO_PASSWORD`** as GitHub Actions repository secret | Even though saucedemo's password is public, treat as a secret so the pattern is right for future projects. |
-| 7 | **CI artifacts: HTML report on failure only** | Successful runs don't need the artifact; failures do (trace inspection). 7-day retention. |
-| 8 | **createRequire cleanup: import attributes** (`with { type: 'json' }`) | Native ESM standard since Node 22.13. TypeScript 5.7 supports it. Resolves the convention-drift trap for AI agents. |
-| 9 | **storageState reuse across browsers** | `auth/standard.json` works for chromium, firefox, and webkit (cookies are engine-portable for saucedemo's basic session). No per-browser auth setup needed. |
+| #   | Decision                                                                                                                     | Rationale                                                                                                                                                          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Cross-browser scope: smoke pattern** — chromium runs the full 5-user matrix; firefox and webkit run the standard user only | Catches real browser rendering/locator bugs without re-running saucedemo's intentional per-user bugs three times. 62 test instances total vs ~120 for full matrix. |
+| 2   | **CI platform: GitHub Actions**                                                                                              | Repo is on GitHub. First-class Playwright integration. Free for public repos.                                                                                      |
+| 3   | **CI triggers: `pull_request` to main + `push` to main**                                                                     | Standard pattern. PRs validated; main verified after merge.                                                                                                        |
+| 4   | **CI matrix: single job, all 7 projects**                                                                                    | Playwright already parallelizes within a job. Per-browser-job sharding adds setup overhead unjustified at this scale.                                              |
+| 5   | **CI caching: npm + Playwright browsers**                                                                                    | Browser downloads dominate cold-cache CI time (~2 min). `~/.cache/ms-playwright` keyed on `package-lock.json`.                                                     |
+| 6   | **CI secret: `SAUCEDEMO_PASSWORD`** as GitHub Actions repository secret                                                      | Even though saucedemo's password is public, treat as a secret so the pattern is right for future projects.                                                         |
+| 7   | **CI artifacts: HTML report on failure only**                                                                                | Successful runs don't need the artifact; failures do (trace inspection). 7-day retention.                                                                          |
+| 8   | **createRequire cleanup: import attributes** (`with { type: 'json' }`)                                                       | Native ESM standard since Node 22.13. TypeScript 5.7 supports it. Resolves the convention-drift trap for AI agents.                                                |
+| 9   | **storageState reuse across browsers**                                                                                       | `auth/standard.json` works for chromium, firefox, and webkit (cookies are engine-portable for saucedemo's basic session). No per-browser auth setup needed.        |
 
 ---
 
@@ -197,18 +198,19 @@ After the workflow lands, the user (or implementer with user's confirmation) doe
 2. `npx playwright install --with-deps chromium firefox webkit` succeeds locally.
 3. `npm test` locally runs all 9 projects from a clean state and produces **62 passing test instances**, broken down:
 
-   | Project | Tests |
-   |---|---|
-   | `setup` | 5 |
-   | `no-auth` | 3 |
-   | `standard` | 11 |
-   | `problem` | 4 |
-   | `performance_glitch` | 7 |
-   | `error` | 3 |
-   | `visual` | 7 |
-   | `firefox-standard` | 11 |
-   | `webkit-standard` | 11 |
-   | **Total** | **62** |
+   | Project              | Tests  |
+   | -------------------- | ------ |
+   | `setup`              | 5      |
+   | `no-auth`            | 3      |
+   | `standard`           | 11     |
+   | `problem`            | 4      |
+   | `performance_glitch` | 7      |
+   | `error`              | 3      |
+   | `visual`             | 7      |
+   | `firefox-standard`   | 11     |
+   | `webkit-standard`    | 11     |
+   | **Total**            | **62** |
+
 4. `npm run test:firefox` runs only the firefox-standard project and passes.
 5. `npm run test:webkit` runs only the webkit-standard project and passes.
 6. `data/fixtures.ts` no longer imports `createRequire` from `'module'`. It uses `import x from './x.json' with { type: 'json' }`.
@@ -236,9 +238,9 @@ This is a single-file revert if needed, not a rollback of Phase A.5.
 
 ## 7. Out of scope (deferred to later phases)
 
-| Deferred to | What |
-|---|---|
-| **Phase B** | All AI-context content: `/docs` architecture doc, `/docs` saucedemo natural-language spec, CLAUDE.md, MCP servers (Playwright MCP, Atlassian MCP, GitHub MCP) |
-| **Phase C** | AI skills, slash commands, sub-agents, the `/from-jira` orchestrator, PR creation flow |
-| **Phase D** | Post-commit hook to refresh `/docs`, MCP-driven selector discovery, TestRail export, visual regression baselines, pre-commit hooks (husky/lint-staged) |
-| **Phase A.5 (rejected)** | Per-user × per-browser full matrix (15 projects), Allure or custom reporters, branch protection rules in YAML |
+| Deferred to              | What                                                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase B**              | All AI-context content: `/docs` architecture doc, `/docs` saucedemo natural-language spec, CLAUDE.md, MCP servers (Playwright MCP, Atlassian MCP, GitHub MCP) |
+| **Phase C**              | AI skills, slash commands, sub-agents, the `/from-jira` orchestrator, PR creation flow                                                                        |
+| **Phase D**              | Post-commit hook to refresh `/docs`, MCP-driven selector discovery, TestRail export, visual regression baselines, pre-commit hooks (husky/lint-staged)        |
+| **Phase A.5 (rejected)** | Per-user × per-browser full matrix (15 projects), Allure or custom reporters, branch protection rules in YAML                                                 |
