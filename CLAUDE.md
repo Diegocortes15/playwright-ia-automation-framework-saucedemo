@@ -1,0 +1,98 @@
+# CLAUDE.md — Always-loaded AI rules
+
+This file is loaded into context for every Claude Code session in this project. Keep it under 150 lines. Detailed reference lives in `docs/`.
+
+## Project purpose
+
+Playwright + TypeScript test framework for [saucedemo](https://www.saucedemo.com). AI-assisted extension is a first-class workflow.
+
+- Framework architecture: [`docs/architecture.md`](docs/architecture.md)
+- App behavior (the 6 saucedemo users, flows): [`docs/app/`](docs/app/)
+- Decision rationale: [`docs/adr/`](docs/adr/)
+- Design specs and plans (don't auto-load — read on demand): [`docs/superpowers/`](docs/superpowers/)
+
+## Quick run
+
+```bash
+npm test                 # full matrix (9 projects, 62 instances, ~1 min)
+npm run test:standard    # standard chromium only (fast local iteration)
+npm run test:debug       # Playwright Inspector
+npm run test:ui          # Playwright UI mode
+```
+
+## Composition rules (must follow)
+
+1. **Component knows about Locators and (optionally) child Components only.** Never about Pages or its parent.
+2. **Page composes Components and holds page-unique Locators.** Never composes other Pages.
+3. **Pages NEVER return other Pages.** Methods return `void` or data only. Tests use injected page fixtures to navigate explicitly.
+4. **Tests know about Pages and Data only.** Never raw Locators or Components directly.
+5. **All locator/component fields are `readonly`.** Set in constructor, never reassigned.
+6. **Constructor order:** composed Components first → page-direct Locators second.
+7. **Action methods read like English.** Tests should be near-prose: `inventoryPage.addProductToCart('X')`.
+8. **Queries return data, never `Locator`.** `getProductNames(): string[]`, not `getProductLocators(): Locator[]`.
+9. **Components scoped to one of many similar elements take a discriminator** in the constructor (e.g., `new ProductCard(page, productName)`).
+10. **Refactor a page-direct locator into a Component the moment a 2nd page needs it.** Don't wait.
+11. **Component nesting depth ≤ 2.** Deeper indicates a design problem.
+12. **No `await page.waitForTimeout()` ever.** Use Playwright auto-waiting assertions (`expect(...).toBeVisible()` etc.). Enforced by lint.
+
+## Selector preference order
+
+1. `[data-test="..."]` attribute
+2. `getByRole(...)` (with anchored regex like `/^Add to cart$/i`)
+3. Text matchers
+4. CSS selectors (only when nothing above is available)
+
+Never use XPath.
+
+## Tag conventions (Playwright Projects + storageState + role tags)
+
+| Tag                   | Runs on project(s)                                                                | Purpose                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                       |
+| `@all-users`          | All 5 chromium user projects + firefox/webkit                                     | User-agnostic flows                                                                               |
+| `@standard`           | `standard`, `firefox-standard`, `webkit-standard`                                 | Tests where only standard user is meaningful                                                      |
+| `@problem`            | `problem`                                                                         | Tests that _expect_ the problem user's broken UI                                                  |
+| `@performance_glitch` | `performance_glitch`                                                              | Tests that handle slow loads                                                                      |
+| `@error`              | `error`                                                                           | Tests for the error user's random failures                                                        |
+| `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                             |
+| `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users) |
+
+## Where things live
+
+| What                                         | Where                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Page objects                                 | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                      |
+| Components                                   | `src/components/` (`Header.ts`, `CartBadge.ts`, `ProductCard.ts`, `SortDropdown.ts`)                |
+| Fixture (auto-injects pages)                 | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test` |
+| Test data + types + loaders                  | `data/` (use `@data/*` alias)                                                                       |
+| env config                                   | `src/utils/env.ts` (single read point for `process.env`)                                            |
+| Specs                                        | `tests/<feature>/*.spec.ts`                                                                         |
+| Auth setup (generates storageState per user) | `tests/auth.setup.ts`                                                                               |
+| Playwright config (9 projects)               | `playwright.config.ts`                                                                              |
+
+## Path aliases
+
+```ts
+'@data/*'       → 'data/*'
+'@pages/*'      → 'src/pages/*'
+'@components/*' → 'src/components/*'
+'@fixtures/*'   → 'src/fixtures/*'
+'@utils/*'      → 'src/utils/*'
+```
+
+## When extending the framework
+
+- **Adding a test:** put it under `tests/<feature>/*.spec.ts`. Tag it correctly. Use `@fixtures/test` for `test`/`expect`, never `@playwright/test`.
+- **Adding a page:** put it under `src/pages/`. Compose any existing Components first. Hold page-unique locators directly.
+- **Adding a component:** put it under `src/components/`. Only if reused (or about to be reused) by 2+ pages.
+- **Adding test data:** put reference data in `data/shared/`, scenarios in `data/scenarios/<feature>/`. Add a typed loader in `data/fixtures.ts`.
+- **Architectural changes:** read `docs/adr/` first; if you need to overturn an ADR, write a superseding one rather than editing the original.
+
+## What to NEVER do
+
+- `await page.waitForTimeout()` — lint blocks; use auto-waiting assertions
+- Make a Page method return another Page (we explicitly rejected fluent navigation — see ADR-0001)
+- Import a Page from another Page (no cross-page imports in `src/pages/`)
+- Import a raw Locator into a test (tests use Pages and Data only)
+- Use XPath
+- Add a 15-project per-user-per-browser matrix (smoke pattern is intentional — see ADR-0004)
