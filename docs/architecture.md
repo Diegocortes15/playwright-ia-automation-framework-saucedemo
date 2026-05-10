@@ -29,7 +29,7 @@ playwright-ia-framework/
 ├── playwright.config.ts
 ├── tsconfig.json
 ├── package.json
-├── .eslintrc.json
+├── eslint.config.js
 ├── .prettierrc.json
 ├── .env.example
 ├── .gitignore
@@ -93,7 +93,9 @@ playwright-ia-framework/
 │       └── inventory-images.spec.ts      # @problem
 │
 └── docs/
-    └── superpowers/specs/                # design docs
+    └── superpowers/
+        ├── specs/                        # design docs
+        └── plans/                        # implementation plans
 ```
 
 ### Directory guide
@@ -155,6 +157,19 @@ These rules are the contract every contributor (human or AI agent) must follow w
 11. **Component nesting depth is at most 2.** `Header` may compose `CartBadge` (depth 2). A component that needs to compose a component that composes another component indicates a design problem — flatten or redesign.
 
 12. **No `await page.waitForTimeout()` ever.** Use Playwright's auto-waiting assertions (`expect(...).toBeVisible()`, `expect(...).toHaveURL()`, etc.). Arbitrary timeouts are a flakiness source and are blocked by the `playwright/no-wait-for-timeout` lint rule.
+
+### Selector preference order
+
+When choosing how to identify a UI element, prefer this order:
+
+1. `[data-test="..."]` attribute (most stable; saucedemo provides these widely)
+2. `getByRole(...)` with anchored regex (e.g., `/^Add to cart$/i`)
+3. Text matchers (`getByText`, `hasText` filters)
+4. CSS selectors — only when none of the above is available
+
+**Never use XPath.** This is the framework's only hard rule about selectors. The Phase A code-review process found XPath selectors brittle, hard to read, and incompatible with Playwright's auto-waiting semantics.
+
+The only legitimate non-`data-test` locator currently in the framework is `LoginPage.errorCloseButton` (the `.error-button` CSS class) — saucedemo doesn't expose a `data-test` attribute for that element.
 
 For the historical decision behind this pattern, see [ADR-0001](adr/0001-pom-by-component.md).
 
