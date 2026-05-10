@@ -8,6 +8,8 @@
     "test:standard": "playwright test --project=standard",
     "test:no-auth": "playwright test --project=no-auth",
     "test:problem": "playwright test --project=problem",
+    "test:firefox": "playwright test --project=firefox-standard",
+    "test:webkit": "playwright test --project=webkit-standard",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --project=standard --debug",
     "test:headed": "playwright test --project=standard --headed",

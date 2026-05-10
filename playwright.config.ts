@@ -53,5 +53,25 @@ export default defineConfig({
         },
       };
     }),
+    {
+      name: 'firefox-standard',
+      testIgnore: /.*\.setup\.ts/,
+      grep: /@all-users|@standard|@sort-functional/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: 'auth/standard.json',
+      },
+    },
+    {
+      name: 'webkit-standard',
+      testIgnore: /.*\.setup\.ts/,
+      grep: /@all-users|@standard|@sort-functional/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: 'auth/standard.json',
+      },
+    },
   ],
 });
