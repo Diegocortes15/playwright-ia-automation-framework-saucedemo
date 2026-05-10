@@ -40,6 +40,7 @@ Expected: 62 test instances pass across 9 Playwright projects (~1 minute on a wa
 | `npm run codegen`       | Open Playwright codegen against saucedemo               |
 | `npm run typecheck`     | TypeScript strict typecheck (no emit)                   |
 | `npm run lint`          | ESLint v9 flat config                                   |
+| `npm run lint:fix`      | ESLint with `--fix` (auto-resolve fixable issues)       |
 | `npm run format`        | Prettier write                                          |
 | `npm run format:check`  | Prettier check (used by CI)                             |
 
@@ -57,7 +58,7 @@ Expected: 62 test instances pass across 9 Playwright projects (~1 minute on a wa
 │   └── scenarios/    # Parameterized test scenarios (sort/, checkout/)
 ├── tests/            # Spec files (one folder per feature) + auth.setup.ts
 ├── auth/             # Generated storageState files (git-ignored; .gitkeep tracked)
-├── docs/             # Documentation
+├── docs/             # Documentation (architecture, app/, adr/, superpowers/)
 └── .github/workflows/test.yml   # GitHub Actions CI
 ```
 
