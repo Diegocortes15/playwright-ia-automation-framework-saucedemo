@@ -19,7 +19,7 @@ Override locally via `SAUCEDEMO_BASE_URL` in `.env`. Default is set in `playwrig
 
 The username for each user is documented in [`users.md`](users.md). The password is the same for all users and is the published value `secret_sauce`.
 
-Although `secret_sauce` is public, this framework treats it as a secret in `.env` (loaded via `src/utils/env.ts`). This is intentional — it sets the right pattern for future projects that test apps with real credentials.
+Although `secret_sauce` is public, this framework stores it under the `SAUCEDEMO_PASSWORD` env var in `.env` (loaded via `src/utils/env.ts`). This is intentional — it sets the right pattern for future projects that test apps with real credentials.
 
 ## See also
 
