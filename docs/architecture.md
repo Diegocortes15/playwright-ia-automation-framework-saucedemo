@@ -59,7 +59,7 @@ playwright-ia-framework/
 │
 ├── data/
 │   ├── types.ts                          # Product, CheckoutScenario, SortOption
-│   ├── fixtures.ts                       # loadProducts(), loadCheckoutScenarios(), ...
+│   ├── fixtures.ts                       # loadProducts(), loadValidCheckouts(), loadSortOrders(), ...
 │   ├── shared/
 │   │   └── products.json
 │   └── scenarios/
