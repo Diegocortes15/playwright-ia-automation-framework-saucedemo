@@ -83,7 +83,7 @@ playwright-ia-framework/
 │   │   └── login.spec.ts                 # @no-auth
 │   ├── inventory/
 │   │   ├── browse.spec.ts                # @all-users
-│   │   └── sort.spec.ts                  # @all-users
+│   │   └── sort.spec.ts                  # @sort-functional
 │   ├── cart/
 │   │   └── add-remove.spec.ts            # @all-users
 │   ├── checkout/
