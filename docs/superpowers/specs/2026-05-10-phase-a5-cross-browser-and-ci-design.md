@@ -222,17 +222,21 @@ After the workflow lands, the user (or implementer with user's confirmation) doe
 
 ---
 
-## 6. Risk: `with { type: 'json' }` may not work in our toolchain
+## 6. Risk (resolved): `with { type: 'json' }` toolchain support
 
-The import-attributes syntax is well-supported in Node 22.13+ and TypeScript 5.7+, but Playwright's test runner has its own TypeScript pipeline. If it doesn't transpile or pass through the attribute correctly, runtime imports will fail with a JSON-parse error.
+**Outcome:** The import-attributes path succeeded on first try in our toolchain — Node 22.x + TypeScript 5.9 + Playwright 1.59. No revert was needed. The risk-mitigation plan below is preserved as historical context for similar toolchain decisions in future phases.
 
-**Mitigation plan:**
+### Original risk assessment
+
+The import-attributes syntax is well-supported in Node 22.13+ and TypeScript 5.7+, but Playwright's test runner has its own TypeScript pipeline. If it had not transpiled or passed through the attribute correctly, runtime imports would have failed with a JSON-parse error.
+
+### Mitigation plan (was not triggered)
 
 1. The implementer applies the change and runs `npx playwright test --project=standard tests/inventory/browse.spec.ts` immediately after.
 2. If it fails: the implementer reverts `data/fixtures.ts` to the `createRequire` form, restores the original comment, marks the cleanup as deferred to a future phase (when Playwright/TS toolchain catches up), and updates this spec's section 6 with the actual failure mode observed.
 3. The other Phase A.5 work (cross-browser projects, CI workflow) proceeds unaffected — they don't depend on this change.
 
-This is a single-file revert if needed, not a rollback of Phase A.5.
+This was a single-file revert if needed, not a rollback of Phase A.5.
 
 ---
 
