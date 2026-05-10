@@ -16,7 +16,7 @@ The deliverables follow the 2026 industry standard for AI-assisted dev projects:
 
 - A **two-layer doc system**: short always-loaded rules (`CLAUDE.md`) + on-demand reference (`/docs/*.md`)
 - **Separation of framework docs from app-under-test docs** — the framework will outlive any single app it tests
-- **Architecture Decision Records (ADRs)** capturing the *why* of foundational decisions
+- **Architecture Decision Records (ADRs)** capturing the _why_ of foundational decisions
 - **Placeholder files** for known-future docs, with comments explaining why deferred
 
 ### Why this exists
@@ -24,7 +24,7 @@ The deliverables follow the 2026 industry standard for AI-assisted dev projects:
 Three concrete problems Phase B.1 solves:
 
 1. **Onboarding (human and AI):** A fresh clone has no entry point. `README.md` and `CLAUDE.md` give immediate context to whoever (or whatever) opens the repo.
-2. **AI extension quality:** AI agents in Phase C will write tests, pages, components. Without `CLAUDE.md` rules and architectural references, AI follows generic patterns instead of *this* framework's patterns. Convention drift compounds across PRs.
+2. **AI extension quality:** AI agents in Phase C will write tests, pages, components. Without `CLAUDE.md` rules and architectural references, AI follows generic patterns instead of _this_ framework's patterns. Convention drift compounds across PRs.
 3. **Decision continuity:** The Phase A/A.5 design specs contain rich decision rationale, but they're long-form documents. ADRs distill the architecturally significant decisions into short, addressable, link-able units that AI and humans can reference quickly.
 
 ### Why split B.1 from B.2 (MCP)
@@ -43,19 +43,19 @@ Documentation work is mostly markdown writing — predictable, parallelizable, n
 
 ## 2. Decision log
 
-| # | Decision | Rationale |
-|---|---|---|
-| 1 | **Two-layer doc system** (`CLAUDE.md` always-loaded; `/docs/*` on-demand) | Industry standard in 2026 (Anthropic, Cursor, GitHub Copilot all converge); keeps `CLAUDE.md` lean to avoid bloating every AI context window |
-| 2 | **`CLAUDE.md` at repo root** (not `AGENTS.md` or `.cursorrules`) | Native convention for Claude Code (the tool the project's AI workflow targets) |
-| 3 | **Separate `/docs/app/` for the app under test** | The framework will outlive any single app; app docs scope per-app and need their own lifecycle |
-| 4 | **ADRs in `/docs/adr/` with Michael Nygard format** (Context/Decision/Consequences/Alternatives) | Industry standard since ~2018 (ThoughtWorks, Spotify); short numbered files; AI agents can reference by ID |
-| 5 | **Five starter ADRs** (not all 26 decisions from Phase A/A.5 specs) | ADRs are for *architecturally significant* decisions only; the rest stay in long-form design specs |
-| 6 | **Placeholder files for known-future docs** with comment block explaining deferral | User's explicit ask — keeps "future reference" without committing to write content prematurely |
-| 7 | **`README.md` includes CI status badge** | Standard practice; signals project health at a glance |
-| 8 | **Keep `docs/superpowers/specs/` and `docs/superpowers/plans/` untouched** | Those are *our* design artifacts (this brainstorm/plan/exec process), not the framework's external docs |
-| 9 | **No `CONTRIBUTING.md` content yet** (placeholder only) | Solo project; no external contributors; CLAUDE.md absorbs the AI-side guidance |
-| 10 | **No glossary content yet** (placeholder only) | Domain is small (saucedemo has ~10-15 terms total); a glossary file is overhead until terms accumulate |
-| 11 | **No runbook content yet** (placeholder only) | No incidents to document yet; runbook fills naturally as flakes/failures emerge |
+| #   | Decision                                                                                         | Rationale                                                                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Two-layer doc system** (`CLAUDE.md` always-loaded; `/docs/*` on-demand)                        | Industry standard in 2026 (Anthropic, Cursor, GitHub Copilot all converge); keeps `CLAUDE.md` lean to avoid bloating every AI context window |
+| 2   | **`CLAUDE.md` at repo root** (not `AGENTS.md` or `.cursorrules`)                                 | Native convention for Claude Code (the tool the project's AI workflow targets)                                                               |
+| 3   | **Separate `/docs/app/` for the app under test**                                                 | The framework will outlive any single app; app docs scope per-app and need their own lifecycle                                               |
+| 4   | **ADRs in `/docs/adr/` with Michael Nygard format** (Context/Decision/Consequences/Alternatives) | Industry standard since ~2018 (ThoughtWorks, Spotify); short numbered files; AI agents can reference by ID                                   |
+| 5   | **Five starter ADRs** (not all 26 decisions from Phase A/A.5 specs)                              | ADRs are for _architecturally significant_ decisions only; the rest stay in long-form design specs                                           |
+| 6   | **Placeholder files for known-future docs** with comment block explaining deferral               | User's explicit ask — keeps "future reference" without committing to write content prematurely                                               |
+| 7   | **`README.md` includes CI status badge**                                                         | Standard practice; signals project health at a glance                                                                                        |
+| 8   | **Keep `docs/superpowers/specs/` and `docs/superpowers/plans/` untouched**                       | Those are _our_ design artifacts (this brainstorm/plan/exec process), not the framework's external docs                                      |
+| 9   | **No `CONTRIBUTING.md` content yet** (placeholder only)                                          | Solo project; no external contributors; CLAUDE.md absorbs the AI-side guidance                                                               |
+| 10  | **No glossary content yet** (placeholder only)                                                   | Domain is small (saucedemo has ~10-15 terms total); a glossary file is overhead until terms accumulate                                       |
+| 11  | **No runbook content yet** (placeholder only)                                                    | No incidents to document yet; runbook fills naturally as flakes/failures emerge                                                              |
 
 ---
 
@@ -92,13 +92,13 @@ Documentation work is mostly markdown writing — predictable, parallelizable, n
 
 **Total new files: 15** (6 framework/app docs + 1 ADR template + 5 ADRs + 3 placeholders).
 
-| Category | Files | Count |
-|---|---|---|
-| Framework/app docs | `README.md`, `CLAUDE.md`, `docs/architecture.md`, `docs/app/overview.md`, `docs/app/users.md`, `docs/app/flows.md` | 6 |
-| ADR template | `docs/adr/0000-template.md` | 1 |
-| ADRs (real content) | `docs/adr/0001-pom-by-component.md` through `0005-esm-import-attributes-for-json.md` | 5 |
-| Placeholders | `CONTRIBUTING.md`, `docs/runbook.md`, `docs/app/glossary.md` | 3 |
-| **Total** | | **15** |
+| Category            | Files                                                                                                              | Count  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| Framework/app docs  | `README.md`, `CLAUDE.md`, `docs/architecture.md`, `docs/app/overview.md`, `docs/app/users.md`, `docs/app/flows.md` | 6      |
+| ADR template        | `docs/adr/0000-template.md`                                                                                        | 1      |
+| ADRs (real content) | `docs/adr/0001-pom-by-component.md` through `0005-esm-import-attributes-for-json.md`                               | 5      |
+| Placeholders        | `CONTRIBUTING.md`, `docs/runbook.md`, `docs/app/glossary.md`                                                       | 3      |
+| **Total**           |                                                                                                                    | **15** |
 
 ---
 
@@ -230,14 +230,14 @@ report (`npm run report`) for debugging. Inspect Playwright traces in
 
 The 6 users:
 
-| User | Test project mapping | Known behavior |
-|---|---|---|
-| `standard_user` | `standard`, `firefox-standard`, `webkit-standard` | Happy path; sort works; cart works; checkout works |
-| `locked_out_user` | `no-auth` (login test only — no storageState) | Login fails with "Sorry, this user has been locked out" |
-| `problem_user` | `problem` | Wrong product images on inventory; sort dropdown selections are ignored |
-| `performance_glitch_user` | `performance_glitch` | Each navigation has ~10s artificial delay; functionally correct otherwise |
-| `error_user` | `error` | Sort dropdown ignored (same as problem_user); intermittent UI glitches |
-| `visual_user` | `visual` | Visual regressions intended (font sizes, colors); functional flows work |
+| User                      | Test project mapping                              | Known behavior                                                            |
+| ------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------- |
+| `standard_user`           | `standard`, `firefox-standard`, `webkit-standard` | Happy path; sort works; cart works; checkout works                        |
+| `locked_out_user`         | `no-auth` (login test only — no storageState)     | Login fails with "Sorry, this user has been locked out"                   |
+| `problem_user`            | `problem`                                         | Wrong product images on inventory; sort dropdown selections are ignored   |
+| `performance_glitch_user` | `performance_glitch`                              | Each navigation has ~10s artificial delay; functionally correct otherwise |
+| `error_user`              | `error`                                           | Sort dropdown ignored (same as problem_user); intermittent UI glitches    |
+| `visual_user`             | `visual`                                          | Visual regressions intended (font sizes, colors); functional flows work   |
 
 ### `docs/app/flows.md` (~150 lines)
 
@@ -362,6 +362,7 @@ Until then: <where to find equivalent info, if any>
 ```
 
 **Rationale for HTML comment + visible body:**
+
 - HTML comment (`<!-- ... -->`) doesn't render in markdown viewers (clean appearance)
 - Visible "(Placeholder — see comment above.)" body tells readers in rendered view that the file is intentional, not missing
 - AI agents reading the raw file see the full comment block and understand the deferral
@@ -387,10 +388,10 @@ Until then: <where to find equivalent info, if any>
 
 ## 7. Out of scope (deferred)
 
-| Deferred to | What |
-|---|---|
-| **Phase B.2** | MCP servers setup: Playwright MCP (browser inspection), Atlassian MCP (Jira), GitHub MCP (PR creation) |
-| **Phase C** | AI skills (`code-review`, `testrail-export`, etc.); slash commands (`/from-jira`, `/refine-jira`); planner/implementer/reviewer sub-agents; PR creation flow |
-| **Phase D** | Post-commit hook to refresh `/docs` automatically; visual regression baselines; pre-commit hooks |
-| **Future fill-in** (no phase yet) | Content for `CONTRIBUTING.md`, `docs/runbook.md`, `docs/app/glossary.md` |
-| **Out of scope** | Translation/i18n of docs; auto-generated docs from code; ADRs 0006+ (added when new architectural decisions emerge) |
+| Deferred to                       | What                                                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Phase B.2**                     | MCP servers setup: Playwright MCP (browser inspection), Atlassian MCP (Jira), GitHub MCP (PR creation)                                                       |
+| **Phase C**                       | AI skills (`code-review`, `testrail-export`, etc.); slash commands (`/from-jira`, `/refine-jira`); planner/implementer/reviewer sub-agents; PR creation flow |
+| **Phase D**                       | Post-commit hook to refresh `/docs` automatically; visual regression baselines; pre-commit hooks                                                             |
+| **Future fill-in** (no phase yet) | Content for `CONTRIBUTING.md`, `docs/runbook.md`, `docs/app/glossary.md`                                                                                     |
+| **Out of scope**                  | Translation/i18n of docs; auto-generated docs from code; ADRs 0006+ (added when new architectural decisions emerge)                                          |

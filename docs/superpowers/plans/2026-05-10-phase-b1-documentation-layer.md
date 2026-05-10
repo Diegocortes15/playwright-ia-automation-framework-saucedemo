@@ -13,6 +13,7 @@
 **Working directory:** `d:\Diego\Projects\IA Engineer\playwright-ia-framework`. Currently on `main` at `5dfc121` (the Phase B.1 spec commit). Implementation should happen on a new feature branch `phase-b1-docs`.
 
 **Source specs the implementer can read:**
+
 - `docs/superpowers/specs/2026-05-09-phase-a-framework-foundation-design.md` (Phase A spec — sections 3, 4, 5, 6 contain source material)
 - `docs/superpowers/specs/2026-05-10-phase-a5-cross-browser-and-ci-design.md` (Phase A.5 spec — sections 2, 3 contain source material)
 - `docs/superpowers/specs/2026-05-10-phase-b1-documentation-layer-design.md` (this phase's spec — file scope and decision log)
@@ -26,6 +27,7 @@
 - [ ] **Step 1: Create and switch to feature branch**
 
 Run:
+
 ```
 git checkout -b phase-b1-docs
 ```
@@ -78,23 +80,23 @@ Expected: 62 test instances pass across 9 Playwright projects (~1 minute on a wa
 
 ## npm scripts
 
-| Script | What it does |
-|---|---|
-| `npm test` | Run the full matrix (all 9 projects, 62 instances) |
+| Script                  | What it does                                            |
+| ----------------------- | ------------------------------------------------------- |
+| `npm test`              | Run the full matrix (all 9 projects, 62 instances)      |
 | `npm run test:standard` | Run only the standard chromium project (fast iteration) |
-| `npm run test:no-auth` | Run only login tests (no storageState) |
-| `npm run test:problem` | Run only the `problem_user` project |
-| `npm run test:firefox` | Run only the `firefox-standard` project |
-| `npm run test:webkit` | Run only the `webkit-standard` project |
-| `npm run test:debug` | Standard project with `--debug` (Playwright Inspector) |
-| `npm run test:ui` | Open Playwright UI mode |
-| `npm run test:headed` | Standard project in headed mode |
-| `npm run report` | Open the HTML report from the last run |
-| `npm run codegen` | Open Playwright codegen against saucedemo |
-| `npm run typecheck` | TypeScript strict typecheck (no emit) |
-| `npm run lint` | ESLint v9 flat config |
-| `npm run format` | Prettier write |
-| `npm run format:check` | Prettier check (used by CI) |
+| `npm run test:no-auth`  | Run only login tests (no storageState)                  |
+| `npm run test:problem`  | Run only the `problem_user` project                     |
+| `npm run test:firefox`  | Run only the `firefox-standard` project                 |
+| `npm run test:webkit`   | Run only the `webkit-standard` project                  |
+| `npm run test:debug`    | Standard project with `--debug` (Playwright Inspector)  |
+| `npm run test:ui`       | Open Playwright UI mode                                 |
+| `npm run test:headed`   | Standard project in headed mode                         |
+| `npm run report`        | Open the HTML report from the last run                  |
+| `npm run codegen`       | Open Playwright codegen against saucedemo               |
+| `npm run typecheck`     | TypeScript strict typecheck (no emit)                   |
+| `npm run lint`          | ESLint v9 flat config                                   |
+| `npm run format`        | Prettier write                                          |
+| `npm run format:check`  | Prettier check (used by CI)                             |
 
 ## Project structure
 
@@ -116,12 +118,12 @@ Expected: 62 test instances pass across 9 Playwright projects (~1 minute on a wa
 
 ## Documentation
 
-| File | Purpose |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | AI rules — auto-loaded by Claude Code |
+| File                                           | Purpose                                             |
+| ---------------------------------------------- | --------------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                       | AI rules — auto-loaded by Claude Code               |
 | [`docs/architecture.md`](docs/architecture.md) | Framework structure, composition rules, conventions |
-| [`docs/app/`](docs/app/) | About the app under test (saucedemo) |
-| [`docs/adr/`](docs/adr/) | Architecture Decision Records (numbered) |
+| [`docs/app/`](docs/app/)                       | About the app under test (saucedemo)                |
+| [`docs/adr/`](docs/adr/)                       | Architecture Decision Records (numbered)            |
 
 ## Tech stack
 
@@ -131,6 +133,7 @@ Node 22 · Playwright 1.59 · TypeScript 5.9 (strict) · ESLint v9 flat config +
 - [ ] **Step 2: Verify markdown renders**
 
 Open `README.md` in a markdown preview (VS Code preview, or commit + view on GitHub later). Confirm:
+
 - Title and badge render at the top
 - Tables format correctly
 - Code blocks have correct fences
@@ -210,29 +213,29 @@ Never use XPath.
 
 ## Tag conventions (Playwright Projects + storageState + role tags)
 
-| Tag | Runs on project(s) | Purpose |
-|---|---|---|
-| `@no-auth` | `no-auth` | Login/logout tests, no pre-existing session |
-| `@all-users` | All 5 chromium user projects + firefox/webkit | User-agnostic flows |
-| `@standard` | `standard`, `firefox-standard`, `webkit-standard` | Tests where only standard user is meaningful |
-| `@problem` | `problem` | Tests that *expect* the problem user's broken UI |
-| `@performance_glitch` | `performance_glitch` | Tests that handle slow loads |
-| `@error` | `error` | Tests for the error user's random failures |
-| `@visual` | `visual` | Visual regression for the visual user |
-| `@sort-functional` | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users) |
+| Tag                   | Runs on project(s)                                                                | Purpose                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                       |
+| `@all-users`          | All 5 chromium user projects + firefox/webkit                                     | User-agnostic flows                                                                               |
+| `@standard`           | `standard`, `firefox-standard`, `webkit-standard`                                 | Tests where only standard user is meaningful                                                      |
+| `@problem`            | `problem`                                                                         | Tests that _expect_ the problem user's broken UI                                                  |
+| `@performance_glitch` | `performance_glitch`                                                              | Tests that handle slow loads                                                                      |
+| `@error`              | `error`                                                                           | Tests for the error user's random failures                                                        |
+| `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                             |
+| `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users) |
 
 ## Where things live
 
-| What | Where |
-|---|---|
-| Page objects | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`) |
-| Components | `src/components/` (`Header.ts`, `CartBadge.ts`, `ProductCard.ts`, `SortDropdown.ts`) |
-| Fixture (auto-injects pages) | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test` |
-| Test data + types + loaders | `data/` (use `@data/*` alias) |
-| env config | `src/utils/env.ts` (single read point for `process.env`) |
-| Specs | `tests/<feature>/*.spec.ts` |
-| Auth setup (generates storageState per user) | `tests/auth.setup.ts` |
-| Playwright config (9 projects) | `playwright.config.ts` |
+| What                                         | Where                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Page objects                                 | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                      |
+| Components                                   | `src/components/` (`Header.ts`, `CartBadge.ts`, `ProductCard.ts`, `SortDropdown.ts`)                |
+| Fixture (auto-injects pages)                 | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test` |
+| Test data + types + loaders                  | `data/` (use `@data/*` alias)                                                                       |
+| env config                                   | `src/utils/env.ts` (single read point for `process.env`)                                            |
+| Specs                                        | `tests/<feature>/*.spec.ts`                                                                         |
+| Auth setup (generates storageState per user) | `tests/auth.setup.ts`                                                                               |
+| Playwright config (9 projects)               | `playwright.config.ts`                                                                              |
 
 ## Path aliases
 
@@ -346,6 +349,7 @@ Use Markdown headings (`##` for the 8 sections, `###` for sub-sections within), 
 - [ ] **Step 2: Verify content matches sources**
 
 Cross-check that:
+
 - The 12 composition rules in §4 match Phase A spec §4 exactly (same wording)
 - The 9 Playwright projects in §6 match `playwright.config.ts` (read the actual file to confirm names)
 - The tag table in §6 matches CLAUDE.md table you just wrote
@@ -368,6 +372,7 @@ git commit -m "docs: add architecture.md covering structure, rules, data, multi-
 ## Task 4: docs/app/ — overview, users, flows
 
 **Files:** Create three files in `docs/app/`:
+
 - `docs/app/overview.md` (~40 lines)
 - `docs/app/users.md` (~80 lines)
 - `docs/app/flows.md` (~150 lines)
@@ -381,7 +386,7 @@ PowerShell: `New-Item -ItemType Directory -Force -Path docs/app | Out-Null`
 
 - [ ] **Step 2: Create `docs/app/overview.md` with the EXACT content below**
 
-````markdown
+```markdown
 # Saucedemo — Overview
 
 [Saucedemo](https://www.saucedemo.com) is a public e-commerce demo application provided by Sauce Labs. It is intentionally seeded with bugs across multiple user accounts so that test automation tools and developers can exercise their tooling against realistic-but-controlled failures.
@@ -410,25 +415,25 @@ Although `secret_sauce` is public, this framework treats it as a secret in `.env
 - [`users.md`](users.md) — the 6 user accounts and their per-user behaviors
 - [`flows.md`](flows.md) — login, browse, sort, cart, and checkout user journeys
 - [`../architecture.md`](../architecture.md) — how this framework is organized
-````
+```
 
 - [ ] **Step 3: Create `docs/app/users.md` with the EXACT content below**
 
-````markdown
+```markdown
 # Saucedemo — Users
 
 Saucedemo provides 6 user accounts. The password is the same for all (`secret_sauce`, also documented in [`overview.md`](overview.md)). Each user surfaces a different intentional behavior, and each maps to a Playwright project in `playwright.config.ts`.
 
 ## Summary
 
-| Username | Project(s) | Intent |
-|---|---|---|
-| `standard_user` | `standard`, `firefox-standard`, `webkit-standard` | Happy path — everything works |
-| `locked_out_user` | `no-auth` (login test only — no storageState exists) | Login fails with a lockout error |
-| `problem_user` | `problem` | Wrong product images; broken sort dropdown |
-| `performance_glitch_user` | `performance_glitch` | ~10s artificial delay on every navigation |
-| `error_user` | `error` | Broken sort dropdown (same as problem); intermittent errors |
-| `visual_user` | `visual` | Intentional visual regressions (font sizes, colors) |
+| Username                  | Project(s)                                           | Intent                                                      |
+| ------------------------- | ---------------------------------------------------- | ----------------------------------------------------------- |
+| `standard_user`           | `standard`, `firefox-standard`, `webkit-standard`    | Happy path — everything works                               |
+| `locked_out_user`         | `no-auth` (login test only — no storageState exists) | Login fails with a lockout error                            |
+| `problem_user`            | `problem`                                            | Wrong product images; broken sort dropdown                  |
+| `performance_glitch_user` | `performance_glitch`                                 | ~10s artificial delay on every navigation                   |
+| `error_user`              | `error`                                              | Broken sort dropdown (same as problem); intermittent errors |
+| `visual_user`             | `visual`                                             | Intentional visual regressions (font sizes, colors)         |
 
 ## Per-user details
 
@@ -440,7 +445,7 @@ Saucedemo provides 6 user accounts. The password is the same for all (`secret_sa
 
 ### `locked_out_user`
 
-- **Behavior:** Login fails. Saucedemo returns the error: *"Epic sadface: Sorry, this user has been locked out."*
+- **Behavior:** Login fails. Saucedemo returns the error: _"Epic sadface: Sorry, this user has been locked out."_
 - **Used by:** Login spec only (`tests/login/login.spec.ts`, tagged `@no-auth`).
 - **Why no storageState:** Authentication never succeeds, so there is no session to save. This user is the only reason the `no-auth` Playwright project exists.
 
@@ -472,11 +477,11 @@ Saucedemo provides 6 user accounts. The password is the same for all (`secret_sa
 ## Tag mapping
 
 For the per-tag → per-project mapping, see [`CLAUDE.md`](../../CLAUDE.md) (section "Tag conventions").
-````
+```
 
 - [ ] **Step 4: Create `docs/app/flows.md` with the EXACT content below**
 
-````markdown
+```markdown
 # Saucedemo — User Flows
 
 Step-by-step descriptions of the user journeys this framework tests. Each flow lists the URL paths, the key UI elements (with their `data-test` attributes), and which user accounts exhibit special behavior.
@@ -494,13 +499,13 @@ For framework-level page object structure see [`../architecture.md`](../architec
 
 **Key elements:**
 
-| Element | Selector |
-|---|---|
-| Username input | `[data-test="username"]` |
-| Password input | `[data-test="password"]` |
-| Login button | `[data-test="login-button"]` |
-| Error banner (if any) | `[data-test="error"]` |
-| Error close button | `.error-button` (only non-data-test selector — saucedemo doesn't expose one) |
+| Element               | Selector                                                                     |
+| --------------------- | ---------------------------------------------------------------------------- |
+| Username input        | `[data-test="username"]`                                                     |
+| Password input        | `[data-test="password"]`                                                     |
+| Login button          | `[data-test="login-button"]`                                                 |
+| Error banner (if any) | `[data-test="error"]`                                                        |
+| Error close button    | `.error-button` (only non-data-test selector — saucedemo doesn't expose one) |
 
 **Steps:**
 
@@ -510,8 +515,8 @@ For framework-level page object structure see [`../architecture.md`](../architec
 4. Click `[data-test="login-button"]`
 5. **On success:** browser navigates to `/inventory.html`
 6. **On failure:** error banner appears in `[data-test="error"]` with text like:
-   - `locked_out_user`: *"Epic sadface: Sorry, this user has been locked out."*
-   - Wrong password: *"Epic sadface: Username and password do not match any user in this service"*
+   - `locked_out_user`: _"Epic sadface: Sorry, this user has been locked out."_
+   - Wrong password: _"Epic sadface: Username and password do not match any user in this service"_
 
 **Tests:** `tests/login/login.spec.ts` (3 tests, tagged `@no-auth`).
 
@@ -526,27 +531,27 @@ For framework-level page object structure see [`../architecture.md`](../architec
 
 **Key elements:**
 
-| Element | Selector |
-|---|---|
-| Page title | `[data-test="title"]` (text: `"Products"`) |
-| Inventory grid container | `[data-test="inventory-list"]` |
-| Each product card | `[data-test="inventory-item"]` |
-| Product name | `[data-test="inventory-item-name"]` (under each item) |
-| Product price | `[data-test="inventory-item-price"]` (under each item) |
-| Product description | `[data-test="inventory-item-desc"]` |
-| Add-to-cart button | role=button, name=`/^Add to cart$/i` (under each item) |
-| Remove button | role=button, name=`/^Remove$/i` (under each item) |
-| Product image | `img.inventory_item_img` (under each item, CSS selector — no data-test) |
+| Element                  | Selector                                                                |
+| ------------------------ | ----------------------------------------------------------------------- |
+| Page title               | `[data-test="title"]` (text: `"Products"`)                              |
+| Inventory grid container | `[data-test="inventory-list"]`                                          |
+| Each product card        | `[data-test="inventory-item"]`                                          |
+| Product name             | `[data-test="inventory-item-name"]` (under each item)                   |
+| Product price            | `[data-test="inventory-item-price"]` (under each item)                  |
+| Product description      | `[data-test="inventory-item-desc"]`                                     |
+| Add-to-cart button       | role=button, name=`/^Add to cart$/i` (under each item)                  |
+| Remove button            | role=button, name=`/^Remove$/i` (under each item)                       |
+| Product image            | `img.inventory_item_img` (under each item, CSS selector — no data-test) |
 
 **The 6 products** (full reference data in `data/shared/products.json`):
 
-| Name | Price |
-|---|---|
-| Sauce Labs Backpack | $29.99 |
-| Sauce Labs Bike Light | $9.99 |
-| Sauce Labs Bolt T-Shirt | $15.99 |
-| Sauce Labs Fleece Jacket | $49.99 |
-| Sauce Labs Onesie | $7.99 |
+| Name                              | Price  |
+| --------------------------------- | ------ |
+| Sauce Labs Backpack               | $29.99 |
+| Sauce Labs Bike Light             | $9.99  |
+| Sauce Labs Bolt T-Shirt           | $15.99 |
+| Sauce Labs Fleece Jacket          | $49.99 |
+| Sauce Labs Onesie                 | $7.99  |
 | Test.allTheThings() T-Shirt (Red) | $15.99 |
 
 **Per-user notes:** `problem_user` shows the same broken image asset for every product. Functionality (add to cart, sort, etc.) is unaffected by image source.
@@ -565,12 +570,12 @@ For framework-level page object structure see [`../architecture.md`](../architec
 
 **Options:**
 
-| Label | Value | Expected first product | Expected last product |
-|---|---|---|---|
-| Name (A to Z) | `az` | Sauce Labs Backpack | Test.allTheThings() T-Shirt (Red) |
-| Name (Z to A) | `za` | Test.allTheThings() T-Shirt (Red) | Sauce Labs Backpack |
-| Price (low to high) | `lohi` | Sauce Labs Onesie | Sauce Labs Fleece Jacket |
-| Price (high to low) | `hilo` | Sauce Labs Fleece Jacket | Sauce Labs Onesie |
+| Label               | Value  | Expected first product            | Expected last product             |
+| ------------------- | ------ | --------------------------------- | --------------------------------- |
+| Name (A to Z)       | `az`   | Sauce Labs Backpack               | Test.allTheThings() T-Shirt (Red) |
+| Name (Z to A)       | `za`   | Test.allTheThings() T-Shirt (Red) | Sauce Labs Backpack               |
+| Price (low to high) | `lohi` | Sauce Labs Onesie                 | Sauce Labs Fleece Jacket          |
+| Price (high to low) | `hilo` | Sauce Labs Fleece Jacket          | Sauce Labs Onesie                 |
 
 **Per-user notes:** `problem_user` and `error_user` ignore the sort dropdown — selections register on the UI but the inventory stays in default A→Z order. This is why the `@sort-functional` tag exists: sort tests run only on `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard`.
 
@@ -587,21 +592,21 @@ For framework-level page object structure see [`../architecture.md`](../architec
 
 **Cart badge:**
 
-| Element | Selector |
-|---|---|
+| Element          | Selector                                                          |
+| ---------------- | ----------------------------------------------------------------- |
 | Badge with count | `[data-test="shopping-cart-badge"]` (only present when count > 0) |
-| Cart icon link | `[data-test="shopping-cart-link"]` |
+| Cart icon link   | `[data-test="shopping-cart-link"]`                                |
 
 **Cart page (`/cart.html`):**
 
-| Element | Selector |
-|---|---|
-| Page title | `[data-test="title"]` (text: `"Your Cart"`) |
-| Cart list container | `[data-test="cart-list"]` |
-| Each item | `[data-test="inventory-item"]` (under cart-list) |
-| Item name | `[data-test="inventory-item-name"]` |
-| Continue shopping button | `[data-test="continue-shopping"]` |
-| Checkout button | `[data-test="checkout"]` |
+| Element                  | Selector                                         |
+| ------------------------ | ------------------------------------------------ |
+| Page title               | `[data-test="title"]` (text: `"Your Cart"`)      |
+| Cart list container      | `[data-test="cart-list"]`                        |
+| Each item                | `[data-test="inventory-item"]` (under cart-list) |
+| Item name                | `[data-test="inventory-item-name"]`              |
+| Continue shopping button | `[data-test="continue-shopping"]`                |
+| Checkout button          | `[data-test="checkout"]`                         |
 
 **Steps (add):**
 
@@ -628,15 +633,15 @@ The checkout has three sequential pages:
 
 **Page object:** `src/pages/checkout/CheckoutInfoPage.ts`
 
-| Element | Selector |
-|---|---|
-| Page title | `[data-test="title"]` (text: `"Checkout: Your Information"`) |
-| First name | `[data-test="firstName"]` |
-| Last name | `[data-test="lastName"]` |
-| Postal code | `[data-test="postalCode"]` |
-| Continue button | `[data-test="continue"]` |
-| Cancel button | `[data-test="cancel"]` |
-| Validation error banner | `[data-test="error"]` |
+| Element                 | Selector                                                     |
+| ----------------------- | ------------------------------------------------------------ |
+| Page title              | `[data-test="title"]` (text: `"Checkout: Your Information"`) |
+| First name              | `[data-test="firstName"]`                                    |
+| Last name               | `[data-test="lastName"]`                                     |
+| Postal code             | `[data-test="postalCode"]`                                   |
+| Continue button         | `[data-test="continue"]`                                     |
+| Cancel button           | `[data-test="cancel"]`                                       |
+| Validation error banner | `[data-test="error"]`                                        |
 
 **Validation:** All three fields required; clicking Continue with any empty triggers an error like `"Error: Postal Code is required"` or `"Error: First Name is required"`.
 
@@ -644,15 +649,15 @@ The checkout has three sequential pages:
 
 **Page object:** `src/pages/checkout/CheckoutOverviewPage.ts`
 
-| Element | Selector |
-|---|---|
-| Page title | `[data-test="title"]` (text: `"Checkout: Overview"`) |
-| Item list | `[data-test="cart-list"]` |
+| Element        | Selector                                                       |
+| -------------- | -------------------------------------------------------------- |
+| Page title     | `[data-test="title"]` (text: `"Checkout: Overview"`)           |
+| Item list      | `[data-test="cart-list"]`                                      |
 | Subtotal label | `[data-test="subtotal-label"]` (format: `"Item total: $X.YZ"`) |
-| Tax label | `[data-test="tax-label"]` |
-| Total label | `[data-test="total-label"]` |
-| Finish button | `[data-test="finish"]` |
-| Cancel button | `[data-test="cancel"]` |
+| Tax label      | `[data-test="tax-label"]`                                      |
+| Total label    | `[data-test="total-label"]`                                    |
+| Finish button  | `[data-test="finish"]`                                         |
+| Cancel button  | `[data-test="cancel"]`                                         |
 
 **Subtotal parsing:** `getSubtotal()` and `getTotal()` use the regex `/\$([\d.]+)/` to extract the numeric value. They throw on parse failure (loud-fail, not silent-zero).
 
@@ -660,15 +665,16 @@ The checkout has three sequential pages:
 
 **Page object:** `src/pages/checkout/CheckoutCompletePage.ts`
 
-| Element | Selector |
-|---|---|
-| Page title | `[data-test="title"]` (text: `"Checkout: Complete!"`) |
-| Thank-you header | `[data-test="complete-header"]` (text: `"Thank you for your order!"`) |
-| Body text | `[data-test="complete-text"]` |
-| Pony express image | `[data-test="pony-express"]` |
-| Back home button | `[data-test="back-to-products"]` |
+| Element            | Selector                                                              |
+| ------------------ | --------------------------------------------------------------------- |
+| Page title         | `[data-test="title"]` (text: `"Checkout: Complete!"`)                 |
+| Thank-you header   | `[data-test="complete-header"]` (text: `"Thank you for your order!"`) |
+| Body text          | `[data-test="complete-text"]`                                         |
+| Pony express image | `[data-test="pony-express"]`                                          |
+| Back home button   | `[data-test="back-to-products"]`                                      |
 
 **Tests:**
+
 - `tests/checkout/happy-path.spec.ts` — 2 parameterized scenarios from `data/scenarios/checkout/valid-checkout.json`, tagged `@standard`
 - `tests/checkout/validation.spec.ts` — 2 parameterized scenarios from `data/scenarios/checkout/invalid-postalcode.json`, tagged `@standard`
 
@@ -680,11 +686,11 @@ The checkout has three sequential pages:
 
 **Component:** `src/components/Header.ts`
 
-| Element | Selector |
-|---|---|
-| Menu toggle button | `#react-burger-menu-btn` (CSS — no data-test on this React-internal element) |
-| Logout link | `#logout_sidebar_link` |
-| App logo (always visible) | `.app_logo` |
+| Element                   | Selector                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| Menu toggle button        | `#react-burger-menu-btn` (CSS — no data-test on this React-internal element) |
+| Logout link               | `#logout_sidebar_link`                                                       |
+| App logo (always visible) | `.app_logo`                                                                  |
 
 **Steps:**
 
@@ -693,7 +699,7 @@ The checkout has three sequential pages:
 3. Browser returns to `/` (login page)
 
 **Tests:** Not currently exercised (no `@logout` test exists in Phase A.5; the framework supports it via `header.logout()` but no spec uses it yet).
-````
+```
 
 - [ ] **Step 5: Verify all 3 files render correctly + format/lint pass**
 
@@ -716,6 +722,7 @@ git commit -m "docs(app): add overview, users, and flows for saucedemo"
 ## Task 5: docs/adr/ — template + 5 starter ADRs
 
 **Files:** Create six files in `docs/adr/`:
+
 - `0000-template.md`
 - `0001-pom-by-component.md`
 - `0002-multi-user-via-projects-storage-state.md`
@@ -729,7 +736,7 @@ PowerShell: `New-Item -ItemType Directory -Force -Path docs/adr | Out-Null`
 
 - [ ] **Step 2: Create `docs/adr/0000-template.md` with the EXACT content below**
 
-````markdown
+```markdown
 # NNNN — <Decision Title>
 
 **Date:** YYYY-MM-DD
@@ -754,18 +761,19 @@ What other options were evaluated? Why were they rejected? Bullet list with brie
 ---
 
 **Template usage:**
+
 - Copy this file to `NNNN-<kebab-case-title>.md` where NNNN is the next sequential number
 - Replace title, date, status, and content sections
 - Keep status `Proposed` until merged, then update to `Accepted`
 - If a future ADR overturns this one, change status to `Superseded by ADR-XXXX` (don't delete)
 - Keep ADRs short — under 80 lines is the goal
-````
+```
 
 - [ ] **Step 3: Create `docs/adr/0001-pom-by-component.md`**
 
 Source: Phase A spec §2 decision #2 + §4 composition rules. Use this exact content:
 
-````markdown
+```markdown
 # 0001 — Page Object Model by Component
 
 **Date:** 2026-05-09
@@ -804,13 +812,13 @@ We needed to pick one for the framework's lifetime. AI-extension friendliness wa
 - **Flat POM** — rejected: leads to duplication once the app grows; no clear pattern for shared UI
 - **Component-tree (no pages)** — rejected: elegant but harder for AI to extend without coupling components together; navigation becomes implicit
 - **Fluent navigation (Pages return Pages)** — rejected: tests become harder to read for AI; chained returns mask navigation intent; cross-page imports leak between page files
-````
+```
 
 - [ ] **Step 4: Create `docs/adr/0002-multi-user-via-projects-storage-state.md`**
 
 Source: Phase A spec §2 decision #7 + §5. Use this exact content:
 
-````markdown
+```markdown
 # 0002 — Multi-User via Playwright Projects + storageState + Role Tags
 
 **Date:** 2026-05-09
@@ -851,13 +859,13 @@ Three approaches were evaluated.
 - **Custom `--runAs <user>` CLI flag** — rejected: the `--project` flag in Playwright already does this natively; a custom flag would duplicate Playwright's mechanism with worse IDE/UI integration
 - **Per-test `test.use({ storageState })` annotations** — rejected: every test would need an annotation; high duplication; no good way to filter by user from the CLI
 - **Login per test (no storageState)** — rejected: 5-10x slower; would dominate test runtime
-````
+```
 
 - [ ] **Step 5: Create `docs/adr/0003-data-hybrid-shared-scenarios.md`**
 
 Source: Phase A spec §2 decision #10 + §6. Use this exact content:
 
-````markdown
+```markdown
 # 0003 — Hybrid Data Layout (`shared/` + `scenarios/`) with Typed Loaders
 
 **Date:** 2026-05-09
@@ -898,13 +906,13 @@ Tests import via the `@data/*` path alias. JSON imports use ESM import attribute
 - **Flat `data/` with all files at the same level** — rejected: doesn't scale past 5-10 files; no obvious place for parameterized inputs
 - **Mirror the POM (`data/pages/<PageName>.data.json`)** — rejected: tightly couples data to pages; bad for shared data (e.g., products used on inventory + cart + checkout)
 - **Per-test fixtures (`<test-name>.data.json` next to each spec)** — rejected: duplication of shared data; no way to share scenarios across tests
-````
+```
 
 - [ ] **Step 6: Create `docs/adr/0004-cross-browser-smoke-pattern.md`**
 
 Source: Phase A.5 spec §2 decision #1 + §3. Use this exact content:
 
-````markdown
+```markdown
 # 0004 — Cross-Browser Smoke Pattern (firefox + webkit on standard user only)
 
 **Date:** 2026-05-10
@@ -935,7 +943,7 @@ Total: 7 chromium projects (`setup`, `no-auth`, 5 users) + 2 cross-browser smoke
 - **Full per-user × per-browser matrix (15 projects)** — rejected: 90%+ of those runs verify the same things; CI time triples for marginal coverage
 - **Cross-browser only on a tiny `@smoke` tag (3-4 tests)** — rejected: smaller smoke set, less confidence; the standard-user grep already gives a balanced subset
 - **No cross-browser** — rejected: leaves real engine differences uncaught until they manifest as production user reports
-````
+```
 
 - [ ] **Step 7: Create `docs/adr/0005-esm-import-attributes-for-json.md`**
 
@@ -1003,13 +1011,14 @@ git commit -m "docs(adr): add Nygard template and 5 starter ADRs
 ## Task 6: 3 placeholder files
 
 **Files:** Create three files with the standard placeholder comment block from spec §5:
+
 - `CONTRIBUTING.md`
 - `docs/runbook.md`
 - `docs/app/glossary.md`
 
 - [ ] **Step 1: Create `CONTRIBUTING.md` with the EXACT content below**
 
-````markdown
+```markdown
 <!--
 DEFERRED FROM PHASE B.1.
 
@@ -1027,11 +1036,11 @@ Until then: Humans see README.md for setup; AI agents follow CLAUDE.md.
 # Contributing
 
 (Placeholder — see comment above.)
-````
+```
 
 - [ ] **Step 2: Create `docs/runbook.md` with the EXACT content below**
 
-````markdown
+```markdown
 <!--
 DEFERRED FROM PHASE B.1.
 
@@ -1051,11 +1060,11 @@ report (`npm run report`) for debugging. Inspect Playwright traces in
 # Runbook
 
 (Placeholder — see comment above.)
-````
+```
 
 - [ ] **Step 3: Create `docs/app/glossary.md` with the EXACT content below**
 
-````markdown
+```markdown
 <!--
 DEFERRED FROM PHASE B.1.
 
@@ -1076,7 +1085,7 @@ the saucedemo UI itself.
 # Glossary
 
 (Placeholder — see comment above.)
-````
+```
 
 - [ ] **Step 4: Verify formatting**
 
@@ -1099,6 +1108,7 @@ git commit -m "docs: add 3 placeholder files (CONTRIBUTING, runbook, glossary) w
 - [ ] **Step 1: Confirm all 15 files exist**
 
 PowerShell:
+
 ```powershell
 $expected = @(
   'README.md',
@@ -1128,6 +1138,7 @@ If any are missing: STOP and report which.
 - [ ] **Step 2: Confirm CLAUDE.md is under 150 lines**
 
 PowerShell:
+
 ```powershell
 (Get-Content CLAUDE.md).Count
 ```
@@ -1137,6 +1148,7 @@ Expected: under 150.
 - [ ] **Step 3: Confirm placeholder comment blocks**
 
 For each of the 3 placeholder files (`CONTRIBUTING.md`, `docs/runbook.md`, `docs/app/glossary.md`), confirm the file:
+
 - Starts with `<!--`
 - Contains the exact phrase `DEFERRED FROM PHASE B.1.`
 - Contains the lines `Status: Placeholder for future content.`, `Why deferred:`, `When to fill in:`, `Until then:`
@@ -1144,6 +1156,7 @@ For each of the 3 placeholder files (`CONTRIBUTING.md`, `docs/runbook.md`, `docs
 - Has a visible body line `(Placeholder — see comment above.)`
 
 PowerShell quick check:
+
 ```powershell
 Get-Content CONTRIBUTING.md, docs/runbook.md, docs/app/glossary.md | Select-String 'DEFERRED FROM PHASE B.1.'
 ```
@@ -1166,6 +1179,7 @@ If `npm test` shows fewer than 62: STOP and report — a doc-only phase shouldn'
 - [ ] **Step 5: Visually inspect markdown rendering**
 
 Open the following in a markdown preview (VS Code preview or push branch and view on GitHub):
+
 - `README.md` — check the CI badge image link, table formatting, code block rendering
 - `CLAUDE.md` — check the rules list and tag table render
 - `docs/architecture.md` — check section headings and the folder tree fenced block
@@ -1189,15 +1203,16 @@ git tag -a phase-b1-complete -m "Phase B.1 complete: documentation layer (README
 
 The plan was reviewed against the Phase B.1 spec before writing. Coverage check:
 
-| Spec section | Tasks |
-|---|---|
-| §3 file structure (15 files) | Tasks 1–6 cover every file |
+| Spec section                                  | Tasks                                                      |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| §3 file structure (15 files)                  | Tasks 1–6 cover every file                                 |
 | §4 file content scope (per-file requirements) | Each task includes the exact content or detailed structure |
-| §5 placeholder comment format | Task 6 uses the exact template from spec §5 |
-| §6 DoD (12 acceptance criteria) | Task 7 verifies each |
-| §7 out of scope | Plan contains no MCP, no skills, no auto-update hooks |
+| §5 placeholder comment format                 | Task 6 uses the exact template from spec §5                |
+| §6 DoD (12 acceptance criteria)               | Task 7 verifies each                                       |
+| §7 out of scope                               | Plan contains no MCP, no skills, no auto-update hooks      |
 
 **Source content provenance:**
+
 - Architecture.md: derives from Phase A spec §3, §4 + Phase A.5 spec §3
 - ADR-0001: Phase A spec §2 #2 + §4 + #5
 - ADR-0002: Phase A spec §2 #7 + §5
@@ -1206,6 +1221,7 @@ The plan was reviewed against the Phase B.1 spec before writing. Coverage check:
 - ADR-0005: Phase A.5 spec §2 #8 + §6
 
 **Type/path consistency check:**
+
 - Path aliases match across CLAUDE.md, architecture.md, README.md (no drift)
 - Tag conventions match across CLAUDE.md, architecture.md, ADR-0002, users.md
 - Project names match across CLAUDE.md, architecture.md, users.md, ADR-0002, ADR-0004
