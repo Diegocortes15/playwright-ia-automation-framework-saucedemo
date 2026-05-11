@@ -93,6 +93,10 @@ playwright-ia-framework/
 │       └── inventory-images.spec.ts      # @problem
 │
 └── docs/
+    ├── architecture.md
+    ├── runbook.md                        # placeholder (deferred from Phase B.1)
+    ├── app/                              # overview, users, flows, glossary (placeholder)
+    ├── adr/                              # 0000-template + 0001..0005
     └── superpowers/
         ├── specs/                        # design docs
         └── plans/                        # implementation plans
@@ -240,7 +244,7 @@ See [ADR-0002](adr/0002-multi-user-via-projects-storage-state.md) for the multi-
 
 The workflow lives at `.github/workflows/test.yml`. It runs a single job named `Playwright matrix` on `ubuntu-latest` with a `timeout-minutes: 15` cap.
 
-**Triggers:** `push` to `main` and `pull_request` targeting `main`. A `concurrency` block keyed on `${{ github.ref }}` cancels any queued or running job for the same ref when a new run starts, preventing stacked runs from wasting minutes.
+**Triggers:** `push` to `main` and `pull_request` targeting `main`. A `concurrency` block keyed on `${{ github.workflow }}-${{ github.ref }}` cancels any queued or running job for the same workflow+ref when a new run starts, preventing stacked runs from wasting minutes.
 
 **Dependency installation:**
 
