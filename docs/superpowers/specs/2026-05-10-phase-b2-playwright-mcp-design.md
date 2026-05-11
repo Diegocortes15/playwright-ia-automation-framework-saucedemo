@@ -34,18 +34,18 @@ The brainstorming established a general rule: **add MCP servers right before the
 
 ## 2. Decision log
 
-| #   | Decision                                                                                                | Rationale                                                                                                                                  |
-| --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **MCP package: `@playwright/mcp` (Microsoft official)**                                                 | Canonical, well-maintained, most-documented option. Other community packages exist but offer no clear advantage for this use case.         |
-| 2   | **Install as project dev dependency, not global**                                                       | Version-pinned in `package-lock.json`, reproducible across machines and CI, no per-developer global install step.                          |
-| 3   | **Register in project-local `.claude/settings.json` (committed)**                                       | Anyone cloning the repo gets MCP for free. Personal permission allowlists stay in the gitignored `.claude/settings.local.json`.            |
-| 4   | **Default to headed mode (`--headless=false`)**                                                         | Learning template — the user benefits from watching the browser do things. Override per-session for speed when needed.                     |
-| 5   | **Default browser: chromium**                                                                           | Matches the framework's primary engine, fastest of the three, best DevTools-style output.                                                  |
-| 6   | **Add `.claude/settings.local.json` to `.gitignore`**                                                   | Establishes the project-vs-personal pattern explicitly so future MCP servers and per-developer overrides land in the right file.           |
-| 7   | **`docs/mcp.md` is a learning guide, not a reference manual**                                           | Goal is muscle-memory transfer to the next client engagement, not exhaustive coverage of the `@playwright/mcp` API surface.                |
-| 8   | **CLAUDE.md gets a brief MCP section (~10 lines)**                                                      | Always-loaded — Claude needs to know the tool exists to reach for it proactively. Keeps total CLAUDE.md under the 150-line cap.            |
-| 9   | **Smoke test is manual + documented, not automated**                                                    | MCP only runs inside a Claude Code conversation; there's no harness to execute it from. A repeatable manual recipe in `docs/mcp.md` is the right artifact. |
-| 10  | **No changes to `playwright.config.ts`, `src/`, `tests/`, `data/`, CI**                                 | The MCP browser is independent of the test browser. This phase is config + docs only.                                                      |
+| #   | Decision                                                                | Rationale                                                                                                                                                  |
+| --- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **MCP package: `@playwright/mcp` (Microsoft official)**                 | Canonical, well-maintained, most-documented option. Other community packages exist but offer no clear advantage for this use case.                         |
+| 2   | **Install as project dev dependency, not global**                       | Version-pinned in `package-lock.json`, reproducible across machines and CI, no per-developer global install step.                                          |
+| 3   | **Register in project-local `.claude/settings.json` (committed)**       | Anyone cloning the repo gets MCP for free. Personal permission allowlists stay in the gitignored `.claude/settings.local.json`.                            |
+| 4   | **Default to headed mode (`--headless=false`)**                         | Learning template — the user benefits from watching the browser do things. Override per-session for speed when needed.                                     |
+| 5   | **Default browser: chromium**                                           | Matches the framework's primary engine, fastest of the three, best DevTools-style output.                                                                  |
+| 6   | **Add `.claude/settings.local.json` to `.gitignore`**                   | Establishes the project-vs-personal pattern explicitly so future MCP servers and per-developer overrides land in the right file.                           |
+| 7   | **`docs/mcp.md` is a learning guide, not a reference manual**           | Goal is muscle-memory transfer to the next client engagement, not exhaustive coverage of the `@playwright/mcp` API surface.                                |
+| 8   | **CLAUDE.md gets a brief MCP section (~10 lines)**                      | Always-loaded — Claude needs to know the tool exists to reach for it proactively. Keeps total CLAUDE.md under the 150-line cap.                            |
+| 9   | **Smoke test is manual + documented, not automated**                    | MCP only runs inside a Claude Code conversation; there's no harness to execute it from. A repeatable manual recipe in `docs/mcp.md` is the right artifact. |
+| 10  | **No changes to `playwright.config.ts`, `src/`, `tests/`, `data/`, CI** | The MCP browser is independent of the test browser. This phase is config + docs only.                                                                      |
 
 ---
 
@@ -88,14 +88,14 @@ The existing `.claude/settings.local.json` (currently 2 permission entries) stay
 
 ### 3d. `docs/mcp.md` (new) — six headings
 
-| H2 heading | Approx. words | Purpose |
-| --- | --- | --- |
-| 1. What is Playwright MCP | 80 | Plain-language definition; one-line distinction between MCP browser and the test runner |
-| 2. How it's wired in this project | 50 | Pointer to `.claude/settings.json`, the npm dev dep, the headed default |
-| 3. Verifying the setup | 30 | The 3-step smoke test (see §4) |
-| 4. Worked examples | 600 | Four scenarios, ~150 words each (see §3e) |
-| 5. When NOT to use it | 80 | Honest list of anti-patterns |
-| 6. Pointers | 30 | Links to ADR-0006, official Microsoft docs, CLAUDE.md MCP section |
+| H2 heading                        | Approx. words | Purpose                                                                                 |
+| --------------------------------- | ------------- | --------------------------------------------------------------------------------------- |
+| 1. What is Playwright MCP         | 80            | Plain-language definition; one-line distinction between MCP browser and the test runner |
+| 2. How it's wired in this project | 50            | Pointer to `.claude/settings.json`, the npm dev dep, the headed default                 |
+| 3. Verifying the setup            | 30            | The 3-step smoke test (see §4)                                                          |
+| 4. Worked examples                | 600           | Four scenarios, ~150 words each (see §3e)                                               |
+| 5. When NOT to use it             | 80            | Honest list of anti-patterns                                                            |
+| 6. Pointers                       | 30            | Links to ADR-0006, official Microsoft docs, CLAUDE.md MCP section                       |
 
 Estimated total: ~250-300 lines of markdown. Larger than `docs/architecture.md` sections but justified — this is the artifact whose whole purpose is teaching.
 
@@ -103,11 +103,11 @@ Estimated total: ~250-300 lines of markdown. Larger than `docs/architecture.md` 
 
 Each example has a one-line goal, a copy-paste prompt, expected behavior, and a brief reflection note.
 
-| # | Scenario | Why it matters |
-|---|---|---|
-| 4.1 | **Discover selectors on a new page** — "Navigate to `/cart.html` (logged in as standard_user), list every interactive element with the most stable selector and a one-line description" | The headline use case for new client apps. Replaces 5 manual context-switches per element with one round-trip. |
-| 4.2 | **Verify a selector before adding it to a Page object** — "Verify that `[data-test=\"continue\"]` is the right selector for the Continue button on `/checkout-step-one.html` and that it's clickable" | Sanity check before the test even gets written. Catches typos, stale selectors, race conditions early. |
-| 4.3 | **Debug a flaky test by inspecting live DOM** — "The test `cart add/remove (@all-users)` is flaking on the badge count. Navigate to inventory, add a product, and tell me the cart badge's exact rendered HTML and computed visibility state" | Live DOM beats screenshots in a debug log. The go-to when something fails in CI but passes locally. |
+| #   | Scenario                                                                                                                                                                                                                                                                    | Why it matters                                                                                                                                |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 | **Discover selectors on a new page** — "Navigate to `/cart.html` (logged in as standard_user), list every interactive element with the most stable selector and a one-line description"                                                                                     | The headline use case for new client apps. Replaces 5 manual context-switches per element with one round-trip.                                |
+| 4.2 | **Verify a selector before adding it to a Page object** — "Verify that `[data-test=\"continue\"]` is the right selector for the Continue button on `/checkout-step-one.html` and that it's clickable"                                                                       | Sanity check before the test even gets written. Catches typos, stale selectors, race conditions early.                                        |
+| 4.3 | **Debug a flaky test by inspecting live DOM** — "The test `cart add/remove (@all-users)` is flaking on the badge count. Navigate to inventory, add a product, and tell me the cart badge's exact rendered HTML and computed visibility state"                               | Live DOM beats screenshots in a debug log. The go-to when something fails in CI but passes locally.                                           |
 | 4.4 | **Generate a draft Page object from live exploration** — "Explore the `/checkout-complete.html` page and propose a CheckoutCompletePage class following the patterns in `src/pages/checkout/CheckoutInfoPage.ts`. Show only the locator block; I'll review before writing." | The end-to-end "new app, new page" workflow. The "show only the locator block" boundary keeps Claude from over-generating before user review. |
 
 ### 3f. `docs/adr/0006-playwright-mcp.md` (new)
@@ -180,29 +180,31 @@ If all three pass, the install is healthy. The smoke test lives at `docs/mcp.md`
 
 ## 5. Acceptance criteria (Phase B.2 Definition of Done)
 
-| #   | Criterion                                                                                                                                                           | How to verify                                                                                                  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| 1   | `@playwright/mcp` is in `package.json` devDependencies and locked in `package-lock.json`                                                                            | `npm ls @playwright/mcp` returns a version                                                                     |
-| 2   | `.claude/settings.json` exists, is committed, and declares the `playwright` MCP server with `--browser chromium --headless=false` args                              | File diff + `git ls-files .claude/settings.json` returns the path                                              |
-| 3   | `.claude/settings.local.json` is gitignored                                                                                                                         | `.gitignore` contains the rule; `git check-ignore .claude/settings.local.json` exits 0                         |
-| 4   | Smoke test passes: `/mcp` shows `playwright` connected; the headline prompt opens a visible Chromium window and returns `[data-test="login-button"]`                | Manual run, documented in `docs/mcp.md` heading 3                                                              |
-| 5   | `docs/mcp.md` exists with all 6 H2 headings (What is / How wired / Verifying / 4 worked examples / When NOT to use / Pointers)                                      | File exists; section grep finds all 6 H2 headings                                                              |
-| 6   | `docs/adr/0006-playwright-mcp.md` exists, follows Nygard format (Context/Decision/Consequences/Alternatives), under 80 lines                                        | File exists; line count check; section grep finds all 4 ADR headings                                           |
-| 7   | `CLAUDE.md` has a new "MCP servers" section (~10 lines) telling Claude the Playwright MCP is available + when to reach for it; total CLAUDE.md still under 150 lines | Section grep + `(Get-Content CLAUDE.md).Count` < 150                                                            |
-| 8   | `README.md` mentions Playwright MCP availability in the tech-stack line                                                                                             | Grep `README.md` for "Playwright MCP"                                                                          |
-| 9   | `npm run typecheck && npm run lint && npm run format:check && npm test` all exit 0; test count remains **62**                                                        | Run all four; assert test count                                                                                |
-| 10  | Annotated tag `phase-b2-complete` exists locally                                                                                                                    | `git tag -l phase-b2-complete -n5`                                                                             |
+| #   | Criterion                                                                                                                                                            | How to verify                                                                          |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | `@playwright/mcp` is in `package.json` devDependencies and locked in `package-lock.json`                                                                             | `npm ls @playwright/mcp` returns a version                                             |
+| 2   | `.claude/settings.json` exists, is committed, and declares the `playwright` MCP server with `--browser chromium --headless=false` args                               | File diff + `git ls-files .claude/settings.json` returns the path                      |
+| 3   | `.claude/settings.local.json` is gitignored                                                                                                                          | `.gitignore` contains the rule; `git check-ignore .claude/settings.local.json` exits 0 |
+| 4   | Smoke test passes: `/mcp` shows `playwright` connected; the headline prompt opens a visible Chromium window and returns `[data-test="login-button"]`                 | Manual run, documented in `docs/mcp.md` heading 3                                      |
+| 5   | `docs/mcp.md` exists with all 6 H2 headings (What is / How wired / Verifying / 4 worked examples / When NOT to use / Pointers)                                       | File exists; section grep finds all 6 H2 headings                                      |
+| 6   | `docs/adr/0006-playwright-mcp.md` exists, follows Nygard format (Context/Decision/Consequences/Alternatives), under 80 lines                                         | File exists; line count check; section grep finds all 4 ADR headings                   |
+| 7   | `CLAUDE.md` has a new "MCP servers" section (~10 lines) telling Claude the Playwright MCP is available + when to reach for it; total CLAUDE.md still under 150 lines | Section grep + `(Get-Content CLAUDE.md).Count` < 150                                   |
+| 8   | `README.md` mentions Playwright MCP availability in the tech-stack line                                                                                              | Grep `README.md` for "Playwright MCP"                                                  |
+| 9   | `npm run typecheck && npm run lint && npm run format:check && npm test` all exit 0; test count remains **62**                                                        | Run all four; assert test count                                                        |
+| 10  | Annotated tag `phase-b2-complete` exists locally                                                                                                                     | `git tag -l phase-b2-complete -n5`                                                     |
 
 ---
 
 ## 6. File deliverables summary
 
 **New files (3):**
+
 - `.claude/settings.json` — MCP server registration
 - `docs/mcp.md` — learning guide (6 H2 headings, ~250-300 lines)
 - `docs/adr/0006-playwright-mcp.md` — rationale (Nygard format, under 80 lines)
 
 **Modified files (5):**
+
 - `.gitignore` — add `.claude/settings.local.json` rule
 - `CLAUDE.md` — add ~10-line "MCP servers" section
 - `README.md` — add `Playwright MCP` to tech-stack line
@@ -210,6 +212,7 @@ If all three pass, the install is healthy. The smoke test lives at `docs/mcp.md`
 - `package-lock.json` — auto-updated by `npm install`
 
 **Unchanged (everything else):**
+
 - `playwright.config.ts`, `tsconfig.json`, `eslint.config.js`, `.prettierrc.json`, `.env.example`
 - All files under `src/`, `tests/`, `data/`, `auth/`
 - All existing Phase B.1 docs except CLAUDE.md and README.md (modified above)
@@ -219,10 +222,10 @@ If all three pass, the install is healthy. The smoke test lives at `docs/mcp.md`
 
 ## 7. Out of scope (deferred to later phases)
 
-| Deferred to                | What                                                                                                                                                                                          |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Future mini-phase B.3**  | GitHub MCP server (added right before Phase C orchestrator needs it for PR creation)                                                                                                          |
-| **Future mini-phase B.4**  | Atlassian MCP server (added right before Phase C `/from-jira` orchestrator needs it)                                                                                                           |
-| **Phase C**                | Claude Code custom skills (`.claude/skills/*.md`) that wrap Playwright MCP into invokable workflows; the `/from-jira` orchestrator; sub-agent definitions for ticket → test code flow         |
-| **Phase D**                | Auto-running MCP in CI; pre-commit hook using MCP to validate selectors; auto-discovery of new pages; selector drift detection                                                                |
-| **Out of scope (rejected)** | Global install of `@playwright/mcp`; user-level Claude config for MCP server; community/non-official MCP packages; headless default for the project; new npm scripts to invoke MCP from CLI    |
+| Deferred to                 | What                                                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Future mini-phase B.3**   | GitHub MCP server (added right before Phase C orchestrator needs it for PR creation)                                                                                                        |
+| **Future mini-phase B.4**   | Atlassian MCP server (added right before Phase C `/from-jira` orchestrator needs it)                                                                                                        |
+| **Phase C**                 | Claude Code custom skills (`.claude/skills/*.md`) that wrap Playwright MCP into invokable workflows; the `/from-jira` orchestrator; sub-agent definitions for ticket → test code flow       |
+| **Phase D**                 | Auto-running MCP in CI; pre-commit hook using MCP to validate selectors; auto-discovery of new pages; selector drift detection                                                              |
+| **Out of scope (rejected)** | Global install of `@playwright/mcp`; user-level Claude config for MCP server; community/non-official MCP packages; headless default for the project; new npm scripts to invoke MCP from CLI |
