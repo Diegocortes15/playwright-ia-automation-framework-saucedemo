@@ -9,3 +9,6 @@ auth/*.json
 
 .env
 .env.local
+
+# Claude Code: project config committed; per-developer settings ignored
+.claude/settings.local.json
