@@ -92,11 +92,13 @@ Expected output ends with a line like `└── @playwright/mcp@<version>` (whe
   "mcpServers": {
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless=false"]
+      "args": ["-y", "@playwright/mcp@0.0.75", "--browser", "chromium"]
     }
   }
 }
 ```
+
+The version is pinned to `@0.0.75` to match `package.json` from Step 1. `--headless` is intentionally absent — `@playwright/mcp` defaults to headed when the flag is missing, and passing `--headless=false` is a parse error in v0.0.75.
 
 Use the Write tool. The file does not exist yet — `.claude/` already exists locally (it contains `settings.local.json`).
 
@@ -166,7 +168,7 @@ Several MCP server implementations for Playwright exist. We needed to pick one, 
 
 - Install as a project dev dependency (`npm install -D @playwright/mcp`); version-pinned via `package-lock.json`
 - Register in `.claude/settings.json` (project-local, committed) so the team gets MCP working after `npm install`
-- Default to chromium browser, headed mode (`--headless=false`)
+- Default to chromium browser, headed mode (no `--headless` flag — absence means headed on non-Linux)
 - Personal Claude Code config (permissions allowlist) stays in the gitignored `.claude/settings.local.json`
 
 ## Consequences
@@ -242,7 +244,7 @@ The MCP server is declared in [`.claude/settings.json`](../.claude/settings.json
   "mcpServers": {
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless=false"]
+      "args": ["-y", "@playwright/mcp@0.0.75", "--browser", "chromium"]
     }
   }
 }
@@ -250,7 +252,9 @@ The MCP server is declared in [`.claude/settings.json`](../.claude/settings.json
 
 `@playwright/mcp` is a project dev dependency declared in `package.json` and locked in `package-lock.json`. Run `npm install` once and the server is ready — no global installs.
 
-The browser defaults to **chromium, headed**. Headed mode (visible window) is intentional: this is a learning template, and you should see what the MCP is doing. To run headless for one session, modify the args temporarily or use the `/mcp` command in Claude Code to manage server settings.
+The version is pinned to `0.0.75` in BOTH `package.json` and the args above. Keep them in sync when upgrading: `npx -y <pkg>@latest` would resolve against the npm registry at runtime and bypass the lockfile, which is dangerous at v0.0.x.
+
+The browser defaults to **chromium, headed**. Headed mode (visible window) is intentional: this is a learning template, and you should see what the MCP is doing. The `--headless` flag is omitted — it's a boolean switch (presence sets headless=true), and absence means headed on non-Linux. To run headless for one session, modify the args temporarily.
 
 ## Verifying the setup
 
@@ -265,8 +269,8 @@ If all three pass, the install is healthy.
 ### Failure modes
 
 - **`/mcp` shows the server as failed or absent.** Check Claude Code's MCP logs (Output panel → Claude Code Server). Most common cause: `npm install` was skipped after a fresh clone, so `@playwright/mcp` isn't on disk.
-- **Browser window doesn't appear when MCP runs.** Confirm `--headless=false` is in the args of `.claude/settings.json`. Restart the Claude Code session after editing.
-- **First call is very slow (~30s+).** `@playwright/mcp@latest` resolved to a newer version and is downloading the Playwright browser binary. Subsequent calls cache; this is one-time cost.
+- **Browser window doesn't appear when MCP runs.** Confirm no `--headless` flag is in the args of `.claude/settings.json` (the flag is a boolean switch — presence sets headless=true; absence is headed by default on non-Linux). Restart the Claude Code session after editing.
+- **First call is very slow (~30s+).** First MCP call triggers Playwright's browser binary download via `npx`. Subsequent calls cache; this is one-time cost.
 - **`npx` can't find `@playwright/mcp`.** Run `npm install` from the repo root. The package must be present locally; it is not a global tool.
 
 ## Worked examples
@@ -511,7 +515,7 @@ Expected:
 - A Chromium window appears (headed-mode confirmation)
 - Claude reports `[data-test="login-button"]` (or an equivalent stable selector if MCP suggests `getByRole(...)` instead)
 
-If the window doesn't appear: the `--headless=false` flag isn't being honored — verify `.claude/settings.json` and restart the session.
+If the window doesn't appear: an unexpected `--headless` flag is present in the args — verify `.claude/settings.json` has no `--headless` and restart the session.
 
 If the selector returned is wrong: STOP and investigate (saucedemo's selectors are stable; this would indicate an MCP issue).
 
@@ -699,6 +703,6 @@ The plan was reviewed against the Phase B.2 spec before writing. Coverage check:
 
 - `.claude/settings.json` referenced consistently across CLAUDE.md, docs/mcp.md, ADR-0006
 - `@playwright/mcp` package name spelled consistently
-- The `--headless=false` flag value spelled the same in `.claude/settings.json`, ADR-0006, docs/mcp.md
+- The pinned version `@playwright/mcp@0.0.75` and the absence of any `--headless` flag are spelled the same way in `.claude/settings.json`, ADR-0006, and docs/mcp.md (the package version in `package.json` matches the version pin in args)
 - The illustrative tool names (`browser_navigate`, etc.) are flagged as illustrative in CLAUDE.md and verified against actual output in Task 5
 - The 62-passing-tests target matches Phase B.1's tag state and is verified in Task 6 Step 9
