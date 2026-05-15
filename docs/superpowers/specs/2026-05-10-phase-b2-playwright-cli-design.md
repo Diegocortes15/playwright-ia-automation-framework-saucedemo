@@ -28,7 +28,7 @@ This phase originally targeted `@playwright/mcp` (Microsoft's MCP server for Pla
 The CLI's three concrete advantages for our use case:
 
 1. **Token efficiency.** No persistent MCP server holding session state in the conversation. Each Bash command returns only its own output. Snapshots are command-scoped, not auto-loaded every turn.
-2. **Skill-based workflow.** The package ships a Claude Code skill (`.claude/skills/playwright-cli/SKILL.md`) with `allowed-tools: Bash(playwright-cli:*)` — Claude invokes commands directly without per-call permission prompts, and the skill body teaches Claude the command surface.
+2. **Skill-based workflow.** The package ships a Claude Code skill (`.claude/skills/playwright-cli/SKILL.md`) with `allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)` — Claude invokes commands directly without per-call permission prompts, and the skill body teaches Claude the command surface.
 3. **Same Playwright underneath.** No second browser engine, no different selector semantics. Just a thin CLI over the same Playwright Chromium binary the test runner uses.
 
 The MCP path is preserved in the project's git history (commits `03235d0`, `93e1993`, `3371da1`) as a learning artifact — future-you can read the journey.

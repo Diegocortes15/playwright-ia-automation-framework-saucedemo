@@ -12,3 +12,6 @@ auth/*.json
 
 # Claude Code: project config committed; per-developer settings ignored
 .claude/settings.local.json
+
+# Playwright CLI workspace (per-session browser state, console logs, snapshots)
+.playwright-cli/

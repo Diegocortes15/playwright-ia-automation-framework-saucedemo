@@ -24,9 +24,10 @@ npm run test:ui          # Playwright UI mode
 
 This project ships with the `@playwright/cli` Claude Code skill registered at `.claude/skills/playwright-cli/`. When you need to inspect the live application — discover selectors on an unfamiliar page, verify a selector before writing a test, or debug a flaky test by reading the rendered DOM — invoke the skill or call `playwright-cli` commands directly via Bash.
 
-- Skill frontmatter `allowed-tools: Bash(playwright-cli:*)` permits the commands without per-call approval.
+- Skill frontmatter `allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)` permits these commands without per-call approval.
 - Browser auto-detected at install time (Chrome on most dev machines).
 - The CLI is independent of the test runner — `npm test` uses the bundled Playwright chromium and is unaffected.
+- On `@playwright/cli` upgrade, re-run `npx playwright-cli install --skills` and commit the regenerated skill files in the same commit as the version bump.
 - Full usage guide with worked examples: [`docs/playwright-cli.md`](docs/playwright-cli.md)
 - Reach for `npm run codegen` instead when YOU want to manually click through the app and capture selectors interactively.
 
