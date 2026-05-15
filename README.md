@@ -73,4 +73,4 @@ Expected: 62 test instances pass across 9 Playwright projects (~1 minute on a wa
 
 ## Tech stack
 
-Node 22 · Playwright 1.59 · TypeScript 5.9 (strict) · ESLint v9 flat config + `eslint-plugin-playwright` · Prettier 3 · GitHub Actions.
+Node 22 · Playwright 1.59 · TypeScript 5.9 (strict) · ESLint v9 flat config + `eslint-plugin-playwright` · Prettier 3 · GitHub Actions · Playwright CLI (see [`docs/playwright-cli.md`](docs/playwright-cli.md)).
