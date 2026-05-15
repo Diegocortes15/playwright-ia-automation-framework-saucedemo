@@ -258,13 +258,11 @@ If all three pass, the install is healthy. The smoke test lives at `docs/playwri
 
 ## 7. Out of scope (deferred to later phases)
 
-| Deferred to                 | What                                                                                                                                                                           |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Future mini-phase B.3**   | GitHub MCP server (added right before Phase C orchestrator needs it for PR creation)                                                                                           |
-| **Future mini-phase B.4**   | Atlassian MCP server (added right before Phase C `/from-jira` orchestrator needs it)                                                                                           |
-| **Phase C**                 | Custom Claude Code skills layered on top of the playwright-cli skill (e.g., a `/discover-selectors` skill that wraps a multi-step CLI workflow); the `/from-jira` orchestrator |
-| **Phase D**                 | Auto-running CLI in CI; pre-commit hook using CLI to validate selectors; auto-discovery of new pages; selector drift detection                                                 |
-| **Out of scope (rejected)** | `@playwright/mcp` (rejected after CLI pivot); global install of `@playwright/cli`; community/non-official packages; explicit `--browser` override in skill                     |
+| Deferred to                 | What                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase C**                 | Custom Claude Code skills layered on top of the playwright-cli skill (e.g., a `/discover-selectors` skill that wraps a multi-step CLI workflow); the `/from-issue` orchestrator (reads GitHub Issues via `gh` CLI)                                                                                            |
+| **Phase D**                 | Auto-running CLI in CI; pre-commit hook using CLI to validate selectors; auto-discovery of new pages; selector drift detection                                                                                                                                                                                |
+| **Out of scope (rejected)** | `@playwright/mcp` (rejected after CLI pivot — see ADR-0006); GitHub MCP (rejected — `gh` CLI is sufficient, see ADR-0007); Atlassian/Jira MCP (rejected — project uses GitHub Issues, not Jira); global install of `@playwright/cli`; community/non-official packages; explicit `--browser` override in skill |
 
 ---
 

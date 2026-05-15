@@ -31,6 +31,15 @@ This project ships with the `@playwright/cli` Claude Code skill registered at `.
 - Full usage guide with worked examples: [`docs/playwright-cli.md`](docs/playwright-cli.md)
 - Reach for `npm run codegen` instead when YOU want to manually click through the app and capture selectors interactively.
 
+## GitHub operations
+
+This project uses the `gh` CLI for all GitHub operations (issues, PRs, releases, workflow runs, arbitrary REST calls). `gh` is the user-installed GitHub CLI; assume it's authenticated (`gh auth login` is a one-time step).
+
+- For issues: `gh issue view <num>`, `gh issue create`, `gh issue list`
+- For PRs: `gh pr create`, `gh pr view`, `gh pr comment`, `gh pr checks`
+- For arbitrary API: `gh api repos/<owner>/<repo>/...`
+- We do NOT install a GitHub MCP server — see [ADR-0007](docs/adr/0007-gh-cli-not-github-mcp.md) for the rationale (same logic as the Playwright CLI / MCP choice in ADR-0006).
+
 ## Composition rules (must follow)
 
 1. **Component knows about Locators and (optionally) child Components only.** Never about Pages or its parent.
