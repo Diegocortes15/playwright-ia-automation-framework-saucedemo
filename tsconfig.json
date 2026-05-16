@@ -21,5 +21,6 @@
       "@utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src", "tests", "data", "playwright.config.ts"]
+  "include": ["src", "tests", "data", "playwright.config.ts"],
+  "exclude": ["node_modules", "scratch/**"]
 }

@@ -15,3 +15,6 @@ auth/*.json
 
 # Playwright CLI workspace (per-session browser state, console logs, snapshots)
 .playwright-cli/
+
+# Skill experimentation area (created by /scaffold-page-object and similar)
+scratch/
