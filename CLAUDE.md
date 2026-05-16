@@ -31,6 +31,14 @@ This project ships with the `@playwright/cli` Claude Code skill registered at `.
 - Full usage guide with worked examples: [`docs/playwright-cli.md`](docs/playwright-cli.md)
 - Reach for `npm run codegen` instead when YOU want to manually click through the app and capture selectors interactively.
 
+## Custom skills
+
+This project ships custom skills under `.claude/skills/<skill-name>/` — domain-specific workflows that build on top of `playwright-cli` and other tools. The pattern is documented in [ADR-0008](docs/adr/0008-custom-skills-pattern.md): compact `SKILL.md` (frontmatter + intro + pointer) and verbose detail in `references/`.
+
+Current custom skills:
+
+- **`/scaffold-page-object`** — generate a draft Page Object class from a live page snapshot. Full guide: [`docs/scaffold-page-object.md`](docs/scaffold-page-object.md).
+
 ## GitHub operations
 
 This project uses the `gh` CLI for all GitHub operations (issues, PRs, releases, workflow runs, arbitrary REST calls). `gh` is the user-installed GitHub CLI; assume it's authenticated (`gh auth login` is a one-time step).
