@@ -95,7 +95,9 @@ rm -rf scratch
 
 Use Read tool on `tsconfig.json`. Locate the `"exclude"` array (it's near the bottom of the file; typically contains `"node_modules"` and similar).
 
-- [ ] **Step 4: Add `scratch/**`to`tsconfig.json` `exclude`\*\*
+- [ ] **Step 4: Add the scratch exclude pattern to tsconfig.json**
+
+Add the string `"scratch/**"` to the `exclude` array of `tsconfig.json`.
 
 Use Edit tool. The exact edit depends on the current `exclude` array shape. The two most likely current states:
 
