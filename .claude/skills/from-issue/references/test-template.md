@@ -15,7 +15,7 @@ import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 
 test.describe('<feature> (<auth-tag>)', () => {
-  test('<auth-tag> <user-tag> <behavior description>', async ({ <pageFixture>, page }) => {
+  test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
     // Arrange
     await <pageFixture>.goto();
     await <pageFixture>.loginAs('<user>', env.password); // if @no-auth, omit this
@@ -36,7 +36,7 @@ test.describe('<feature> (<auth-tag>)', () => {
   - Always `import { test, expect } from '@fixtures/test'` — NEVER from `@playwright/test` (per CLAUDE.md "Where things live").
   - `import { env } from '@utils/env'` only when a test calls `loginAs(...)` and needs the password.
 - **Describe wrap** — exactly one `test.describe('<feature> (<auth-tag>)', () => { ... })` block per file. `<feature>` matches the issue template's Feature field; `<auth-tag>` is the dominant auth tag across tests in the file (e.g., `@standard`, `@no-auth`).
-- **Per-test title** — `'<auth-tag> <user-tag> <behavior description>'`. Examples:
+- **Per-test title** — `'<auth-tag> [<user-tag>] <behavior description>'` (square brackets = optional). Examples:
   - `'@no-auth standard_user logs in successfully and lands on inventory'`
   - `'@standard remove single item from cart updates cart badge'`
   - The `<user-tag>` is the saucedemo user name (e.g., `standard_user`, `locked_out_user`); omit if the test is user-agnostic.
