@@ -1,0 +1,64 @@
+name: To Be Automated
+description: File a feature/test request that should be turned into Playwright tests via /from-issue.
+title: "[TBA] "
+labels: ["to-be-automated"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill out this form to request automated test coverage. The `/from-issue` Claude Code skill will read this issue and generate a set of Playwright tests in a PR for human review.
+
+        Tips:
+        - **Feature** drives the test folder (`tests/<feature>/`). Use a short slug (e.g., `cart`, `checkout`, `login`).
+        - **Page Name** drives the Page Object class. Use PascalCase (e.g., `CartPage`, `CheckoutInfoPage`).
+        - **Acceptance Criteria** — one per line. The orchestrator decides which to automate and groups them into tests.
+
+  - type: input
+    id: feature
+    attributes:
+      label: Feature
+      description: Short folder name (snake_case). Becomes `tests/<feature>/`.
+      placeholder: cart
+    validations:
+      required: true
+
+  - type: input
+    id: page_name
+    attributes:
+      label: Page Name
+      description: PascalCase Page Object class. Reused if it already exists in `src/pages/`; otherwise scaffolded via `/scaffold-page-object`.
+      placeholder: CartPage
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User Story
+      description: Optional. As a / I want / so that.
+      placeholder: |
+        As a standard user
+        I want to remove items from the cart
+        so that I can adjust my order before checkout.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: One AC per line. The orchestrator decides automation-worth and groups ACs into tests.
+      placeholder: |
+        AC 1: Standard user can remove a single item from the cart; cart badge updates.
+        AC 2: Standard user can remove all items; cart is empty.
+        AC 3: Visual aesthetic of the remove button — manual review only.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional context (related issues, edge cases, links).
+    validations:
+      required: false
