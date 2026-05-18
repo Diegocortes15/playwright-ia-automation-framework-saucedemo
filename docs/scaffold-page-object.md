@@ -103,7 +103,7 @@ Open any file the skill produced. The first ~4 lines must be:
 // not regenerated automatically.
 ```
 
-This block is mandatory per the template in ADR-0008. Future PR reviewers reading the file will know it was AI-generated, where matching tests come from, and that edits are expected.
+This block is mandatory per the skill's output template ([`.claude/skills/scaffold-page-object/references/page-object-template.md`](../.claude/skills/scaffold-page-object/references/page-object-template.md)). Future PR reviewers reading the file will know it was AI-generated, where matching tests come from, and that edits are expected.
 
 ## When NOT to use it
 

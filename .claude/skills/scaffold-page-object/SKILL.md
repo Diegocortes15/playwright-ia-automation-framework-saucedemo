@@ -1,7 +1,7 @@
 ---
 name: scaffold-page-object
 description: Generate a draft Page Object class from a live page snapshot, composing framework components when detected.
-allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Read Glob Grep Write
+allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(rm:*) Read Glob Grep Write
 ---
 
 # scaffold-page-object

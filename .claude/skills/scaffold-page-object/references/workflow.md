@@ -117,24 +117,29 @@ Use the `Write` tool. (Step 3 already confirmed the path didn't exist.)
 
 A bare `npx tsc --noEmit <path>` does NOT pick up the project's `tsconfig.json` — it falls back to TS defaults without `paths` aliases, so any file using `@components/*` or `@playwright/test` types would fail with "Cannot find module" errors that aren't real.
 
-Use a one-shot tsconfig that extends the project's settings:
+Use a one-shot tsconfig that extends the project's settings.
 
-```bash
-# 1. Write a throwaway tsconfig that includes only the generated file
-cat > .tsconfig.scratch.json <<EOF
-{
-  "extends": "./tsconfig.json",
-  "include": ["<path-to-generated-file>"],
-  "exclude": []
-}
-EOF
+1. **Write a throwaway tsconfig** via the `Write` tool (cross-platform; no shell heredoc) at `.tsconfig.scratch.json`:
 
-# 2. Typecheck via the temp tsconfig
-npx tsc --noEmit -p .tsconfig.scratch.json
+   ```json
+   {
+     "extends": "./tsconfig.json",
+     "include": ["<path-to-generated-file>"],
+     "exclude": []
+   }
+   ```
 
-# 3. Always clean up (whether typecheck passed or failed)
-rm .tsconfig.scratch.json
-```
+2. **Typecheck via the temp tsconfig** (Bash):
+
+   ```bash
+   npx tsc --noEmit -p .tsconfig.scratch.json
+   ```
+
+3. **Always clean up** (Bash; whether typecheck passed or failed):
+
+   ```bash
+   rm .tsconfig.scratch.json
+   ```
 
 This runs the project's strict TS settings (with `paths` aliases) against the single generated file, regardless of whether it landed in `src/pages/` (in `tsconfig.json` include) or `scratch/` (excluded from project-wide typecheck).
 
