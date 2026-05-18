@@ -46,12 +46,16 @@ This prevents silently missing newly-added components.
 ### 5. Open the page via playwright-cli
 
 ```bash
-# If storageState provided:
-playwright-cli state-load <path>
+# Unauthenticated (no storageState):
+playwright-cli open <url>
 
-# Then:
+# Authenticated (storageState provided):
+playwright-cli open
+playwright-cli state-load <path>
 playwright-cli goto <url>
 ```
+
+**Caveat — `state-load` limitation:** `playwright-cli`'s `state-load` calls `setStorageState` on an existing context, which restores cookies + localStorage but **does NOT restore sessionStorage** (sessionStorage is per-tab and can't be reapplied after page creation). For apps that gate routes on a sessionStorage flag (saucedemo is one such app — `session-username` lives in sessionStorage), `state-load` followed by `goto` redirects back to the login page. If you detect this redirect (page URL doesn't match the target after `goto`), fall back to manual login via `playwright-cli fill` + `click` against the login form, then `goto` the target URL.
 
 ### 6. Snapshot the page
 
@@ -111,14 +115,32 @@ Use the `Write` tool. (Step 3 already confirmed the path didn't exist.)
 
 ### 11. Isolated typecheck of the generated file
 
+A bare `npx tsc --noEmit <path>` does NOT pick up the project's `tsconfig.json` — it falls back to TS defaults without `paths` aliases, so any file using `@components/*` or `@playwright/test` types would fail with "Cannot find module" errors that aren't real.
+
+Use a one-shot tsconfig that extends the project's settings:
+
 ```bash
-npx tsc --noEmit <path>
+# 1. Write a throwaway tsconfig that includes only the generated file
+cat > .tsconfig.scratch.json <<EOF
+{
+  "extends": "./tsconfig.json",
+  "include": ["<path-to-generated-file>"],
+  "exclude": []
+}
+EOF
+
+# 2. Typecheck via the temp tsconfig
+npx tsc --noEmit -p .tsconfig.scratch.json
+
+# 3. Always clean up (whether typecheck passed or failed)
+rm .tsconfig.scratch.json
 ```
 
-This runs the project's strict TS settings against the single generated file, regardless of whether it landed in `src/pages/` (in `tsconfig.json` include) or `scratch/` (excluded from project-wide typecheck).
+This runs the project's strict TS settings (with `paths` aliases) against the single generated file, regardless of whether it landed in `src/pages/` (in `tsconfig.json` include) or `scratch/` (excluded from project-wide typecheck).
 
 - If typecheck **passes**, record the pass for step 12's report
 - If typecheck **fails**, leave the file in place and capture the errors verbatim for step 12
+- **Always remove `.tsconfig.scratch.json`** before reporting — it must not linger in the working tree
 
 The project-wide `npm run typecheck` is unaffected — `scratch/` stays excluded so half-baked AI files don't break the global build.
 
