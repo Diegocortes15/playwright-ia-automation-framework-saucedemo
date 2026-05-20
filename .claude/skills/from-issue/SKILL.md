@@ -1,7 +1,7 @@
 ---
 name: from-issue
 description: Generate Playwright tests from a `to-be-automated`-labeled GitHub Issue, composing /scaffold-page-object when a target Page Object doesn't yet exist, and open a PR with the generated tests for review.
-allowed-tools: Bash(gh:*) Bash(git:*) Bash(npm:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write
+allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write
 ---
 
 # from-issue
