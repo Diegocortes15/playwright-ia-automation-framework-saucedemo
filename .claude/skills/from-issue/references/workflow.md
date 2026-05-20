@@ -89,11 +89,11 @@ ls src/pages/<PageName>.ts 2>/dev/null
 ls src/pages/checkout/<PageName>.ts 2>/dev/null
 ```
 
-- **Found** → reuse. Record a collision warning for the PR body. Continue.
-- **Not found** → invoke `/scaffold-page-object` with inputs:
+- **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. Continue.
+- **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
   - URL: inferred from the AC text (e.g., AC mentions "cart page" → `https://www.saucedemo.com/cart.html`)
-  - storageState: `auth/<inferred-user>.json` (per Decision 13 default)
+  - storageState: `auth/standard.json` by default. Override only if ALL Step 4 AC records share the same non-standard user (the storageState is only used for the snapshot; tests pick their own user via tag→project mapping).
 
   If `/scaffold-page-object` fails, abort with the subprocess error verbatim. No PR.
 
@@ -120,6 +120,8 @@ Apply [`references/test-template.md`](test-template.md):
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
 - Single `test.describe('<feature> (<auth-tag>)', ...)` wrap
 - One `test(...)` per record from Step 6, ordered as emitted
+
+Each `test(...)` title is constructed by prepending the test record's tags to the behavior description: `'<auth-tag> [<user-tag>] <behavior>'` (square brackets = optional; omit `<user-tag>` for user-agnostic tests like `@all-users`). This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
 
 Render to an in-memory string. Do NOT Write yet — Step 8 handles overwrite refusal first.
 
@@ -228,7 +230,7 @@ EOF
 )"
 ```
 
-Capture the returned PR URL.
+Capture the returned PR URL — `gh pr create` writes it to stdout on success (the only line of output is the URL).
 
 If `gh pr create` fails (no remote, no permission), abort with the `gh` error verbatim. The local branch and pushed branch remain on the remote.
 
