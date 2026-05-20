@@ -64,10 +64,10 @@ For each Acceptance Criterion, build an internal record:
 
 > _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_
 
-**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Post a comment on the source issue:
+**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. If `dry-run` was passed, simply report the rationale to the user (no issue comment, no PR). Otherwise, post a comment on the source issue:
 
 ```bash
-gh issue comment <num> --body "$(cat <<EOF
+gh issue comment <num> --body "$(cat <<'EOF'
 /from-issue reviewed this issue but found no ACs worth automating:
 
 - AC 1: <rationale>
@@ -211,8 +211,12 @@ If the branch already exists, abort with: _"Branch `from-issue/<num>-<slug>` exi
 
 ```bash
 git add tests/<feature>/<slug>.spec.ts
-# If /scaffold-page-object created new files in src/pages/ during Step 5, add those too:
-git add src/pages/<PageName>.ts  # only if it didn't exist before Step 5
+# If /scaffold-page-object created a new file during Step 5, also stage its actual path.
+# Use the resolved path from Step 5 — could be src/pages/<PageName>.ts OR src/pages/checkout/<PageName>.ts.
+# Example (top-level page):
+#   git add src/pages/<PageName>.ts
+# Example (checkout subfolder):
+#   git add src/pages/checkout/<PageName>.ts
 git commit -m "feat: add generated tests from #<num>"
 git push -u origin from-issue/<num>-<slug>
 ```
@@ -224,6 +228,7 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 Render the PR body using [`references/pr-description-template.md`](pr-description-template.md). Pass the body via a HEREDOC:
 
 ```bash
+# Title: "feat: tests from #<num> — <issue-title>"; truncate the title portion to ≤ 60 chars (break on a word boundary if possible).
 gh pr create --title "feat: tests from #<num> — <truncated-title>" --body "$(cat <<'EOF'
 <rendered PR body>
 EOF

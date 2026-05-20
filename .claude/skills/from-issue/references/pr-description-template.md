@@ -35,7 +35,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
 (omit this section entirely if no collisions)
 
-- ⚠️ **Page Name collision** — `<PageName>` already exists at `src/pages/<PageName>.ts`. Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the issue with a different Page Name.
+- ⚠️ **Page Name collision** — `<PageName>` already exists at `<resolved-path>` (e.g., `src/pages/<PageName>.ts` or `src/pages/checkout/<PageName>.ts`). Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the issue with a different Page Name.
 
 ## Source
 
