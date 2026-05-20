@@ -8,7 +8,7 @@
 
 ### Goal
 
-Ship `/from-issue <issue-number>` — a Claude Code custom skill that reads a `to-be-automated`-labeled GitHub Issue, generates a *set* of Playwright tests against the framework's Page Objects, and opens a PR with the generated tests for human review.
+Ship `/from-issue <issue-number>` — a Claude Code custom skill that reads a `to-be-automated`-labeled GitHub Issue, generates a _set_ of Playwright tests against the framework's Page Objects, and opens a PR with the generated tests for human review.
 
 The skill is **fully autonomous** by default. The PR is the review gate, not an interactive checkpoint during execution.
 
@@ -45,7 +45,7 @@ The skill is **fully autonomous** by default. The PR is the review gate, not an 
 
 4. **Fully autonomous.** No interactive checkpoints during execution. User invokes `/from-issue <num>` and waits for the report (URL of opened PR + summary). The PR review is where humans intervene.
 
-5. **Adaptive multi-test generation.** The LLM reads ALL Acceptance Criteria from the issue, decides which are worth automating (skipping low-value ones based on AC text — e.g., "manual visual inspection only" → skip), and groups them into a *set* of tests. One test may cover multiple ACs. Test count is unbounded — could be 2, could be 10, driven by what the ACs need. No 1:1 AC-to-test mapping.
+5. **Adaptive multi-test generation.** The LLM reads ALL Acceptance Criteria from the issue, decides which are worth automating (skipping low-value ones based on AC text — e.g., "manual visual inspection only" → skip), and groups them into a _set_ of tests. One test may cover multiple ACs. Test count is unbounded — could be 2, could be 10, driven by what the ACs need. No 1:1 AC-to-test mapping.
 
 6. **Conditional `/scaffold-page-object` dispatch.** The skill globs `src/pages/` for a file matching the issue's **Page Name** field. If found → reuse the existing Page Object, surface a collision warning in the PR description. If not found → call `/scaffold-page-object` to generate it, then continue with test generation.
 
@@ -159,20 +159,20 @@ Useful for trying the skill against test issues without polluting the PR queue.
 
 Theme: **abort early, fail loud — but if code was generated, open the PR anyway so reviewers see what broke.**
 
-| Failure | Behavior |
-|---|---|
-| Issue number not provided | Refuse before fetching. Ask user. |
-| Issue doesn't exist / no access | Abort with `gh` error verbatim. |
-| `to-be-automated` label missing | Abort with: *"Issue #N is missing the `to-be-automated` label. Add the label and re-run."* No autonomous label-adding. |
-| Issue template not used (free-form body) | LLM normalization step attempts best-effort parse. If it can't find any structured ACs, abort with: *"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."* |
-| LLM decides 0 ACs worth automating | Abort BEFORE writing files. Comment on issue: *"Reviewed issue but found no ACs worth automating. Reasons: [LLM per-AC rationale]. Close issue if this is correct, or refile with more concrete ACs."* No PR. |
-| Page Name collision (file exists with same name) | Reuse existing Page Object. Surface in PR body with a warning section. Continue. |
-| `/scaffold-page-object` fails | Abort with the subprocess error verbatim. No PR. |
-| Test file already exists at target path | Refuse to overwrite. Suggest `rm` and re-run. No PR. |
-| Isolated typecheck fails | **Open PR anyway.** PR body marks Typecheck = ❌ with errors verbatim. |
-| Test run fails | **Open PR anyway.** PR body marks per-test ❌ with failure output. |
-| `gh pr create` fails (no remote, no auth) | Abort with `gh` error verbatim. Files already written stay on disk; branch already committed locally. |
-| Branch `from-issue/<num>-<slug>` already exists | Refuse. *"Branch exists — delete it and re-run, or pick a new slug."* No silent reuse. |
+| Failure                                          | Behavior                                                                                                                                                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue number not provided                        | Refuse before fetching. Ask user.                                                                                                                                                                              |
+| Issue doesn't exist / no access                  | Abort with `gh` error verbatim.                                                                                                                                                                                |
+| `to-be-automated` label missing                  | Abort with: _"Issue #N is missing the `to-be-automated` label. Add the label and re-run."_ No autonomous label-adding.                                                                                         |
+| Issue template not used (free-form body)         | LLM normalization step attempts best-effort parse. If it can't find any structured ACs, abort with: _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_ |
+| LLM decides 0 ACs worth automating               | Abort BEFORE writing files. Comment on issue: _"Reviewed issue but found no ACs worth automating. Reasons: [LLM per-AC rationale]. Close issue if this is correct, or refile with more concrete ACs."_ No PR.  |
+| Page Name collision (file exists with same name) | Reuse existing Page Object. Surface in PR body with a warning section. Continue.                                                                                                                               |
+| `/scaffold-page-object` fails                    | Abort with the subprocess error verbatim. No PR.                                                                                                                                                               |
+| Test file already exists at target path          | Refuse to overwrite. Suggest `rm` and re-run. No PR.                                                                                                                                                           |
+| Isolated typecheck fails                         | **Open PR anyway.** PR body marks Typecheck = ❌ with errors verbatim.                                                                                                                                         |
+| Test run fails                                   | **Open PR anyway.** PR body marks per-test ❌ with failure output.                                                                                                                                             |
+| `gh pr create` fails (no remote, no auth)        | Abort with `gh` error verbatim. Files already written stay on disk; branch already committed locally.                                                                                                          |
+| Branch `from-issue/<num>-<slug>` already exists  | Refuse. _"Branch exists — delete it and re-run, or pick a new slug."_ No silent reuse.                                                                                                                         |
 
 **Two principles derived from this table:**
 
@@ -214,16 +214,16 @@ After verifying: close PR, delete branch, close issue.
 
 ### Explicitly deferred
 
-| Concern | Phase |
-|---|---|
-| Positive / Negative / Edge category headers in generated test files | **C.2.b** |
-| `@smoke` tag applied to subset of generated tests | **C.2.c** |
-| Label catalog (different labels route to different orchestrator behaviors) | **C.3** |
-| Conditional sub-agent dispatch by label | **C.4** |
+| Concern                                                                    | Phase     |
+| -------------------------------------------------------------------------- | --------- |
+| Positive / Negative / Edge category headers in generated test files        | **C.2.b** |
+| `@smoke` tag applied to subset of generated tests                          | **C.2.c** |
+| Label catalog (different labels route to different orchestrator behaviors) | **C.3**   |
+| Conditional sub-agent dispatch by label                                    | **C.4**   |
 
 ### Open questions (not blocking C.2.a; capture for paper trail)
 
-1. **Multi-page navigation tests.** Some ACs naturally span pages (login → inventory → cart). Per ADR-0001 rule #3, Pages can't return other Pages — the test itself owns navigation by injecting multiple page fixtures. The orchestrator must generate test code that does this correctly. This is a *prompt engineering* concern for the LLM rendering step (Step 7). May surface as a quality issue in early PR reviews.
+1. **Multi-page navigation tests.** Some ACs naturally span pages (login → inventory → cart). Per ADR-0001 rule #3, Pages can't return other Pages — the test itself owns navigation by injecting multiple page fixtures. The orchestrator must generate test code that does this correctly. This is a _prompt engineering_ concern for the LLM rendering step (Step 7). May surface as a quality issue in early PR reviews.
 
 2. **Duplicate test prevention.** If the same issue gets `/from-issue` run twice (e.g., spec updated, want to regenerate), Step 8 refuses to overwrite. Reviewer must `rm` the old file first. Alternative would be diff-and-merge — explicitly out of scope for C.2.a.
 
@@ -231,7 +231,7 @@ After verifying: close PR, delete branch, close issue.
 
 4. **Test quality regression over time.** As the LLM's behavior shifts across model versions, generated test quality may drift. No automated guard against this in C.2.a. Mitigated by the PR review gate; future phases may add reference outputs to compare against.
 
-5. **AC-grouping heuristic transparency.** The "how the LLM grouped ACs into tests" decision is opaque. PR description shows the *result* (AC coverage table) but not the *reasoning* for why AC#1 + AC#3 became one test rather than two. Acceptable for C.2.a; revisit if reviewers find the groupings consistently surprising.
+5. **AC-grouping heuristic transparency.** The "how the LLM grouped ACs into tests" decision is opaque. PR description shows the _result_ (AC coverage table) but not the _reasoning_ for why AC#1 + AC#3 became one test rather than two. Acceptable for C.2.a; revisit if reviewers find the groupings consistently surprising.
 
 ---
 

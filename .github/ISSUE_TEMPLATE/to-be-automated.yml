@@ -1,7 +1,7 @@
 name: To Be Automated
 description: File a feature/test request that should be turned into Playwright tests via /from-issue.
-title: "[TBA] "
-labels: ["to-be-automated"]
+title: '[TBA] '
+labels: ['to-be-automated']
 body:
   - type: markdown
     attributes:

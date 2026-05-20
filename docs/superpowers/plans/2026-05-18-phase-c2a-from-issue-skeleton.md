@@ -63,6 +63,7 @@ If missing: STOP — C.1 isn't merged.
 ## Task 1: GitHub Issue Template (`to-be-automated.yml`)
 
 **Files:**
+
 - Create: `.github/ISSUE_TEMPLATE/to-be-automated.yml`
 
 This task adds the YAML form BAs/reporters fill out when filing an issue that should produce automated tests. Five structured fields per spec §2 Decision 2.
@@ -82,8 +83,8 @@ Use the Write tool to create `.github/ISSUE_TEMPLATE/to-be-automated.yml`:
 ```yaml
 name: To Be Automated
 description: File a feature/test request that should be turned into Playwright tests via /from-issue.
-title: "[TBA] "
-labels: ["to-be-automated"]
+title: '[TBA] '
+labels: ['to-be-automated']
 body:
   - type: markdown
     attributes:
@@ -168,6 +169,7 @@ git commit -m "feat(c2a): add to-be-automated GitHub Issue Template for /from-is
 ## Task 2: Reference doc — `test-template.md`
 
 **Files:**
+
 - Create: `.claude/skills/from-issue/references/test-template.md`
 
 This is the canonical test-file template the orchestrator follows when rendering generated tests. It defines the mandatory 5-line provenance block, imports, describe/test structure, and naming rules. Read [`src/fixtures/test.ts`](../../../src/fixtures/test.ts) and [`tests/login/login.spec.ts`](../../../tests/login/login.spec.ts) for the existing test conventions before writing this template.
@@ -296,6 +298,7 @@ git commit -m "feat(c2a): add test-template.md (canonical test file template for
 ## Task 3: Reference doc — `pr-description-template.md`
 
 **Files:**
+
 - Create: `.claude/skills/from-issue/references/pr-description-template.md`
 
 The structured PR body the orchestrator writes when opening a PR. Five sections per spec §3 step 12.
@@ -319,17 +322,18 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 **User Story:** <user-story-text or "(none provided)">
 
 **Acceptance Criteria (normalized):**
+
 - AC 1: <normalized text>
 - AC 2: <normalized text>
 - ...
 
 ## AC coverage
 
-| AC | Test | Status |
-|----|------|--------|
-| AC 1: <truncated text> | `<test title>` | ✅ generated |
-| AC 2: <truncated text> | `<test title>` | ✅ generated |
-| AC 3: <truncated text> | — | ⚠️ skipped: <LLM rationale> |
+| AC                     | Test           | Status                      |
+| ---------------------- | -------------- | --------------------------- |
+| AC 1: <truncated text> | `<test title>` | ✅ generated                |
+| AC 2: <truncated text> | `<test title>` | ✅ generated                |
+| AC 3: <truncated text> | —              | ⚠️ skipped: <LLM rationale> |
 
 ## Verification
 
@@ -386,15 +390,16 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
 **User Story:** (none provided)
 
 **Acceptance Criteria (normalized):**
+
 - AC 1: User can log in with standard_user / secret_sauce and lands on inventory page.
 - AC 2: Locked-out user sees an error message.
 
 ## AC coverage
 
-| AC | Test | Status |
-|----|------|--------|
+| AC                                                                   | Test                                                                 | Status       |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------ |
 | AC 1: User can log in with standard_user / secret_sauce and lands... | `@no-auth standard_user logs in successfully and lands on inventory` | ✅ generated |
-| AC 2: Locked-out user sees an error message. | `@no-auth locked_out_user sees the lockout error` | ✅ generated |
+| AC 2: Locked-out user sees an error message.                         | `@no-auth locked_out_user sees the lockout error`                    | ✅ generated |
 
 ## Verification
 
@@ -425,6 +430,7 @@ git commit -m "feat(c2a): add pr-description-template.md (structured PR body for
 ## Task 4: Reference doc — `workflow.md`
 
 **Files:**
+
 - Create: `.claude/skills/from-issue/references/workflow.md`
 
 The 13-step procedural workflow Claude follows when `/from-issue` is invoked. This is the largest reference file — it captures every step of the orchestrator including tool choices, error handling, and per-step outputs. Cross-reference [`spec §3`](../../../../docs/superpowers/specs/2026-05-18-phase-c2a-from-issue-skeleton-design.md) and the C.1 workflow ([`.claude/skills/scaffold-page-object/references/workflow.md`](../../scaffold-page-object/references/workflow.md)) for structural precedent.
@@ -492,6 +498,7 @@ For each Acceptance Criterion, build an internal record:
 ```
 
 **Skip-signal = LLM judgment from AC text** (spec §2 Decision 11). Examples of ACs to skip:
+
 - "Visual aesthetic — manual review only"
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
@@ -629,7 +636,7 @@ npx playwright test tests/<feature>/<slug>.spec.ts --reporter=list
 Capture per-test PASS/FAIL output. Record one line per test for the PR body's Verification section:
 
 - ✅ PASS → `\`<test title>\` — ✅ PASS`
-- ❌ FAIL → `\`<test title>\` — ❌ FAIL: <one-line message>` plus a `<details>` block with verbatim failure output
+- ❌ FAIL → `\`<test title>\` — ❌ FAIL: <one-line message>`plus a`<details>` block with verbatim failure output
 
 DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate model means reviewers see and fix failures in the PR.
 
@@ -698,6 +705,7 @@ git commit -m "feat(c2a): add from-issue workflow reference (13 procedural steps
 ## Task 5: `SKILL.md` (compact frontmatter + intro + pointer)
 
 **Files:**
+
 - Create: `.claude/skills/from-issue/SKILL.md`
 
 Per ADR-0008, SKILL.md stays compact: frontmatter + brief intro + pointer to the workflow reference. The full procedural detail lives in `references/workflow.md`.
@@ -759,6 +767,7 @@ git commit -m "feat(c2a): add from-issue SKILL.md (compact frontmatter + intro +
 ## Task 6: Learning guide `docs/from-issue.md`
 
 **Files:**
+
 - Create: `docs/from-issue.md`
 
 Sibling to `docs/scaffold-page-object.md`. Same structure: What is it / How wired / Verification / Worked examples / When NOT to use / Pointers.
@@ -908,6 +917,7 @@ git commit -m "docs(c2a): add from-issue learning guide with worked examples"
 ## Task 7: Update `CLAUDE.md` "Custom skills" section
 
 **Files:**
+
 - Modify: `CLAUDE.md` (Custom skills section — add `/from-issue` entry)
 
 - [ ] **Step 1: Read the current `CLAUDE.md` "Custom skills" section**
@@ -927,6 +937,7 @@ Current custom skills:
 Use the Edit tool to extend the bullet list:
 
 **old_string:**
+
 ```markdown
 Current custom skills:
 
@@ -934,6 +945,7 @@ Current custom skills:
 ```
 
 **new_string:**
+
 ```markdown
 Current custom skills:
 
@@ -1006,6 +1018,7 @@ cat tests/login/login-coverage-for-standard-and-locked-out-users.spec.ts
 ```
 
 Expected:
+
 - File exists with a sensible slug (≤40 chars, breaks on `-` boundary)
 - First 5 lines match the provenance block from `test-template.md`
 - Imports are from `@fixtures/test` (NOT `@playwright/test`)
@@ -1028,6 +1041,7 @@ gh pr view <pr-num> --json title,body,headRefName
 ```
 
 Expected:
+
 - PR exists on branch `from-issue/<num>-<slug>`
 - Title starts with `feat: tests from #<num>`
 - Body has the five sections in order: What I understood / AC coverage / Verification / Collision warnings / Source
