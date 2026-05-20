@@ -38,6 +38,7 @@ This project ships custom skills under `.claude/skills/<skill-name>/` — domain
 Current custom skills:
 
 - **`/scaffold-page-object`** — generate a draft Page Object class from a live page snapshot. Full guide: [`docs/scaffold-page-object.md`](docs/scaffold-page-object.md).
+- **`/from-issue`** — generate a set of Playwright tests from a `to-be-automated`-labeled GitHub Issue and open a PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist. Full guide: [`docs/from-issue.md`](docs/from-issue.md).
 
 ## GitHub operations
 
