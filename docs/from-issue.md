@@ -20,6 +20,8 @@ The skill is **fully autonomous** by default. The PR is the review gate — no i
 
 **Test bucketing (since C.2.b):** Generated tests are grouped into up to three nested describe blocks — `Positive`, `Negative`, `Edge` — based on the LLM's classification of each test (rules in [`.claude/skills/from-issue/references/bucket-classification.md`](../.claude/skills/from-issue/references/bucket-classification.md)). Empty buckets are omitted. The PR description's AC coverage table includes a `Bucket` column so reviewers see the classification at a glance.
 
+**Smoke tagging (since C.2.c):** A curated subset of generated tests receive the `@smoke` tag. Selection is LLM judgment per test against [`.claude/skills/from-issue/references/smoke-policy.md`](../.claude/skills/from-issue/references/smoke-policy.md) — default is NOT smoke. Smoke is orthogonal to bucket: a Negative test can be smoke (critical regression risk), a Positive test can be NOT-smoke (peripheral happy path). Run the smoke subset with `npm run test:smoke`. PR coverage table shows a `⚡` marker for smoke tests.
+
 Distinction from `/scaffold-page-object`: **`/from-issue` is the orchestrator** that generates tests. When the issue's Page Name field references a Page that doesn't yet exist in `src/pages/`, `/from-issue` invokes `/scaffold-page-object` to create it first, then generates tests against the resulting Page Object.
 
 ## How it's wired in this project
@@ -111,14 +113,14 @@ Open any file the skill produced. The first ~5 lines must be:
 
 This block is mandatory per the skill's output template ([`.claude/skills/from-issue/references/test-template.md`](../.claude/skills/from-issue/references/test-template.md)). Future PR reviewers reading the file will know it was AI-generated, where the source issue is, and that edits are expected.
 
-### Inspect the bucket structure (C.2.b)
+### Inspect the generated file structure (C.2.b + C.2.c)
 
-A generated file with mixed Positive + Negative tests looks like:
+A generated file with mixed Positive + Negative tests + smoke selection looks like:
 
 ```ts
 test.describe('login (@no-auth)', () => {
   test.describe('Positive', () => {
-    test('@no-auth standard_user logs in successfully and lands on inventory', async ({
+    test('@no-auth @smoke standard_user logs in successfully and lands on inventory', async ({
       loginPage,
       page,
     }) => {
@@ -127,15 +129,22 @@ test.describe('login (@no-auth)', () => {
   });
 
   test.describe('Negative', () => {
-    test('@no-auth locked_out_user sees the lockout error', async ({ loginPage }) => {
-      /* ... */
+    test('@no-auth @smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
+      /* ... critical auth-rejection regression risk — selected as smoke */
+    });
+    test('@no-auth invalid password shows generic error', async ({ loginPage }) => {
+      /* ... secondary error path — NOT smoke */
     });
   });
   // Edge describe omitted — no edge tests for this issue.
 });
 ```
 
-Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omitted entirely (no empty describes left in the file). Reviewers can also see the per-test bucket in the PR body's AC coverage table (4-column: `AC | Test | Bucket | Status`).
+Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omitted entirely. Reviewers see the per-test bucket in the PR body's AC coverage table (`AC | Test | Bucket | Status`) and smoke tests are flagged with `⚡` in the Test column.
+
+### Reviewer override: changing the smoke set on a PR
+
+If you disagree with the LLM's smoke picks on a PR, edit the generated file directly in the same PR — add `@smoke ` after the auth-tag of a test that should be smoke, or remove `@smoke ` from a test that shouldn't be. The orchestrator does NOT re-run on the same issue. The PR is the curation gate; the LLM is just the first draft.
 
 ## When NOT to use it
 
@@ -143,7 +152,6 @@ Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omit
 - **Free-form issues that don't follow the template.** The LLM attempts best-effort parsing but aborts if it can't find structured ACs. Ask the reporter to refile using the template.
 - **Regenerating tests over an existing test file.** The skill refuses to overwrite — `rm` the existing file and re-run.
 - **Production credential pages.** The skill picks up storageState files that include real sessions; treat them with the same care as a real browser session.
-- **`@smoke` tag application.** That's Phase C.2.c.
 
 ## Pointers
 
