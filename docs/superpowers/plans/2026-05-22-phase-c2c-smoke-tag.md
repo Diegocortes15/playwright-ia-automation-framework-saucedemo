@@ -76,7 +76,7 @@ Expected: `OK to create`. If it already exists: STOP and report BLOCKED.
 
 Use the Write tool. Content:
 
-````markdown
+```markdown
 # Smoke Policy Reference
 
 The `/from-issue` skill uses this doc to decide which generated tests get the `@smoke` tag. The decision is recorded in the test's `smoke: boolean` field in Step 6 of [`workflow.md`](workflow.md), then drives the `@smoke ` prepend in Step 7 and the `⚡` marker in the PR description's AC coverage table (see [`pr-description-template.md`](pr-description-template.md)).
@@ -151,7 +151,7 @@ Default to **`smoke: false`**. Over-tagging makes the smoke set useless; under-t
 ## Reviewer override
 
 If a reviewer disagrees with the LLM's smoke pick on a PR, the workflow is: edit the generated test file directly in the PR — add `@smoke ` after the auth-tag, or remove it. The orchestrator does NOT re-run on the same issue. The PR is the curation gate; the LLM is just the first draft.
-````
+```
 
 - [ ] **Step 3: Commit**
 
@@ -268,7 +268,7 @@ Use the Edit tool with `replace_all: false`.
 
 **old_string:**
 
-````
+```
 test.describe('<feature> (<auth-tag>)', () => {
   test.describe('Positive', () => {
     test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
@@ -295,11 +295,11 @@ test.describe('<feature> (<auth-tag>)', () => {
   });
   // Omit any bucket describe whose record list is empty.
 });
-````
+```
 
 **new_string:**
 
-````
+```
 test.describe('<feature> (<auth-tag>)', () => {
   test.describe('Positive', () => {
     test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
@@ -326,7 +326,7 @@ test.describe('<feature> (<auth-tag>)', () => {
   });
   // Omit any bucket describe whose record list is empty.
 });
-````
+```
 
 - [ ] **Step 2: Update the Per-test title rule to document the @smoke slot**
 
@@ -357,7 +357,7 @@ Use the Edit tool with `replace_all: false`.
 
 **old_string:**
 
-````
+```
 test.describe('login (@no-auth)', () => {
   test.describe('Positive', () => {
     test('@no-auth standard_user logs in successfully and lands on inventory', async ({
@@ -380,11 +380,11 @@ test.describe('login (@no-auth)', () => {
   });
   // Edge describe omitted — no edge tests for this issue.
 });
-````
+```
 
 **new_string:**
 
-````
+```
 test.describe('login (@no-auth)', () => {
   test.describe('Positive', () => {
     test('@no-auth @smoke standard_user logs in successfully and lands on inventory', async ({
@@ -407,7 +407,7 @@ test.describe('login (@no-auth)', () => {
   });
   // Edge describe omitted — no edge tests for this issue.
 });
-````
+```
 
 - [ ] **Step 4: Commit**
 

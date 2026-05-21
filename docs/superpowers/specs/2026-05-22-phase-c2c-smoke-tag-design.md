@@ -65,16 +65,16 @@ Extend `/from-issue` to apply the `@smoke` tag to a curated subset of generated 
 
 ### File touchpoints
 
-| File | Change | Why |
-|---|---|---|
-| `.claude/skills/from-issue/references/smoke-policy.md` | **NEW** | Defines smoke-worthiness criteria + 3-5 worked examples per category (smoke vs. NOT-smoke). LLM reads this when classifying. ~60-80 lines. Mirrors the structural pattern of `bucket-classification.md`. |
-| `.claude/skills/from-issue/references/workflow.md` | Modify Steps 6 + 7 | Step 6 records gain `smoke` field. Step 7 prepends `@smoke ` when true. |
-| `.claude/skills/from-issue/references/test-template.md` | Modify "Per-test title" rule + Example | Title format gains optional `[@smoke]` slot. Example shows mixed smoke + non-smoke tests. |
-| `.claude/skills/from-issue/references/pr-description-template.md` | Modify "Test" column rule + Template + Example | Prepend `⚡ ` to smoke test titles in AC coverage table. |
-| `.claude/skills/from-issue/SKILL.md` | Add 1 line to References section | Pointer to new `smoke-policy.md`. |
-| `package.json` | Add `test:smoke` npm script | `"test:smoke": "playwright test --grep '@smoke'"` |
-| `CLAUDE.md` | Add `@smoke` row to Tag conventions table | Registers the cross-cutting tag project-wide. |
-| `docs/from-issue.md` | Add smoke paragraph + update Worked example snippet + note reviewer override pattern | Learning guide explains the LLM-judgment rule, the `⚡` marker, and how reviewers override smoke picks. |
+| File                                                              | Change                                                                               | Why                                                                                                                                                                                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/skills/from-issue/references/smoke-policy.md`            | **NEW**                                                                              | Defines smoke-worthiness criteria + 3-5 worked examples per category (smoke vs. NOT-smoke). LLM reads this when classifying. ~60-80 lines. Mirrors the structural pattern of `bucket-classification.md`. |
+| `.claude/skills/from-issue/references/workflow.md`                | Modify Steps 6 + 7                                                                   | Step 6 records gain `smoke` field. Step 7 prepends `@smoke ` when true.                                                                                                                                  |
+| `.claude/skills/from-issue/references/test-template.md`           | Modify "Per-test title" rule + Example                                               | Title format gains optional `[@smoke]` slot. Example shows mixed smoke + non-smoke tests.                                                                                                                |
+| `.claude/skills/from-issue/references/pr-description-template.md` | Modify "Test" column rule + Template + Example                                       | Prepend `⚡ ` to smoke test titles in AC coverage table.                                                                                                                                                 |
+| `.claude/skills/from-issue/SKILL.md`                              | Add 1 line to References section                                                     | Pointer to new `smoke-policy.md`.                                                                                                                                                                        |
+| `package.json`                                                    | Add `test:smoke` npm script                                                          | `"test:smoke": "playwright test --grep '@smoke'"`                                                                                                                                                        |
+| `CLAUDE.md`                                                       | Add `@smoke` row to Tag conventions table                                            | Registers the cross-cutting tag project-wide.                                                                                                                                                            |
+| `docs/from-issue.md`                                              | Add smoke paragraph + update Worked example snippet + note reviewer override pattern | Learning guide explains the LLM-judgment rule, the `⚡` marker, and how reviewers override smoke picks.                                                                                                  |
 
 **1 new + 7 modified = 8 files touched.** Zero changes to `src/`, `tests/`, `playwright.config.ts`, ADR-0008, or the GitHub Issue Template.
 
@@ -126,12 +126,12 @@ test.describe('login (@no-auth)', () => {
 ### PR AC coverage table (after C.2.c)
 
 ```markdown
-| AC | Test | Bucket | Status |
-|----|------|--------|--------|
-| AC 1: ... | `⚡ @no-auth @smoke standard_user logs in...` | Positive | ✅ generated |
+| AC        | Test                                                        | Bucket   | Status       |
+| --------- | ----------------------------------------------------------- | -------- | ------------ |
+| AC 1: ... | `⚡ @no-auth @smoke standard_user logs in...`               | Positive | ✅ generated |
 | AC 2: ... | `⚡ @no-auth @smoke locked_out_user sees the lockout error` | Negative | ✅ generated |
-| AC 3: ... | `@no-auth invalid password shows generic error` | Negative | ✅ generated |
-| AC 4: ... | `@no-auth username with whitespace is rejected` | Edge | ✅ generated |
+| AC 3: ... | `@no-auth invalid password shows generic error`             | Negative | ✅ generated |
+| AC 4: ... | `@no-auth username with whitespace is rejected`             | Edge     | ✅ generated |
 ```
 
 The `⚡ ` prefix in the Test column visually flags smoke tests without changing the column count.
@@ -185,12 +185,12 @@ All failure modes from C.2.a §4 and C.2.b §5 carry over identically. C.2.c doe
 
 ### New for C.2.c
 
-| Failure | Behavior |
-|---|---|
-| `smoke-policy.md` missing/unreadable | Abort with: _"`.claude/skills/from-issue/references/smoke-policy.md` not found. Re-install the skill or restore from git."_ No inline fallback. |
+| Failure                                              | Behavior                                                                                                                                                                                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `smoke-policy.md` missing/unreadable                 | Abort with: _"`.claude/skills/from-issue/references/smoke-policy.md` not found. Re-install the skill or restore from git."_ No inline fallback.                                                                                                                                |
 | LLM emits invalid `smoke` value (not `true`/`false`) | Validation at boundary between Step 6 and Step 7: default the test to `smoke: false` and record a soft warning in the PR body's Verification section: `⚠️ LLM emitted invalid smoke value "<value>" for test "<title>" — defaulted to false. Reviewer: verify classification.` |
-| Zero smoke tests selected | No failure. PR description shows zero `⚡` markers. `npm run test:smoke` (after merge) matches zero tests from this PR's file. Acceptable — some features have no critical path. |
-| All tests selected as smoke | No failure. Reviewer can push back via PR comment. Acceptable but rare (policy default-NOT-smoke should prevent this in practice). |
+| Zero smoke tests selected                            | No failure. PR description shows zero `⚡` markers. `npm run test:smoke` (after merge) matches zero tests from this PR's file. Acceptable — some features have no critical path.                                                                                               |
+| All tests selected as smoke                          | No failure. Reviewer can push back via PR comment. Acceptable but rare (policy default-NOT-smoke should prevent this in practice).                                                                                                                                             |
 
 ### Edge case worth naming explicitly
 
@@ -241,14 +241,14 @@ After verifying: close PR, delete branches, close issue (same cleanup as C.2.a/b
 
 ### Explicitly deferred
 
-| Concern | Phase |
-|---|---|
-| Hard numeric smoke cap (if default-NOT-smoke proves insufficient) | **C.3+** — revisit after observing real PR drift |
+| Concern                                                                                             | Phase                                                                                   |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Hard numeric smoke cap (if default-NOT-smoke proves insufficient)                                   | **C.3+** — revisit after observing real PR drift                                        |
 | Per-feature smoke budget across many issues (e.g., "don't add more smoke if feature already has N") | **C.3+** — requires cross-issue state tracking; out of scope for stateless orchestrator |
-| Smoke as a CI merge-blocking gate | **Future** — project decision, not skill scope |
-| Retroactive smoke tagging on legacy tests | **Out of scope permanently** — consistent with the C.2.a/b "not retroactive" principle |
-| Label catalog (other labels route to other sub-skills) | **C.3** |
-| Conditional sub-agent dispatch by label | **C.4** |
+| Smoke as a CI merge-blocking gate                                                                   | **Future** — project decision, not skill scope                                          |
+| Retroactive smoke tagging on legacy tests                                                           | **Out of scope permanently** — consistent with the C.2.a/b "not retroactive" principle  |
+| Label catalog (other labels route to other sub-skills)                                              | **C.3**                                                                                 |
+| Conditional sub-agent dispatch by label                                                             | **C.4**                                                                                 |
 
 ### Open questions (not blocking C.2.c)
 
