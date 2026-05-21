@@ -18,11 +18,11 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
 ## AC coverage
 
-| AC | Test | Status |
-|----|------|--------|
-| AC 1: <truncated text> | `<test title>` | ✅ generated |
-| AC 2: <truncated text> | `<test title>` | ✅ generated |
-| AC 3: <truncated text> | — | ⚠️ skipped: <LLM rationale> |
+| AC | Test | Bucket | Status |
+|----|------|--------|--------|
+| AC 1: <truncated text> | `<test title>` | Positive | ✅ generated |
+| AC 2: <truncated text> | `<test title>` | Negative | ✅ generated |
+| AC 3: <truncated text> | — | — | ⚠️ skipped: <LLM rationale> |
 
 ## Verification
 
@@ -48,6 +48,7 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the issue for full text.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped.
+  - "Bucket" column: exactly one of `Positive` / `Negative` / `Edge` for generated tests; em-dash `—` for skipped ACs. Classification follows [`bucket-classification.md`](bucket-classification.md).
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`.
 - **Verification on failure**:
   - Typecheck FAIL → use `❌ FAIL` and include a fenced code block with the verbatim typecheck errors.
@@ -84,10 +85,10 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
 
 ## AC coverage
 
-| AC | Test | Status |
-|----|------|--------|
-| AC 1: User can log in with standard_user / secret_sauce and lands... | `@no-auth standard_user logs in successfully and lands on inventory` | ✅ generated |
-| AC 2: Locked-out user sees an error message. | `@no-auth locked_out_user sees the lockout error` | ✅ generated |
+| AC | Test | Bucket | Status |
+|----|------|--------|--------|
+| AC 1: User can log in with standard_user / secret_sauce and lands... | `@no-auth standard_user logs in successfully and lands on inventory` | Positive | ✅ generated |
+| AC 2: Locked-out user sees an error message. | `@no-auth locked_out_user sees the lockout error` | Negative | ✅ generated |
 
 ## Verification
 
