@@ -36,7 +36,7 @@ Extend `/from-issue` (C.2.a) to organize generated tests into three nested descr
 
 5. **Bucket order = fixed: Positive → Negative → Edge.** Even if Negative tests outnumber Positive, the file order stays Positive first. Predictability of structure over preservation of density.
 
-6. **Bucket lives on the test, not the AC.** Because one test can cover multiple ACs (per C.2.a Decision 5), the LLM classifies the *test* (based on its dominant behavior), not the underlying ACs. If a test spans a happy-path AC and an error-scenario AC, the LLM picks one bucket using `bucket-classification.md`'s ambiguity rules as the tiebreaker.
+6. **Bucket lives on the test, not the AC.** Because one test can cover multiple ACs (per C.2.a Decision 5), the LLM classifies the _test_ (based on its dominant behavior), not the underlying ACs. If a test spans a happy-path AC and an error-scenario AC, the LLM picks one bucket using `bucket-classification.md`'s ambiguity rules as the tiebreaker.
 
 7. **PR description gains a Bucket column.** AC coverage table grows from 3 columns (`AC | Test | Status`) to 4 (`AC | Test | Bucket | Status`). Skipped ACs show `—` in the Bucket column. Generated tests show `Positive` / `Negative` / `Edge`.
 
@@ -46,20 +46,20 @@ Extend `/from-issue` (C.2.a) to organize generated tests into three nested descr
 
 10. **Invalid bucket value = default to Edge + soft warning.** If the LLM emits `bucket: "Boundary"` or any value outside `{Positive, Negative, Edge}`, the orchestrator validates at the boundary between Step 6 and Step 7, defaults the test to `Edge` (the catch-all bucket), and records a soft warning in the PR body's Verification section: `⚠️ LLM emitted invalid bucket "<value>" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
 
-11. **bucket-classification.md is the single source of truth.** No inline fallback rules. If the doc is missing or unreadable, abort with: *"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."* Silent fallbacks hide drift.
+11. **bucket-classification.md is the single source of truth.** No inline fallback rules. If the doc is missing or unreadable, abort with: _"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."_ Silent fallbacks hide drift.
 
 ## 3. Architecture
 
 ### File touchpoints
 
-| File | Change | Why |
-|---|---|---|
-| `.claude/skills/from-issue/references/bucket-classification.md` | **NEW** | Defines Positive / Negative / Edge with 3-5 worked examples per bucket. LLM reads this when classifying. ~60-80 lines. |
-| `.claude/skills/from-issue/references/workflow.md` | Modify Steps 6 + 7 | Step 6 records gain `bucket` field. Step 7 renders nested describes. |
-| `.claude/skills/from-issue/references/test-template.md` | Modify Template + add "Bucket structure" rule | Skeleton shows nested describes. Rule explains nesting + omit-empty + fixed order. |
-| `.claude/skills/from-issue/references/pr-description-template.md` | Modify AC coverage table 3→4 cols | Reviewers see classification per AC. |
-| `.claude/skills/from-issue/SKILL.md` | Add 1 line to References section | Pointer to the new `bucket-classification.md`. |
-| `docs/from-issue.md` | Add short paragraph + update worked example | Learning guide notes the new structure with a before/after snippet. |
+| File                                                              | Change                                        | Why                                                                                                                    |
+| ----------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `.claude/skills/from-issue/references/bucket-classification.md`   | **NEW**                                       | Defines Positive / Negative / Edge with 3-5 worked examples per bucket. LLM reads this when classifying. ~60-80 lines. |
+| `.claude/skills/from-issue/references/workflow.md`                | Modify Steps 6 + 7                            | Step 6 records gain `bucket` field. Step 7 renders nested describes.                                                   |
+| `.claude/skills/from-issue/references/test-template.md`           | Modify Template + add "Bucket structure" rule | Skeleton shows nested describes. Rule explains nesting + omit-empty + fixed order.                                     |
+| `.claude/skills/from-issue/references/pr-description-template.md` | Modify AC coverage table 3→4 cols             | Reviewers see classification per AC.                                                                                   |
+| `.claude/skills/from-issue/SKILL.md`                              | Add 1 line to References section              | Pointer to the new `bucket-classification.md`.                                                                         |
+| `docs/from-issue.md`                                              | Add short paragraph + update worked example   | Learning guide notes the new structure with a before/after snippet.                                                    |
 
 **6 files touched (1 new + 5 modified).** Zero changes to `src/`, `tests/`, CLAUDE.md, ADR-0008, or the GitHub Issue Template.
 
@@ -133,15 +133,16 @@ Estimated ~60-80 lines. Mirrors the structural pattern of C.1's `component-detec
 ```markdown
 ## AC coverage
 
-| AC | Test | Bucket | Status |
-|----|------|--------|--------|
-| AC 1: <truncated text> | `<test title>` | Positive | ✅ generated |
-| AC 2: <truncated text> | `<test title>` | Negative | ✅ generated |
-| AC 3: <truncated text> | `<test title>` | Edge | ✅ generated |
-| AC 4: <truncated text> | — | — | ⚠️ skipped: <rationale> |
+| AC                     | Test           | Bucket   | Status                  |
+| ---------------------- | -------------- | -------- | ----------------------- |
+| AC 1: <truncated text> | `<test title>` | Positive | ✅ generated            |
+| AC 2: <truncated text> | `<test title>` | Negative | ✅ generated            |
+| AC 3: <truncated text> | `<test title>` | Edge     | ✅ generated            |
+| AC 4: <truncated text> | —              | —        | ⚠️ skipped: <rationale> |
 ```
 
 Rules:
+
 - Skipped ACs show `—` in the Bucket column (no test was generated, no bucket to report).
 - Generated tests show exactly one of `Positive` / `Negative` / `Edge`.
 
@@ -151,7 +152,7 @@ Rules:
 
 **Before (C.2.a):** LLM groups automation-worthy ACs into a set of tests. Each test records `title`, `covers[]`, `user`, `tags[]`.
 
-**After (C.2.b):** Same as before, plus each test record gains a `bucket` field. The LLM classifies the *test* (not the AC) using `references/bucket-classification.md`.
+**After (C.2.b):** Same as before, plus each test record gains a `bucket` field. The LLM classifies the _test_ (not the AC) using `references/bucket-classification.md`.
 
 Rationale for classifying on the test rather than the AC: one test may cover multiple ACs (per C.2.a Decision 5). If AC#1 is happy-path and AC#3 is an error scenario but the LLM groups them into a single integration test, that test goes to ONE bucket. The LLM picks the dominant behavior, with `bucket-classification.md`'s ambiguity rules as the tiebreaker.
 
@@ -189,11 +190,11 @@ All 11 failure modes from C.2.a §4 carry over identically — bucketing doesn't
 
 ### New for C.2.b
 
-| Failure | Behavior |
-|---|---|
+| Failure                                                                                          | Behavior                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | LLM emits an invalid bucket value (e.g., `"Boundary"` instead of `"Positive"/"Negative"/"Edge"`) | Orchestrator validates each test record's `bucket` field against the closed set `{Positive, Negative, Edge}` before rendering. On mismatch: default to `Edge` and record a soft warning in the PR body's Verification section: `⚠️ LLM emitted invalid bucket "<value>" for test "<title>" — defaulted to Edge. Reviewer: verify classification.` |
-| `bucket-classification.md` missing/unreadable | Abort with: *"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."* Don't fall back to inline rules — the doc is the source of truth and silent fallbacks hide drift. |
-| All tests cluster into one bucket | No failure. Per Decision 8 (no single-bucket flag), this is acceptable. Reviewer sees the classification in the AC coverage table and can push back via PR comment if needed. |
+| `bucket-classification.md` missing/unreadable                                                    | Abort with: _"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."_ Don't fall back to inline rules — the doc is the source of truth and silent fallbacks hide drift.                                                                                                            |
+| All tests cluster into one bucket                                                                | No failure. Per Decision 8 (no single-bucket flag), this is acceptable. Reviewer sees the classification in the AC coverage table and can push back via PR comment if needed.                                                                                                                                                                     |
 
 ### Edge case worth naming explicitly
 
@@ -242,11 +243,11 @@ Optional second smoke run with a pure-Positive issue (e.g., "AC 1: User can view
 
 ### Explicitly deferred
 
-| Concern | Phase |
-|---|---|
-| `@smoke` tag applied to a subset of tests | **C.2.c** |
-| Label catalog (other labels route to different sub-skills) | **C.3** |
-| Conditional sub-agent dispatch by label | **C.4** |
+| Concern                                                    | Phase     |
+| ---------------------------------------------------------- | --------- |
+| `@smoke` tag applied to a subset of tests                  | **C.2.c** |
+| Label catalog (other labels route to different sub-skills) | **C.3**   |
+| Conditional sub-agent dispatch by label                    | **C.4**   |
 
 ### Open questions (not blocking C.2.b)
 

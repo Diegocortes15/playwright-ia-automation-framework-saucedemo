@@ -80,7 +80,7 @@ Expected: `OK to create`. If it already exists: STOP and ask the controller.
 
 Use the Write tool to create `.claude/skills/from-issue/references/bucket-classification.md` with the EXACT following content verbatim:
 
-````markdown
+```markdown
 # Bucket Classification Reference
 
 The `/from-issue` skill uses this doc to classify each generated test into one of three buckets: **Positive**, **Negative**, or **Edge**. The classification is recorded in the test's `bucket` field in Step 6 of [`workflow.md`](workflow.md), then drives the nested describe structure in Step 7 and the `Bucket` column in the PR description's AC coverage table (see [`pr-description-template.md`](pr-description-template.md)).
@@ -156,7 +156,7 @@ When a test could plausibly fit multiple buckets, apply these tiebreakers in ord
 ## When in doubt
 
 Default to **Edge**. It's the catch-all bucket. Misclassifying a Positive test as Edge surfaces in PR review (reviewer can recategorize); misclassifying a Negative test as Positive silently hides the negative coverage.
-````
+```
 
 - [ ] **Step 3: Commit**
 
@@ -290,7 +290,7 @@ Use the Edit tool.
 
 **old_string:**
 
-````
+```
 test.describe('<feature> (<auth-tag>)', () => {
   test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
     // Arrange
@@ -304,11 +304,11 @@ test.describe('<feature> (<auth-tag>)', () => {
 
   // ... one `test(...)` per generated test, ordered as the orchestrator emitted them
 });
-````
+```
 
 **new_string:**
 
-````
+```
 test.describe('<feature> (<auth-tag>)', () => {
   test.describe('Positive', () => {
     test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
@@ -335,7 +335,7 @@ test.describe('<feature> (<auth-tag>)', () => {
   });
   // Omit any bucket describe whose record list is empty.
 });
-````
+```
 
 - [ ] **Step 2: Add a new "Bucket structure" rule to the Rules section**
 
@@ -360,7 +360,7 @@ Use the Edit tool.
 
 **old_string:**
 
-````
+```
 test.describe('login (@no-auth)', () => {
   test('@no-auth standard_user logs in successfully and lands on inventory', async ({
     loginPage,
@@ -378,11 +378,11 @@ test.describe('login (@no-auth)', () => {
     expect(await loginPage.getErrorText()).toContain('locked out');
   });
 });
-````
+```
 
 **new_string:**
 
-````
+```
 test.describe('login (@no-auth)', () => {
   test.describe('Positive', () => {
     test('@no-auth standard_user logs in successfully and lands on inventory', async ({
@@ -405,7 +405,7 @@ test.describe('login (@no-auth)', () => {
   });
   // Edge describe omitted — no edge tests for this issue.
 });
-````
+```
 
 - [ ] **Step 4: Commit**
 
