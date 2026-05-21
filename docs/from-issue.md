@@ -18,6 +18,8 @@ It's a Claude Code custom skill that takes:
 
 The skill is **fully autonomous** by default. The PR is the review gate — no interactive checkpoints during execution.
 
+**Test bucketing (since C.2.b):** Generated tests are grouped into up to three nested describe blocks — `Positive`, `Negative`, `Edge` — based on the LLM's classification of each test (rules in [`.claude/skills/from-issue/references/bucket-classification.md`](../.claude/skills/from-issue/references/bucket-classification.md)). Empty buckets are omitted. The PR description's AC coverage table includes a `Bucket` column so reviewers see the classification at a glance.
+
 Distinction from `/scaffold-page-object`: **`/from-issue` is the orchestrator** that generates tests. When the issue's Page Name field references a Page that doesn't yet exist in `src/pages/`, `/from-issue` invokes `/scaffold-page-object` to create it first, then generates tests against the resulting Page Object.
 
 ## How it's wired in this project
@@ -109,13 +111,38 @@ Open any file the skill produced. The first ~5 lines must be:
 
 This block is mandatory per the skill's output template ([`.claude/skills/from-issue/references/test-template.md`](../.claude/skills/from-issue/references/test-template.md)). Future PR reviewers reading the file will know it was AI-generated, where the source issue is, and that edits are expected.
 
+### Inspect the bucket structure (C.2.b)
+
+A generated file with mixed Positive + Negative tests looks like:
+
+```ts
+test.describe('login (@no-auth)', () => {
+  test.describe('Positive', () => {
+    test('@no-auth standard_user logs in successfully and lands on inventory', async ({
+      loginPage,
+      page,
+    }) => {
+      /* ... */
+    });
+  });
+
+  test.describe('Negative', () => {
+    test('@no-auth locked_out_user sees the lockout error', async ({ loginPage }) => {
+      /* ... */
+    });
+  });
+  // Edge describe omitted — no edge tests for this issue.
+});
+```
+
+Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omitted entirely (no empty describes left in the file). Reviewers can also see the per-test bucket in the PR body's AC coverage table (4-column: `AC | Test | Bucket | Status`).
+
 ## When NOT to use it
 
 - **Issues without the `to-be-automated` label.** The skill refuses by design. Add the label first.
 - **Free-form issues that don't follow the template.** The LLM attempts best-effort parsing but aborts if it can't find structured ACs. Ask the reporter to refile using the template.
 - **Regenerating tests over an existing test file.** The skill refuses to overwrite — `rm` the existing file and re-run.
 - **Production credential pages.** The skill picks up storageState files that include real sessions; treat them with the same care as a real browser session.
-- **Multi-page test bucketing (Positive / Negative / Edge headers).** That's Phase C.2.b.
 - **`@smoke` tag application.** That's Phase C.2.c.
 
 ## Pointers

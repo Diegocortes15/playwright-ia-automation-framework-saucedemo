@@ -106,11 +106,16 @@ Group the `worth_automating=true` AC records into a set of tests. One test may c
   title: "<behavior-only description, e.g., 'remove single item from cart updates badge'>",
   covers: [1, 3],  // AC IDs
   user: "<saucedemo user>",
-  tags: ["<auth-tag>", "<user-tag-if-not-no-auth>"]
+  tags: ["<auth-tag>", "<user-tag-if-not-no-auth>"],
+  bucket: "Positive" | "Negative" | "Edge"
 }
 ```
 
-Tag selection follows CLAUDE.md "Tag conventions" table. Title format follows [`references/test-template.md`](test-template.md) "Rules".
+Tag selection follows CLAUDE.md "Tag conventions" table. Title format follows [`references/test-template.md`](test-template.md) "Rules". Bucket assignment follows [`references/bucket-classification.md`](bucket-classification.md) — read it before classifying. The bucket lives on the test (not on the AC) because one test can cover multiple ACs; classify by the test's dominant behavior, using the ambiguity rules in bucket-classification.md as the tiebreaker.
+
+**Validate bucket values before Step 7.** Each test's `bucket` must be one of `{Positive, Negative, Edge}`. If the LLM emits any other value (e.g., `"Boundary"`), default that test to `Edge` and record a soft warning for the PR body's Verification section: `⚠️ LLM emitted invalid bucket "<value>" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
+
+**If `references/bucket-classification.md` is missing or unreadable**, abort with: _"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."_ Do not fall back to inline rules — the doc is the source of truth.
 
 ### 7. Render test file
 
@@ -118,8 +123,11 @@ Apply [`references/test-template.md`](test-template.md):
 
 - Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
-- Single `test.describe('<feature> (<auth-tag>)', ...)` wrap
-- One `test(...)` per record from Step 6, ordered as emitted
+- Single outer `test.describe('<feature> (<auth-tag>)', ...)` wrap
+- Inside the outer describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
+- Bucket describes appear in fixed order: **Positive → Negative → Edge** (even if Negative tests outnumber Positive)
+- **Omit empty buckets entirely** — if no tests were classified into a bucket, don't emit its describe block at all
+- Within each bucket describe, tests appear in their Step 6 emission order
 
 Each `test(...)` title is constructed by prepending the test record's tags to the behavior description: `'<auth-tag> [<user-tag>] <behavior>'` (square brackets = optional; omit `<user-tag>` for user-agnostic tests like `@all-users`). This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
 

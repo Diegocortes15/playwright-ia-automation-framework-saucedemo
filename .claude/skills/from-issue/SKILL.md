@@ -27,6 +27,7 @@ The full 13-step procedural workflow is in [`references/workflow.md`](references
 - [`references/workflow.md`](references/workflow.md) — the 13-step procedural workflow
 - [`references/test-template.md`](references/test-template.md) — canonical test-file template
 - [`references/pr-description-template.md`](references/pr-description-template.md) — structured PR body template
+- [`references/bucket-classification.md`](references/bucket-classification.md) — Positive/Negative/Edge bucket definitions + worked examples (C.2.b)
 
 ## Composition
 
