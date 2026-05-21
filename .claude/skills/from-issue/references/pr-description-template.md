@@ -50,6 +50,7 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped.
   - "Bucket" column: exactly one of `Positive` / `Negative` / `Edge` for generated tests; em-dash `—` for skipped ACs. Classification follows [`bucket-classification.md`](bucket-classification.md).
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`.
+- **Verification — bucket warnings**: If workflow Step 6 emitted any "invalid bucket" soft warnings (per [`bucket-classification.md`](bucket-classification.md)), append them as additional bullets at the END of the Verification section, after the Test run list. Example: `- ⚠️ LLM emitted invalid bucket "Boundary" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
 - **Verification on failure**:
   - Typecheck FAIL → use `❌ FAIL` and include a fenced code block with the verbatim typecheck errors.
   - Test FAIL → use `❌ FAIL: <one-line message>` and include a `<details>` block with the verbatim failure output:

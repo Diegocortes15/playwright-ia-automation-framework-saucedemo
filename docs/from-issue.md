@@ -143,7 +143,6 @@ Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omit
 - **Free-form issues that don't follow the template.** The LLM attempts best-effort parsing but aborts if it can't find structured ACs. Ask the reporter to refile using the template.
 - **Regenerating tests over an existing test file.** The skill refuses to overwrite — `rm` the existing file and re-run.
 - **Production credential pages.** The skill picks up storageState files that include real sessions; treat them with the same care as a real browser session.
-- **Multi-page test bucketing (Positive / Negative / Edge headers).** That's Phase C.2.b.
 - **`@smoke` tag application.** That's Phase C.2.c.
 
 ## Pointers
