@@ -107,15 +107,22 @@ Group the `worth_automating=true` AC records into a set of tests. One test may c
   covers: [1, 3],  // AC IDs
   user: "<saucedemo user>",
   tags: ["<auth-tag>", "<user-tag-if-not-no-auth>"],
-  bucket: "Positive" | "Negative" | "Edge"
+  bucket: "Positive" | "Negative" | "Edge",
+  smoke: true | false
 }
 ```
 
 Tag selection follows CLAUDE.md "Tag conventions" table. Title format follows [`references/test-template.md`](test-template.md) "Rules". Bucket assignment follows [`references/bucket-classification.md`](bucket-classification.md) — read it before classifying. The bucket lives on the test (not on the AC) because one test can cover multiple ACs; classify by the test's dominant behavior, using the ambiguity rules in bucket-classification.md as the tiebreaker.
 
+Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — read it before classifying. Smoke status is orthogonal to bucket: a Negative test can be smoke (critical regression risk) and a Positive test can be NOT-smoke (peripheral happy path). The default per smoke-policy.md is `false` ("when in doubt, NOT smoke").
+
 **Validate bucket values before Step 7.** Each test's `bucket` must be one of `{Positive, Negative, Edge}`. If the LLM emits any other value (e.g., `"Boundary"`), default that test to `Edge` and record a soft warning for the PR body's Verification section: `⚠️ LLM emitted invalid bucket "<value>" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
 
+**Validate smoke values before Step 7.** Each test's `smoke` must be exactly `true` or `false`. If the LLM emits any other value, default that test to `false` and record a soft warning for the PR body's Verification section: `⚠️ LLM emitted invalid smoke value "<value>" for test "<title>" — defaulted to false. Reviewer: verify classification.`
+
 **If `references/bucket-classification.md` is missing or unreadable**, abort with: _"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."_ Do not fall back to inline rules — the doc is the source of truth.
+
+**If `references/smoke-policy.md` is missing or unreadable**, abort with: _"`.claude/skills/from-issue/references/smoke-policy.md` not found. Re-install the skill or restore from git."_ Do not fall back to inline rules.
 
 ### 7. Render test file
 
@@ -129,7 +136,7 @@ Apply [`references/test-template.md`](test-template.md):
 - **Omit empty buckets entirely** — if no tests were classified into a bucket, don't emit its describe block at all
 - Within each bucket describe, tests appear in their Step 6 emission order
 
-Each `test(...)` title is constructed by prepending the test record's tags to the behavior description: `'<auth-tag> [<user-tag>] <behavior>'` (square brackets = optional; omit `<user-tag>` for user-agnostic tests like `@all-users`). This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
+Each `test(...)` title is constructed by prepending the test record's tags to the behavior description: `'<auth-tag> [@smoke] [<user-tag>] <behavior>'` (square brackets = optional). If `smoke: true`, prepend `@smoke ` immediately after the auth-tag; if `smoke: false`, omit it. Omit `<user-tag>` for user-agnostic tests like `@all-users`. This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
 
 Render to an in-memory string. Do NOT Write yet — Step 8 handles overwrite refusal first.
 
