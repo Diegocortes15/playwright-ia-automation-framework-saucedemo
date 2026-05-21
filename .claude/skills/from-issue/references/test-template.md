@@ -16,7 +16,7 @@ import { env } from '@utils/env';
 
 test.describe('<feature> (<auth-tag>)', () => {
   test.describe('Positive', () => {
-    test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
       // Arrange
       await <pageFixture>.goto();
       await <pageFixture>.loginAs('<user>', env.password); // if @no-auth, omit this
@@ -28,13 +28,13 @@ test.describe('<feature> (<auth-tag>)', () => {
   });
 
   test.describe('Negative', () => {
-    test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
       // ... one `test(...)` per Negative record from Step 6
     });
   });
 
   test.describe('Edge', () => {
-    test('<auth-tag> [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
       // ... one `test(...)` per Edge record from Step 6
     });
   });
@@ -50,9 +50,10 @@ test.describe('<feature> (<auth-tag>)', () => {
   - `import { env } from '@utils/env'` only when a test calls `loginAs(...)` and needs the password.
 - **Describe wrap** — exactly one outer `test.describe('<feature> (<auth-tag>)', () => { ... })` block per file. `<feature>` matches the issue template's Feature field; `<auth-tag>` is the dominant auth tag across tests in the file (e.g., `@standard`, `@no-auth`).
 - **Bucket structure** — inside the outer describe, group tests into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` blocks. Order is fixed: **Positive → Negative → Edge**. Omit a bucket describe entirely if it has zero tests (do not render empty describes). The bucket label is exactly one of `Positive` / `Negative` / `Edge` — no other strings, no tags on the describe, no description suffix. Classification rules live in [`bucket-classification.md`](bucket-classification.md).
-- **Per-test title** — `'<auth-tag> [<user-tag>] <behavior description>'` (square brackets = optional). Examples:
-  - `'@no-auth standard_user logs in successfully and lands on inventory'`
-  - `'@standard remove single item from cart updates cart badge'`
+- **Per-test title** — `'<auth-tag> [@smoke] [<user-tag>] <behavior description>'` (square brackets = optional). `@smoke` slots in immediately after the auth-tag when the test is smoke-worthy per [`smoke-policy.md`](smoke-policy.md); otherwise omit it. Examples:
+  - `'@no-auth @smoke standard_user logs in successfully and lands on inventory'` (smoke = true)
+  - `'@no-auth invalid password shows generic error'` (smoke = false; secondary error path)
+  - `'@standard @smoke checkout with valid info completes successfully'` (smoke = true)
   - The `<user-tag>` is the saucedemo user name (e.g., `standard_user`, `locked_out_user`); omit if the test is user-agnostic.
 - **Tag selection** — per CLAUDE.md "Tag conventions" table:
   - Login/logout tests with no pre-existing session → `@no-auth`
@@ -87,7 +88,7 @@ import { env } from '@utils/env';
 
 test.describe('login (@no-auth)', () => {
   test.describe('Positive', () => {
-    test('@no-auth standard_user logs in successfully and lands on inventory', async ({
+    test('@no-auth @smoke standard_user logs in successfully and lands on inventory', async ({
       loginPage,
       page,
     }) => {
@@ -98,7 +99,7 @@ test.describe('login (@no-auth)', () => {
   });
 
   test.describe('Negative', () => {
-    test('@no-auth locked_out_user sees the lockout error', async ({ loginPage }) => {
+    test('@no-auth @smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
       await loginPage.goto();
       await loginPage.loginAs('locked_out_user', env.password);
       await expect(loginPage.errorBanner).toBeVisible();
