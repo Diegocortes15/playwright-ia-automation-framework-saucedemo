@@ -85,7 +85,7 @@ Never use XPath.
 | `@error`              | `error`                                                                           | Tests for the error user's random failures                                                                    |
 | `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                                         |
 | `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users)             |
-| `@smoke`              | Cross-cutting (filtered via `--grep '@smoke'`)                                    | Build-verification candidates from /from-issue. Selected per `smoke-policy.md`. Run via `npm run test:smoke`. |
+| `@smoke`              | Cross-cutting (filtered via `--grep "@smoke"`)                                    | Build-verification candidates from /from-issue. Selected per `smoke-policy.md`. Run via `npm run test:smoke`. |
 
 ## Where things live
 

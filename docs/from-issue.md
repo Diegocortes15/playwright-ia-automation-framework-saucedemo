@@ -113,7 +113,7 @@ Open any file the skill produced. The first ~5 lines must be:
 
 This block is mandatory per the skill's output template ([`.claude/skills/from-issue/references/test-template.md`](../.claude/skills/from-issue/references/test-template.md)). Future PR reviewers reading the file will know it was AI-generated, where the source issue is, and that edits are expected.
 
-### Inspect the bucket structure (C.2.b)
+### Inspect the generated file structure (C.2.b + C.2.c)
 
 A generated file with mixed Positive + Negative tests + smoke selection looks like:
 
@@ -152,7 +152,6 @@ If you disagree with the LLM's smoke picks on a PR, edit the generated file dire
 - **Free-form issues that don't follow the template.** The LLM attempts best-effort parsing but aborts if it can't find structured ACs. Ask the reporter to refile using the template.
 - **Regenerating tests over an existing test file.** The skill refuses to overwrite — `rm` the existing file and re-run.
 - **Production credential pages.** The skill picks up storageState files that include real sessions; treat them with the same care as a real browser session.
-- **`@smoke` tag application.** That's Phase C.2.c.
 
 ## Pointers
 
