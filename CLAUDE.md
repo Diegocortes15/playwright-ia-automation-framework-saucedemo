@@ -8,6 +8,7 @@ Playwright + TypeScript test framework for [saucedemo](https://www.saucedemo.com
 
 - Framework architecture: [`docs/architecture.md`](docs/architecture.md)
 - App behavior (the 6 saucedemo users, flows): [`docs/app/`](docs/app/)
+- Test case management philosophy (why no TCMS, where reports live): [`docs/test-case-management.md`](docs/test-case-management.md)
 - Decision rationale: [`docs/adr/`](docs/adr/)
 - Design specs and plans (don't auto-load — read on demand): [`docs/superpowers/`](docs/superpowers/)
 
