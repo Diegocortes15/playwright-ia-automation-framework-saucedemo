@@ -29,6 +29,9 @@ The full 13-step procedural workflow is in [`references/workflow.md`](references
 - [`references/pr-description-template.md`](references/pr-description-template.md) — structured PR body template
 - [`references/bucket-classification.md`](references/bucket-classification.md) — Positive/Negative/Edge bucket definitions + worked examples (C.2.b)
 - [`references/smoke-policy.md`](references/smoke-policy.md) — `@smoke` selection criteria + worked examples (C.2.c)
+- [`references/qa-analysis.md`](references/qa-analysis.md) — Senior QA SDET judgment: when to merge/split/skip ACs (D.1)
+- [`references/test-principles.md`](references/test-principles.md) — F.I.R.S.T. principles for generated tests (D.1)
+- [`references/playwright-conventions.md`](references/playwright-conventions.md) — Playwright best practices the skill follows (D.1)
 
 ## Composition
 
