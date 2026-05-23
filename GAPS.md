@@ -31,6 +31,8 @@ These were flagged during planning. Verify each as you go.
 
 - **G4: `/from-issue` may fail if tagged with `@standard` etc. while only `no-auth` project exists.** Tags don't match any project's grep → 0 tests run. Workaround: file issues only with `@no-auth` semantics until auth chain is rebuilt, OR re-add user projects manually first.
 
+- **G5: `/from-issue` assumes single-page features; doesn't infer pages from AC text.** Identified pre-experiment when reviewing the workflow with multi-page features in mind (checkout spans 4 pages, login involves LoginPage → InventoryPage, etc.). To force the gap into the open, the `Page Name` required field was REMOVED from the Issue Template on main (commit `fcc39e9`). **Expected behavior during experiment:** workflow Step 4 (LLM normalization) will look for a `### Page Name` heading in the issue body, not find it, and either abort or fall back to best-effort extraction from elsewhere in the body. **Manual workaround:** include the relevant page names explicitly in the AC text or Notes field (e.g., write ACs like "From the LoginPage, standard user enters credentials and lands on InventoryPage"). **Skill fix scope (Phase D candidate):** refactor `/from-issue` workflow Steps 4–7 to (a) extract a LIST of pages from AC text via LLM judgment, (b) loop the existence-check + scaffold over each, (c) generate tests injecting multiple page fixtures (`async ({ loginPage, inventoryPage, page }) => ...`), (d) update PR description "What I understood" + AC coverage table to show inferred pages per AC. Comparable scope to C.2.b or C.2.c.
+
 ## Observed gaps (filled in as the experiment runs)
 
 _Each entry: short title, what happened, manual workaround taken, severity (Critical/Important/Minor), suggested skill fix._
