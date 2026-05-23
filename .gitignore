@@ -22,3 +22,7 @@ scratch/
 # Temporary tsconfig used by /scaffold-page-object step 11 (isolated typecheck);
 # the workflow rms it after every run, but ignore it defensively in case of crash
 .tsconfig.scratch.json
+
+# Temporary PR body file used by /from-issue step 12 (gh pr create --body-file);
+# the workflow rms it after every run, but ignore it defensively in case of crash
+.pr-body*.md

@@ -272,19 +272,27 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 
 ### 12. Open PR
 
-Render the PR body using [`references/pr-description-template.md`](pr-description-template.md). Pass the body via a HEREDOC:
+Render the PR body using [`references/pr-description-template.md`](pr-description-template.md). **Use the Write tool to put the body in a temporary file**, then pass it to `gh pr create --body-file` (do NOT use bash heredoc — see note below):
 
-```bash
-# Title: "feat: tests from #<num> — <issue-title>"; truncate the title portion to ≤ 60 chars (break on a word boundary if possible).
-gh pr create --title "feat: tests from #<num> — <truncated-title>" --body "$(cat <<'EOF'
-<rendered PR body>
-EOF
-)"
-```
+1. Write the rendered PR body to `.pr-body.md` using the Write tool.
+2. Open the PR:
+
+   ```bash
+   # Title: "feat: tests from #<num> — <issue-title>"; truncate the title portion to ≤ 60 chars (break on a word boundary if possible).
+   gh pr create --title "feat: tests from #<num> — <truncated-title>" --body-file .pr-body.md
+   ```
+
+3. After PR creation succeeds, delete the temp file:
+
+   ```bash
+   rm .pr-body.md
+   ```
 
 Capture the returned PR URL — `gh pr create` writes it to stdout on success (the only line of output is the URL).
 
 If `gh pr create` fails (no remote, no permission), abort with the `gh` error verbatim. The local branch and pushed branch remain on the remote.
+
+**Why `--body-file` instead of `--body "$(cat <<'EOF' ... EOF)"`:** the inline heredoc pattern (used in earlier workflow versions) is fragile when the PR body contains backtick-wrapped code spans (e.g., `` `/from-issue` ``, `` `LoginPage` ``, `` `src/fixtures/test.ts` ``). The skill can mis-escape the backticks and leak template-literal-style syntax (`` ` + "..." + ` ``) into the rendered PR body. Writing to a file first eliminates the escaping problem entirely. (Surfaced as D1-OBS-001 during the v2 experiment verification of D.1.)
 
 ### 13. Comment on source issue + report to user
 
