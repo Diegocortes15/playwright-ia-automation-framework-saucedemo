@@ -1,6 +1,13 @@
 # Framework Gaps Log — `experiment-rebuild-from-scratch`
 
-Track gaps in the AI skills / framework workflow as they surface during the blank-slate rebuild experiment. Each entry should be concrete (a specific issue with a specific symptom), not speculative.
+Track gaps in the AI skills / framework workflow as they surface during the blank-slate rebuild experiment.
+
+**Dual purpose** (decided after initial planning):
+
+1. **Skill validation**: prove (or expose limits of) the existing skills' ability to rebuild a working saucedemo test suite from `to-be-automated` GitHub Issues alone.
+2. **Discovery for `/customize-for-new-app`**: every manual step a developer takes during the rebuild becomes a requirement for a future bootstrap skill (Path B from the universalization design discussion). The goal is empirical input — don't predict what `/customize-for-new-app` needs; observe it.
+
+Each entry below should be concrete (a specific issue with a specific symptom), not speculative.
 
 ## Starting state (commit `<TBD>`)
 
@@ -45,9 +52,29 @@ _Each entry: short title, what happened, manual workaround taken, severity (Crit
 
 ## When the experiment ends
 
-After enough data accumulates, take stock:
+After enough data accumulates, take stock for BOTH purposes:
+
+**Purpose 1 — existing skill fixes:**
 
 - Prioritize the observed gaps by severity + frequency.
-- For each critical gap, spec + ship a skill fix (back to main via the usual brainstorm → spec → plan flow).
+- For each critical gap, spec + ship a skill fix on main (usual brainstorm → spec → plan flow).
 - Re-run the experiment on the improved skills.
-- Repeat until "blank slate to working coverage" is smooth.
+
+**Purpose 2 — design `/customize-for-new-app`:**
+
+- Catalog every manual customization step taken during the experiment (e.g., "edited playwright.config.ts to add `standard` project", "wrote tests/auth.setup.ts by hand", "added `loginPage: LoginPage` to fixtures/test.ts").
+- That catalog IS the requirements list for the bootstrap skill.
+- Brainstorm the skill on main following the same Phase pattern as C.2.a (spec → plan → implementation).
+- The skill's job: ask the customer the right questions and do those manual steps automatically.
+
+## Bootstrap-skill requirements (collected during experiment)
+
+Format: each item is a specific manual action you took that a future skill should automate. Reference the issue/commit where it surfaced.
+
+### REQ-001 — _(template — replace when first manual customization happens)_
+
+- **Manual action:**
+- **When it happened (issue/commit):**
+- **Inputs the skill would need:**
+- **Outputs the skill would produce:**
+- **Notes:**
