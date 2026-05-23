@@ -13,6 +13,13 @@ body:
         - **Page Name** drives the Page Object class. Use PascalCase (e.g., `CartPage`, `CheckoutInfoPage`).
         - **Acceptance Criteria** — one per line. The orchestrator decides which to automate and groups them into tests.
 
+        **Before submitting, verify:**
+        - [ ] Each AC describes ONE behavior (split "X and Y" into two separate ACs)
+        - [ ] Each AC specifies the user role explicitly (e.g., "standard_user", "locked_out_user", "any logged-in user")
+        - [ ] Each AC has a clear pass/fail criterion (avoid vague phrases like "looks good" or "works correctly")
+        - [ ] You've considered NEGATIVE cases (failures, validation errors) AND EDGE cases (boundaries, unusual inputs) — `/from-issue` groups tests into Positive / Negative / Edge buckets
+        - [ ] Page Name matches PascalCase and either exists in `src/pages/` OR you're OK with `/scaffold-page-object` creating it
+
   - type: input
     id: feature
     attributes:
