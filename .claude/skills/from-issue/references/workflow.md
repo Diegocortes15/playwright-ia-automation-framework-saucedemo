@@ -38,10 +38,11 @@ Do NOT add the label autonomously.
 The issue body should follow the GitHub Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml`. Extract:
 
 - **Feature** (single-line) — drives `tests/<feature>/`
-- **Page Name** (PascalCase) — drives the Page Object resolution
 - **User Story** (optional) — context only
 - **Acceptance Criteria** (multi-line, one AC per line)
 - **Notes** (optional) — context only
+
+(Note: a `Page Name` field used to exist in the template but was removed in commit `fcc39e9`. Page Object names are now inferred from AC text — see "Page inference from AC text" subsection below.)
 
 For each Acceptance Criterion, build an internal record:
 
@@ -157,7 +158,7 @@ Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — rea
 
 ### 7. Render test file
 
-Apply [`references/test-template.md`](test-template.md):
+Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles) and [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices) to ensure the rendered tests comply with project quality standards:
 
 - Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)

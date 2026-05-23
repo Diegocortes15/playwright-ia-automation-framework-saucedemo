@@ -4,39 +4,38 @@ The `/from-issue` skill consults this doc when rendering test files (Step 7 of [
 
 ## Locator preference order
 
-Use the highest-priority locator that uniquely identifies the element. CLAUDE.md's "Selector preference order" applies here; this doc adds rationale and examples.
+Use the highest-priority locator that uniquely identifies the element. **This matches CLAUDE.md's "Selector preference order" exactly** (single source of truth). Upstream Playwright docs recommend `getByRole` first; this project prioritizes `[data-test="..."]` attributes because saucedemo (and most apps the framework targets) provide explicit testing affordances.
 
-### 1. `getByRole(name, options)` with accessible name
+### 1. `[data-test="..."]` attribute selectors
 
 ```ts
-// PREFERRED
+await page.locator('[data-test="login-button"]').click();
+```
+
+Explicit testing affordance. CLAUDE.md's required default. Survives styling changes; brittle only if someone removes the attribute (which a code reviewer would catch).
+
+### 2. `getByRole(name, options)` with accessible name
+
+```ts
 await page.getByRole('button', { name: 'Login' }).click();
 await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
 ```
 
-Survives UI refactors (text/style changes don't break the locator if the role + name stay), accessibility-friendly, mirrors how users interact.
+When no `data-test` attribute exists. Survives most UI refactors (text/style changes don't break the locator if the role + name stay), accessibility-friendly.
 
-### 2. `getByLabel(...)` / `getByText(...)` / `getByPlaceholder(...)`
+### 3. Text-based matchers (`getByLabel`, `getByText`, `getByPlaceholder`)
 
 ```ts
 await page.getByLabel('Username').fill('standard_user');
 await page.getByText('Login').click();
 ```
 
-When no role is exposed but a human-visible label exists.
+When neither `data-test` nor an accessible role is exposed but a human-visible label exists.
 
-### 3. `[data-test="..."]` attribute selectors
-
-```ts
-await page.locator('[data-test="login-button"]').click();
-```
-
-Explicit testing affordance. CLAUDE.md's current default. Brittle to refactors that change the attribute, but at least the attribute exists to prevent accidental breakage from styling.
-
-### 4. CSS / XPath selectors (last resort)
+### 4. CSS selectors (last resort)
 
 ```ts
-await page.locator('.btn-primary').click(); // CSS
+await page.locator('.btn-primary').click();
 ```
 
 Brittle. Use only when nothing above works. NEVER use XPath in this project (per CLAUDE.md "What to NEVER do").
