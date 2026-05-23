@@ -10,15 +10,15 @@ body:
 
         Tips:
         - **Feature** drives the test folder (`tests/<feature>/`). Use a short slug (e.g., `cart`, `checkout`, `login`).
-        - **Page Name** drives the Page Object class. Use PascalCase (e.g., `CartPage`, `CheckoutInfoPage`).
         - **Acceptance Criteria** — one per line. The orchestrator decides which to automate and groups them into tests.
+        - **Pages are inferred from your AC text.** Mention UI surfaces explicitly (e.g., "from the inventory page", "in the cart", "on the checkout overview"). `/from-issue` extracts which Page Objects are needed, reuses existing ones in `src/pages/`, and scaffolds any missing ones automatically — multi-page flows supported.
 
         **Before submitting, verify:**
         - [ ] Each AC describes ONE behavior (split "X and Y" into two separate ACs)
         - [ ] Each AC specifies the user role explicitly (e.g., "standard_user", "locked_out_user", "any logged-in user")
         - [ ] Each AC has a clear pass/fail criterion (avoid vague phrases like "looks good" or "works correctly")
         - [ ] You've considered NEGATIVE cases (failures, validation errors) AND EDGE cases (boundaries, unusual inputs) — `/from-issue` groups tests into Positive / Negative / Edge buckets
-        - [ ] Page Name matches PascalCase and either exists in `src/pages/` OR you're OK with `/scaffold-page-object` creating it
+        - [ ] Each AC explicitly mentions WHERE in the app it happens ("from the cart", "on the checkout overview", etc.) so `/from-issue` can infer which Page Objects are needed
 
   - type: input
     id: feature
@@ -26,15 +26,6 @@ body:
       label: Feature
       description: Short folder name (snake_case). Becomes `tests/<feature>/`.
       placeholder: cart
-    validations:
-      required: true
-
-  - type: input
-    id: page_name
-    attributes:
-      label: Page Name
-      description: PascalCase Page Object class. Reused if it already exists in `src/pages/`; otherwise scaffolded via `/scaffold-page-object`.
-      placeholder: CartPage
     validations:
       required: true
 
