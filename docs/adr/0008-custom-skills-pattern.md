@@ -31,3 +31,7 @@ The `SKILL.md` body stays small (always-loaded for skill discovery) and points a
 - **Single `SKILL.md` with everything inline** — rejected: as workflows get longer (12+ steps), the always-loaded skill discovery context grows uncomfortably
 - **Code-based skills (TypeScript or Python)** — rejected: procedural prose is simpler for AI to follow; matches Phase B.2's vendored skill pattern; no build step
 - **Shared `references/` across skills** — rejected: each skill is independent; shared references create coupling without clear benefit at current scale
+
+## Related
+
+- [ADR-0009](0009-skill-contracts-in-references-not-comments.md) — mandates that skill behaviors live in `references/`, never in code comments
