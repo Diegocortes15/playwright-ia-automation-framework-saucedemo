@@ -81,6 +81,37 @@ EOF
 
 Then stop. No PR.
 
+#### Free-form / GWT body handling
+
+The Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml` produces a structured body with `### Feature`, `### User Story`, `### Acceptance Criteria`, etc. headings. If the issue body uses a non-template format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
+
+- Extract the **Feature** field from any heading or first line that looks like a feature name
+- Look for Acceptance Criteria in any list/bullet form, regardless of `### Acceptance Criteria` heading
+- Recognize GWT-style scenarios (`Given... When... Then...`) as ACs, one scenario = one AC candidate
+- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_
+
+(Note: this subsection replaces an earlier shorter free-form note. The behavior was previously implicit — confirmed working in PR #8 of the experiment. Now documented explicitly.)
+
+#### Page inference from AC text
+
+The Issue Template does NOT include a Page Name field (removed in commit `fcc39e9` to support multi-page features). Extract Page Names from AC text by:
+
+- Scanning each AC for mentions of UI surfaces ("from the LoginPage", "on the cart page", "checkout overview", etc.)
+- Mapping each mention to a PascalCase Page Object name (e.g., "login page" → `LoginPage`, "cart page" → `CartPage`)
+- Building a set of unique Page Names referenced across all ACs
+
+If zero pages can be inferred: abort with: _"Couldn't infer any Page Object references from the AC text. Ask the reporter to mention UI surfaces explicitly (e.g., 'from the LoginPage', 'on the checkout overview')."_
+
+#### Wire QA analysis (NEW reference doc)
+
+Before producing the per-test records (Step 6), apply senior QA SDET judgment to the extracted ACs per [`qa-analysis.md`](qa-analysis.md):
+
+- Identify ACs to MERGE (shared setup + parameterized variants)
+- Identify ACs to SPLIT (compound behaviors that should be separate tests)
+- Identify ACs to SKIP (non-automatable, out of scope, redundant)
+
+Each merge/split/skip decision must be surfaced in the PR body's "What I understood" + AC coverage table + "Notes for reviewer" section (per `pr-description-template.md`).
+
 ### 5. Resolve target Page Object
 
 ```bash
