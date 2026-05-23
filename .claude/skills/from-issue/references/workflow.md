@@ -38,10 +38,11 @@ Do NOT add the label autonomously.
 The issue body should follow the GitHub Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml`. Extract:
 
 - **Feature** (single-line) — drives `tests/<feature>/`
-- **Page Name** (PascalCase) — drives the Page Object resolution
 - **User Story** (optional) — context only
 - **Acceptance Criteria** (multi-line, one AC per line)
 - **Notes** (optional) — context only
+
+(Note: a `Page Name` field used to exist in the template but was removed in commit `fcc39e9`. Page Object names are now inferred from AC text — see "Page inference from AC text" subsection below.)
 
 For each Acceptance Criterion, build an internal record:
 
@@ -80,6 +81,37 @@ EOF
 ```
 
 Then stop. No PR.
+
+#### Free-form / GWT body handling
+
+The Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml` produces a structured body with `### Feature`, `### User Story`, `### Acceptance Criteria`, etc. headings. If the issue body uses a non-template format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
+
+- Extract the **Feature** field from any heading or first line that looks like a feature name
+- Look for Acceptance Criteria in any list/bullet form, regardless of `### Acceptance Criteria` heading
+- Recognize GWT-style scenarios (`Given... When... Then...`) as ACs, one scenario = one AC candidate
+- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_
+
+(Note: this subsection replaces an earlier shorter free-form note. The behavior was previously implicit — confirmed working in PR #8 of the experiment. Now documented explicitly.)
+
+#### Page inference from AC text
+
+The Issue Template does NOT include a Page Name field (removed in commit `fcc39e9` to support multi-page features). Extract Page Names from AC text by:
+
+- Scanning each AC for mentions of UI surfaces ("from the LoginPage", "on the cart page", "checkout overview", etc.)
+- Mapping each mention to a PascalCase Page Object name (e.g., "login page" → `LoginPage`, "cart page" → `CartPage`)
+- Building a set of unique Page Names referenced across all ACs
+
+If zero pages can be inferred: abort with: _"Couldn't infer any Page Object references from the AC text. Ask the reporter to mention UI surfaces explicitly (e.g., 'from the LoginPage', 'on the checkout overview')."_
+
+#### Wire QA analysis (NEW reference doc)
+
+Before producing the per-test records (Step 6), apply senior QA SDET judgment to the extracted ACs per [`qa-analysis.md`](qa-analysis.md):
+
+- Identify ACs to MERGE (shared setup + parameterized variants)
+- Identify ACs to SPLIT (compound behaviors that should be separate tests)
+- Identify ACs to SKIP (non-automatable, out of scope, redundant)
+
+Each merge/split/skip decision must be surfaced in the PR body's "What I understood" + AC coverage table + "Notes for reviewer" section (per `pr-description-template.md`).
 
 ### 5. Resolve target Page Object
 
@@ -126,7 +158,7 @@ Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — rea
 
 ### 7. Render test file
 
-Apply [`references/test-template.md`](test-template.md):
+Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles) and [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices) to ensure the rendered tests comply with project quality standards:
 
 - Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)

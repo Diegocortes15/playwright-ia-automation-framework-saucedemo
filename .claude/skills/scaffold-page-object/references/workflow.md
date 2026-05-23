@@ -149,6 +149,29 @@ This runs the project's strict TS settings (with `paths` aliases) against the si
 
 The project-wide `npm run typecheck` is unaffected — `scratch/` stays excluded so half-baked AI files don't break the global build.
 
+### 11.5. Register the page in `src/fixtures/test.ts`
+
+Edit `src/fixtures/test.ts` to register the newly-scaffolded Page Object as a fixture so tests can destructure it from the `test()` args (e.g., `async ({ loginPage }) => ...`).
+
+1. Read `src/fixtures/test.ts`.
+2. Verify the page isn't already registered (look for `<pageName>: <PageName>` in the `Pages` type or the `test.extend<Pages>({...})` map).
+3. If unregistered, apply three edits to the file:
+   - Add `import { <PageName> } from '@pages/<PageName>';` to the imports block at the top
+   - Add `<pageName>: <PageName>;` to the `Pages` type
+   - Add to the `test.extend<Pages>({...})` block:
+     ```ts
+     <pageName>: async ({ page }, use) => {
+       await use(new <PageName>(page));
+     },
+     ```
+4. If already registered: skip the edit and report it in Step 12.
+
+Naming: `<pageName>` is the camelCase form of `<PageName>` (e.g., `LoginPage` → `loginPage`, `CheckoutInfoPage` → `checkoutInfoPage`).
+
+**If `src/fixtures/test.ts` doesn't exist**, abort with: _"`src/fixtures/test.ts` not found. The framework's fixture file is required. Restore from git or run framework bootstrap first."_
+
+**This step replaces the previous implicit behavior** where `/from-issue` modified `src/fixtures/test.ts` by reading a code comment in that file. Per ADR-0009, skill contracts must live in `references/`, not in code comments — this step is now the contract.
+
 ### 12. Report what landed
 
 Report to the user:

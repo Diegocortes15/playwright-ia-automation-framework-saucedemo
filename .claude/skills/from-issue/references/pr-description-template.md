@@ -31,6 +31,15 @@ The `/from-issue` skill writes its PR body using this template. Section order is
   - `<test title 1>` — ✅ PASS
   - `<test title 2>` — ✅ PASS
 
+## Notes for reviewer
+
+(omit this section entirely if no notes)
+
+- ⚠️ **Side effect:** the workflow modified `<file>` to make the generated test runnable. Verify the change is reasonable.
+- 📝 **LLM judgment (MERGE):** AC X and AC Y were merged into one parameterized test because both share the same setup + flow with different inputs. Reviewer: push back if you want them split.
+- 📝 **LLM judgment (SPLIT):** AC Z contained compound behaviors and was split into N tests. Reviewer: push back if you wanted one mega-test.
+- 📝 **LLM judgment (SKIP):** AC W was skipped because <rationale per qa-analysis.md>. Reviewer: push back if you want it generated.
+
 ## Collision warnings
 
 (omit this section entirely if no collisions)
@@ -44,7 +53,7 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
 
 ## Rules
 
-- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Collision warnings` (optional) → `Source`.
+- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional) → `Source`.
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the issue for full text.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for smoke tests (those with `@smoke` in the title), e.g., `` `⚡ @no-auth @smoke standard_user logs in...` ``. Non-smoke tests have no prefix.
@@ -52,6 +61,7 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`.
 - **Verification — bucket warnings**: If workflow Step 6 emitted any "invalid bucket" soft warnings (per [`bucket-classification.md`](bucket-classification.md)), append them as additional bullets at the END of the Verification section, after the Test run list. Example: `- ⚠️ LLM emitted invalid bucket "Boundary" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
 - **Verification — smoke warnings**: If workflow Step 6 emitted any "invalid smoke value" soft warnings (per [`smoke-policy.md`](smoke-policy.md)), append them as additional bullets at the END of the Verification section, after any bucket warnings. Example: `- ⚠️ LLM emitted invalid smoke value "maybe" for test "<title>" — defaulted to false. Reviewer: verify classification.`
+- **Notes for reviewer**: include this section ONLY when the skill made side-effect file changes OR LLM-judgment calls (merge/split/skip per [`qa-analysis.md`](qa-analysis.md)) that the reviewer might disagree with. Each note is a bullet starting with an emoji marker (⚠️ for side effects, 📝 for judgment calls). If the workflow produced no side effects and no merge/split/skip decisions, OMIT this section entirely. Position: between `Verification` and `Collision warnings` per the Section order rule.
 - **Verification on failure**:
   - Typecheck FAIL → use `❌ FAIL` and include a fenced code block with the verbatim typecheck errors.
   - Test FAIL → use `❌ FAIL: <one-line message>` and include a `<details>` block with the verbatim failure output:
