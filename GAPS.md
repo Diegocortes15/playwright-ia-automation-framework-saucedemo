@@ -71,7 +71,22 @@ After enough data accumulates, take stock for BOTH purposes:
 
 Format: each item is a specific manual action you took that a future skill should automate. Reference the issue/commit where it surfaced.
 
-### REQ-001 — _(template — replace when first manual customization happens)_
+### REQ-001 — Regenerate saucedemo-specific docs for new customer
+
+- **Manual action:** A new customer can't use `docs/architecture.md` (saucedemo-grounded matrix description, 6 users, etc.) or `docs/app/` (entirely saucedemo behavior). These need to be regenerated for the customer's app: their architecture summary, their user roles, their key flows, their edge cases.
+- **When it happened (issue/commit):** Identified during experiment planning (commit `e3d420e`), before first `/from-issue` run. Saucedemo docs were NOT wiped on this experiment branch because: (a) skills don't read them, (b) wiping is redundant with what `/customize-for-new-app` should do, (c) the experiment isn't blocked by them.
+- **Inputs the skill would need:**
+  - Customer app's base URL
+  - Customer's user roles (or "none, single user" / "none, no auth")
+  - Customer's auth scheme (saucedemo-style storageState? OAuth? SSO?)
+  - Key flows the customer wants tested (could be discovered via `/playwright-cli` + LLM site exploration, or provided manually by BA)
+- **Outputs the skill would produce:**
+  - Fresh `docs/architecture.md` describing THIS customer's matrix (e.g., `2 users × 1 browser = 2 projects` instead of saucedemo's `5×3=9`)
+  - Fresh `docs/app/` folder with customer-specific user definitions, flows, edge cases
+  - Updated CLAUDE.md "Project purpose" links pointing at the new docs (no broken links)
+- **Notes:** This is the first concrete requirement for `/customize-for-new-app`. There will be many more. Each REQ entry should be similarly specific (inputs in, outputs out, manual action that surfaced it).
+
+### REQ-002 — _(template — replace when next manual customization happens)_
 
 - **Manual action:**
 - **When it happened (issue/commit):**
