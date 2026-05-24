@@ -1,12 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
-const userProjects = ['standard', 'problem', 'performance_glitch', 'error', 'visual'] as const;
-
-// Saucedemo intentionally breaks the sort dropdown for problem_user and
-// error_user (selections are ignored, list stays in default A-Z order).
-// Only these 3 users opt into @sort-functional tests.
-const sortFunctionalUsers = new Set<string>(['standard', 'performance_glitch', 'visual']);
+// Blank-slate config (experiment-rebuild-from-scratch-v5 branch).
+// Single no-auth chromium project. Validates phase-d1.2 (feature-based
+// filenames → login.spec.ts) and phase-d1.3 (test.step on Page Object
+// action methods, clean specs) on a fresh /from-issue run.
 
 export default defineConfig({
   testDir: './tests',
@@ -31,47 +29,9 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'no-auth',
-      testIgnore: /.*\.setup\.ts/,
-      grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
-    },
-    ...userProjects.map((u) => {
-      const tagAlternates = ['@all-users', `@${u}`];
-      if (sortFunctionalUsers.has(u)) tagAlternates.push('@sort-functional');
-      return {
-        name: u,
-        testIgnore: /.*\.setup\.ts/,
-        grep: new RegExp(tagAlternates.join('|')),
-        dependencies: ['setup'],
-        use: {
-          ...devices['Desktop Chrome'],
-          storageState: `auth/${u}.json`,
-          ...(u === 'performance_glitch' ? { navigationTimeout: 30_000 } : {}),
-        },
-      };
-    }),
-    {
-      name: 'firefox-standard',
-      testIgnore: /.*\.setup\.ts/,
-      grep: /@all-users|@standard|@sort-functional/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: 'auth/standard.json',
-      },
-    },
-    {
-      name: 'webkit-standard',
-      testIgnore: /.*\.setup\.ts/,
-      grep: /@all-users|@standard|@sort-functional/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Safari'],
-        storageState: 'auth/standard.json',
-      },
     },
   ],
 });
