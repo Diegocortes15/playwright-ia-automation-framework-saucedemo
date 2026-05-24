@@ -63,22 +63,36 @@ await page.waitForTimeout(2000);
 await expect(page.getByText('Loaded')).toBeVisible(); // auto-waits
 ```
 
-## Test structure: Arrange / Act / Assert
+## Test structure: Arrange / Act / Assert wrapped in `test.step`
+
+Every generated test wraps its actions in `await test.step('<descriptive name>', async () => { ... })` blocks. The Playwright HTML report shows these as collapsible nested entries with per-step timing — critical for human-readable test reports (reviewers can immediately see which phase of a test passed/failed and how long each step took).
 
 ```ts
-test('@no-auth standard_user logs in successfully', async ({ loginPage, page }) => {
-  // Arrange
-  await loginPage.goto();
+test('@smoke standard_user logs in successfully', async ({ loginPage, page }) => {
+  await test.step('Navigate to the login page', async () => {
+    await loginPage.goto();
+  });
 
-  // Act
-  await loginPage.loginAs('standard_user', env.password);
+  await test.step('Submit valid standard_user credentials', async () => {
+    await loginPage.loginAs('standard_user', env.password);
+  });
 
-  // Assert
-  await expect(page).toHaveURL(/\/inventory\.html$/);
+  await test.step('Verify landing on the inventory page', async () => {
+    await expect(page).toHaveURL(/\/inventory\.html$/);
+  });
 });
 ```
 
-One logical assertion per test. Don't pile multiple unrelated assertions into one test.
+**Step naming rules:**
+
+- Use **action-focused** descriptions (`'Submit valid credentials'`), not **implementation-focused** ones (`'Fill the username field then the password field then click the login button'`)
+- Step names appear verbatim in the HTML report — write them for a human reading test failures, not for the test code
+- One step per Arrange / Act / Assert phase is the minimum; split further if a phase has multiple distinct sub-actions worth surfacing
+- Setup helpers like `loginPage.loginAs(...)` are ALREADY one logical step — don't wrap each underlying `.fill()` / `.click()` separately
+
+**Why this matters:** without `test.step`, the HTML report shows each Page Object call as a flat list of `await locator.click()` / `await locator.fill()` entries with no semantic grouping. The reviewer has to mentally reconstruct which calls belonged to which test phase. `test.step` blocks make the report self-documenting.
+
+One logical assertion per test (or one logical assertion per `test.step`). Don't pile multiple unrelated assertions into one test.
 
 ## Test isolation
 
