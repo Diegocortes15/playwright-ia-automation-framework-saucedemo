@@ -264,15 +264,15 @@ DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate mod
 
 ### 11. Branch + commit + push
 
-**Dry-run check:** If `dry-run` was passed, SKIP this step and Steps 12–13. Report the local file path and verification status only.
+**Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
 
 ```bash
-git checkout -b from-issue/<num>-<feature>
+git checkout -b from-issue/<KEY>-<feature>
 ```
 
-The branch is named `from-issue/<num>-<feature>` (e.g., `from-issue/7-login`). The `<num>` keeps branches unique across issues that target the same feature.
+The branch is named `from-issue/<KEY>-<feature>` (e.g., `from-issue/SW-123-login`). The Jira key keeps branches unique and — critically — is what the **GitHub-for-Jira app** matches to auto-link this PR onto ticket `<KEY>`.
 
-If the branch already exists, abort with: _"Branch `from-issue/<num>-<feature>` exists — delete it and re-run."_ No PR.
+If the branch already exists, abort with: _"Branch `from-issue/<KEY>-<feature>` exists — delete it and re-run."_ No PR.
 
 ```bash
 git add <testfile>
@@ -284,8 +284,8 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-git commit -m "feat: add generated tests from #<num>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
-git push -u origin from-issue/<num>-<feature>
+git commit -m "feat: add generated tests from <KEY>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+git push -u origin from-issue/<KEY>-<feature>
 ```
 
 **Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
@@ -300,9 +300,11 @@ Render the PR body using [`references/pr-description-template.md`](pr-descriptio
 2. Open the PR:
 
    ```bash
-   # Title: "feat: tests from #<num> — <issue-title>"; truncate the title portion to ≤ 60 chars (break on a word boundary if possible).
-   gh pr create --title "feat: tests from #<num> — <truncated-title>" --body-file .pr-body.md
+   # Title: "feat: tests from <KEY> — <summary>"; truncate the summary so the title stays ≤ ~60 chars after the key.
+   gh pr create --title "feat: tests from <KEY> — <truncated-summary>" --body-file .pr-body.md
    ```
+
+   The PR body MUST reference the Jira key `<KEY>` (the GitHub-for-Jira app matches the key in the branch + title + body to link the PR onto the ticket).
 
 3. After PR creation succeeds, delete the temp file:
 
@@ -316,13 +318,11 @@ If `gh pr create` fails (no remote, no permission), abort with the `gh` error ve
 
 **Why `--body-file` instead of `--body "$(cat <<'EOF' ... EOF)"`:** the inline heredoc pattern (used in earlier workflow versions) is fragile when the PR body contains backtick-wrapped code spans (e.g., `` `/from-issue` ``, `` `LoginPage` ``, `` `src/fixtures/test.ts` ``). The skill can mis-escape the backticks and leak template-literal-style syntax (`` ` + "..." + ` ``) into the rendered PR body. Writing to a file first eliminates the escaping problem entirely. (Surfaced as D1-OBS-001 during the v2 experiment verification of D.1.)
 
-### 13. Comment on source issue + report to user
+### 13. Report to user
 
-```bash
-gh issue comment <num> --body "🤖 /from-issue opened <pr-url> with generated tests for review."
-```
+No Jira write-back is performed: the **GitHub-for-Jira app** auto-links the PR to ticket `<KEY>` from the key in the branch + PR title/body. _(If the link doesn't appear on the ticket, the app isn't connected to this repo's org — post a comment-back via the Atlassian MCP as a fallback.)_
 
-Then report to the user:
+Report to the user:
 
 - PR URL
 - Test count (generated)
