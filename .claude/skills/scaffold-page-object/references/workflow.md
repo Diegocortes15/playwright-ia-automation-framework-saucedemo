@@ -95,13 +95,14 @@ Edge cases (e.g., two buttons with the same name on one page) get caught in C.2 
 Following `references/page-object-template.md`:
 
 - Top-of-file comment block (mandatory; YYYY-MM-DD = today's date in the user's local time)
-- Imports (`type Locator`, `type Page` from `@playwright/test`; detected component classes from `@components/*`)
+- Imports (`test` value + `type Locator`, `type Page` from `@playwright/test`; detected component classes from `@components/*`). The `test` value import is required so composed action methods can wrap their body in `test.step`.
 - `readonly` fields — composed components first, page-direct locators second (ADR-0001 rule #6)
 - Constructor — wire components first, then page-direct locators in declaration order
 - Action methods — one per interactive element type:
   - Button → `click<Name>(): Promise<void>`
   - Input → `fill<Name>(value: string): Promise<void>`
   - Select → `select<Name>(value: string): Promise<void>`
+- **`test.step` placement** (per `page-object-template.md`): single-element primitives (`click<Name>`, `fill<Name>`) are NOT wrapped. A composed/intent-level method that a test calls directly (`goto`, or a domain action like `loginAs`/`fillContactInfo` added when an obvious multi-step flow exists) wraps its body in exactly one `test.step('<action name>', ...)`. Generated specs never carry steps — the named report steps come from these methods.
 
 ### 10. Write the file
 

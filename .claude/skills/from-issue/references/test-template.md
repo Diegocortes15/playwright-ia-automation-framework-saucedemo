@@ -17,30 +17,24 @@ import { env } from '@utils/env';
 test.describe('<feature> <auth-tag>', () => {
   test.describe('Positive', () => {
     test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      await test.step('<Arrange step name>', async () => {
-        await <pageFixture>.goto();
-        await <pageFixture>.loginAs('<user>', env.password); // if @no-auth, omit this
-      });
-
-      await test.step('<Act step name>', async () => {
-        await <pageFixture>.<action>();
-      });
-
-      await test.step('<Assert step name>', async () => {
-        await expect(<pageFixture>.<locator>).toBeVisible();
-      });
+      // Specs DO NOT use test.step. The named, timed report steps come from the
+      // Page Object's composed action methods (each wraps its body in one
+      // test.step). The spec just calls those methods and owns the assertions.
+      await <pageFixture>.goto();
+      await <pageFixture>.<action>(); // e.g. loginAs('<user>', env.password)
+      await expect(<pageFixture>.<locator>).toBeVisible();
     });
   });
 
   test.describe('Negative', () => {
     test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Negative record from Step 6, each wrapped in test.step blocks
+      // ... one `test(...)` per Negative record from Step 6 (no spec-level test.step)
     });
   });
 
   test.describe('Edge', () => {
     test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Edge record from Step 6, each wrapped in test.step blocks
+      // ... one `test(...)` per Edge record from Step 6 (no spec-level test.step)
     });
   });
   // Omit any bucket describe whose record list is empty.
@@ -59,7 +53,7 @@ test.describe('<feature> <auth-tag>', () => {
   - `'@smoke standard_user logs in successfully and lands on inventory'` (smoke = true)
   - `'invalid password shows generic error'` (smoke = false; user-agnostic in title)
   - `'@smoke checkout with valid info completes successfully'` (smoke = true)
-- **Test step organization** — every generated test wraps its actions in `await test.step('<descriptive step name>', async () => { ... })` blocks per [`playwright-conventions.md`](playwright-conventions.md). At minimum, use one step per Arrange / Act / Assert phase. The Playwright HTML report shows these as collapsible nested entries with per-step timing — critical for human-readable test reports. Step names should be ACTION-FOCUSED, not implementation-focused: prefer `'Submit valid credentials'` over `'Fill username and password then click login'`.
+- **Test step organization — steps live in the Page Object, NOT the spec.** Generated specs contain NO `test.step` calls. The named, timed entries in the Playwright HTML report come from the composed action methods the spec calls (`goto`, `loginAs`, etc.), each of which wraps its body in one `test.step` (see [`playwright-conventions.md`](playwright-conventions.md) and `scaffold-page-object`'s `page-object-template.md`). The spec is just method calls + assertions. Assertions stay in the spec as plain `expect(...)` (Playwright auto-records them). If a behavior needs a named action the Page Object doesn't expose yet, add a composed method to the Page Object (with its own `test.step`) rather than wrapping raw calls in the spec.
 - **Tag selection** — per CLAUDE.md "Tag conventions" table:
   - Login/logout tests with no pre-existing session → `@no-auth` (on outer describe)
   - User-agnostic flows → `@all-users` (on outer describe)
@@ -98,36 +92,22 @@ test.describe('login @no-auth', () => {
       loginPage,
       page,
     }) => {
-      await test.step('Navigate to the login page', async () => {
-        await loginPage.goto();
-      });
-
-      await test.step('Submit valid standard_user credentials', async () => {
-        await loginPage.loginAs('standard_user', env.password);
-      });
-
-      await test.step('Verify landing on the inventory page', async () => {
-        await expect(page).toHaveURL(/\/inventory\.html$/);
-      });
+      await loginPage.goto();
+      await loginPage.loginAs('standard_user', env.password);
+      await expect(page).toHaveURL(/\/inventory\.html$/);
     });
   });
 
   test.describe('Negative', () => {
     test('@smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
-      await test.step('Navigate to the login page', async () => {
-        await loginPage.goto();
-      });
-
-      await test.step('Submit locked_out_user credentials', async () => {
-        await loginPage.loginAs('locked_out_user', env.password);
-      });
-
-      await test.step('Verify the lockout error banner is shown', async () => {
-        await expect(loginPage.errorBanner).toBeVisible();
-        expect(await loginPage.getErrorText()).toContain('locked out');
-      });
+      await loginPage.goto();
+      await loginPage.loginAs('locked_out_user', env.password);
+      await expect(loginPage.errorBanner).toBeVisible();
+      expect(await loginPage.getErrorText()).toContain('locked out');
     });
   });
   // Edge describe omitted — no edge tests for this issue.
 });
 ```
+
+The report's named steps — "Navigate to the login page", "Submit credentials" — are produced by `LoginPage.goto()` and `LoginPage.loginAs()`, not by the spec. The two `expect(...)` calls appear as Playwright's auto-recorded assertion entries.
