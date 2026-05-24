@@ -148,6 +148,8 @@ Tag selection follows CLAUDE.md "Tag conventions" table. Title format follows [`
 
 Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — read it before classifying. Smoke status is orthogonal to bucket: a Negative test can be smoke (critical regression risk) and a Positive test can be NOT-smoke (peripheral happy path). The default per smoke-policy.md is `false` ("when in doubt, NOT smoke").
 
+Data placement follows [`references/data-placement.md`](data-placement.md) — decide, per dataset, whether the test's data is **inline** (the default for small, test-local parameterization) or **externalized** to `data/` (only on a concrete trigger: reused / large / non-engineer-owned / env-specific / named scenario). Most issues keep data inline; if any dataset hits an externalize trigger, note that the spec render (Step 7) and commit (Step 11) must also create + stage the `data/` file(s) and loader.
+
 **Validate bucket values before Step 7.** Each test's `bucket` must be one of `{Positive, Negative, Edge}`. If the LLM emits any other value (e.g., `"Boundary"`), default that test to `Edge` and record a soft warning for the PR body's Verification section: `⚠️ LLM emitted invalid bucket "<value>" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
 
 **Validate smoke values before Step 7.** Each test's `smoke` must be exactly `true` or `false`. If the LLM emits any other value, default that test to `false` and record a soft warning for the PR body's Verification section: `⚠️ LLM emitted invalid smoke value "<value>" for test "<title>" — defaulted to false. Reviewer: verify classification.`
@@ -158,7 +160,7 @@ Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — rea
 
 ### 7. Render test file
 
-Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles) and [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices) to ensure the rendered tests comply with project quality standards:
+Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles), [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices), and [`references/data-placement.md`](data-placement.md) (inline vs. externalized test data) to ensure the rendered tests comply with project quality standards:
 
 - Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
@@ -255,6 +257,8 @@ git add <testfile>
 #   git add src/pages/<PageName>.ts
 # Example (checkout subfolder):
 #   git add src/pages/checkout/<PageName>.ts
+# If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
+#   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
 git commit -m "feat: add generated tests from #<num>"
 git push -u origin from-issue/<num>-<feature>
 ```
