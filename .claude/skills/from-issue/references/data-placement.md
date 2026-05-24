@@ -27,6 +27,20 @@ If **none** apply, keep it inline.
 - **Expected-result strings** (`'Epic sadface: Username is required'`) are the *asserted behavior*, not input data. They stay in the spec with the assertion, even when the inputs are externalized.
 - **Locators / selectors** are the Page Object's concern, never test data.
 
+## Anti-pattern: data drives inputs, NOT logic
+
+Data-drive the **inputs and expected outputs** of a test — never its **behavior**. Do NOT build a config/keyword-driven layer where JSON/YAML encodes the steps, actions, or assertions and a generic runner interprets them into tests (e.g. `[{ "action": "click", "target": "login" }, { "action": "expect", "text": "..." }]`).
+
+That is the classic keyword-driven anti-pattern: it reinvents a programming language in data, but with no types, no IDE support, no debugger, and stack traces that point at "row 7 of scenarios.json" instead of a line of code. The interpreter becomes the most complex, least-tested, bespoke part of the suite, and a reviewer seeing a new data row has no idea what the test actually does.
+
+The dividing line:
+
+- **Same flow, varying data** → parameterize ONE typed test over a data table (inline, or externalized per the triggers above). Adding a case is a data-only edit; the loop body stays code. ✅
+- **Genuinely different behavior** → new typed test logic. It is not the same test, so it must not pretend to be. ✅
+- **Steps / assertions encoded in data + a bespoke interpreter** → never. ❌
+
+> **Tests are code. Data-drive the inputs, keep the logic in code.**
+
 ## How to externalize in THIS framework
 
 Per CLAUDE.md "When extending the framework":
