@@ -123,7 +123,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 
 - **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
   - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched.
-  - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
+  - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
   - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting #<num> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
@@ -204,7 +204,7 @@ The new test title format, bucket structure, and the header block are unchanged 
 
 ### 8.5. Insert into the existing file (AUGMENT mode only)
 
-Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` in place with targeted `Edit` calls — never regenerate the whole file (that would destroy manual edits, per [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md)).
+Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` in place with targeted `Edit` calls — never regenerate the whole file (that would destroy manual edits, per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md)).
 
 **Pre-check — auth-tag match.** The outer describe of the existing file carries one auth-tag (`test.describe('<feature> <auth-tag>', ...)`). If the new tests' dominant auth-tag differs (e.g. the file is `@no-auth` but the new ACs are `@standard`), they cannot share one describe — **abort**: _"new tests are `<tag>` but `<testfile>` is `<existing-tag>`; re-run with `--new-file`."_
 

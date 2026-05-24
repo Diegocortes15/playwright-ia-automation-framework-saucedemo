@@ -122,7 +122,7 @@ Open any file the skill produced. The first ~5 lines must be:
 // Source: <issue-url>
 // Title: <issue-title>
 // Manual edits are welcome — this file is not regenerated automatically.
-// Re-running /from-issue against the same issue will refuse to overwrite.
+// Re-running /from-issue against a contributing issue will refuse to overwrite.
 ```
 
 This block is mandatory per the skill's output template ([`.claude/skills/from-issue/references/test-template.md`](../.claude/skills/from-issue/references/test-template.md)). Future PR reviewers reading the file will know it was AI-generated, where the source issue is, and that edits are expected.

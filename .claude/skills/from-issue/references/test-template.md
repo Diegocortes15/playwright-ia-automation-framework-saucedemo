@@ -1,6 +1,6 @@
 # Test File Output Template
 
-The `/from-issue` skill renders generated test files following this template. The top-of-file comment block is **mandatory** and identical across every generated file (only the date, issue number, source URL, and title vary).
+The `/from-issue` skill renders generated test files following this template. The top-of-file comment block is **mandatory** and identical across every freshly-generated file (only the date, issue number, source URL, and title vary; augmented files additionally gain an `Augmented by:` line — see Rules).
 
 ## Template
 
@@ -53,7 +53,7 @@ test.describe('<feature> <auth-tag>', () => {
   // Re-running /from-issue against a contributing issue will refuse to overwrite.
   ```
 
-  When the file is **augmented** by a later issue (per [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md)), a `// Augmented by:` line is inserted directly below `// Title:`, listing each augmenting issue as `#<num> (YYYY-MM-DD)`, comma-separated:
+  When the file is **augmented** by a later issue (per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md)), a `// Augmented by:` line is inserted directly below `// Title:`, listing each augmenting issue as `#<num> (YYYY-MM-DD)`, comma-separated:
 
   ```ts
   // Title: <issue-title>
@@ -79,7 +79,7 @@ test.describe('<feature> <auth-tag>', () => {
   - Visual regression → `@visual` (on outer describe)
   - Sort dropdown tests → `@sort-functional` (on outer describe)
   - Smoke selection → `@smoke` (on individual test titles per smoke-policy.md)
-- **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from [`src/fixtures/test.ts`](../../../src/fixtures/test.ts).
+- **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from [`src/fixtures/test.ts`](../../../../src/fixtures/test.ts).
 - **No raw Locators in tests** — per ADR-0001 rule #4. Tests interact through Page methods, not `page.locator(...)`.
 - **No `await page.waitForTimeout(...)`** — per CLAUDE.md "What to NEVER do". Use Playwright auto-waiting assertions (`await expect(...).toBeVisible()`).
 - **Selector preference order** is the Page Object's concern, not the test's.
