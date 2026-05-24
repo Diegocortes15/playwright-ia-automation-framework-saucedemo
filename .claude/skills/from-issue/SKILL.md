@@ -18,6 +18,10 @@ Or for experimentation (skip push/PR/issue-comment):
 
 > Use the from-issue skill on issue #42 with dry-run.
 
+If the issue's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md). Re-running any issue that already contributed to the file refuses. To force a separate file instead of augmenting:
+
+> Use the from-issue skill on issue #42 with --new-file.
+
 ## Workflow
 
 The full 13-step procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
