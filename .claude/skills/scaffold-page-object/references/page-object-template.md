@@ -10,7 +10,9 @@ The `scaffold-page-object` skill renders generated files following this template
 // from labeled GitHub Issues. Manual edits are welcome — this file is
 // not regenerated automatically.
 
-import { type Locator, type Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
+// ^ `test` (value, not type) is imported so composed action methods can wrap
+//   their body in test.step — see the test.step rule below.
 // ONE of these per detected component:
 import { Header } from '@components/Header';
 
@@ -31,11 +33,29 @@ export class <Name>Page {
     this.continueButton = page.getByRole('button', { name: /^Continue$/i });
   }
 
+  // Primitives — single-element actions. NOT wrapped in test.step: Playwright
+  // already auto-records each .click()/.fill() in the trace, and the composed
+  // method that calls them owns the named step.
   async clickContinue(): Promise<void> {
     await this.continueButton.click();
   }
   async fillFirstName(value: string): Promise<void> {
     await this.firstNameInput.fill(value);
+  }
+
+  // Composed / intent-level actions — the methods a test calls directly.
+  // Wrap the body in exactly ONE test.step named for the action (depth 1).
+  async goto(): Promise<void> {
+    await test.step('Navigate to the <name> page', async () => {
+      await this.page.goto('/<path>');
+    });
+  }
+  async fillContactInfo(firstName: string, lastName: string, postalCode: string): Promise<void> {
+    await test.step('Fill contact information', async () => {
+      await this.firstNameInput.fill(firstName);
+      await this.lastNameInput.fill(lastName);
+      await this.postalCodeInput.fill(postalCode);
+    });
   }
 }
 ```
@@ -52,4 +72,9 @@ export class <Name>Page {
 - **Field order** — composed components first, then page-direct locators (ADR-0001 rule #6)
 - **Constructor wiring order** — same as field order
 - **Action method naming** — start from element's accessible name, normalize to camelCase, strip filler words (`to`, `the`, `and`, `a`, `of`), favor brevity (`"Continue to Checkout"` → `clickContinue`)
+- **`test.step` lives on composed action methods, NOT primitives, NOT the spec.** This framework groups Playwright report steps at the Page Object level (the action knows what it is, every test that calls it inherits the named step for free). The rule:
+  - **Composed / intent-level methods** a test calls directly (`goto`, `loginAs`, `fillContactInfo`, `completeCheckout`) wrap their body in exactly **one** `test.step('<action name>', async () => { ... })`. Depth 1 — a composed method does NOT call other stepped methods inside its step (it calls the unstepped primitives or raw locators).
+  - **Single-element primitives** (`clickContinue`, `fillFirstName`) are **never** wrapped. Playwright auto-records the underlying `.click()`/`.fill()` in the trace; wrapping them would just nest redundant named entries.
+  - **Specs never use `test.step`** — assertions stay in the spec as plain `expect(...)` calls (auto-recorded), and all named action steps come from the Page Object methods the spec invokes.
+  - Step names are action-focused (`'Submit credentials'`), present-tense, written for a human reading the report.
 - **No companion smoke test** — that's C.2's job (test generation requires ticket context)

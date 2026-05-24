@@ -63,36 +63,49 @@ await page.waitForTimeout(2000);
 await expect(page.getByText('Loaded')).toBeVisible(); // auto-waits
 ```
 
-## Test structure: Arrange / Act / Assert wrapped in `test.step`
+## Test structure: `test.step` lives in the Page Object, not the spec
 
-Every generated test wraps its actions in `await test.step('<descriptive name>', async () => { ... })` blocks. The Playwright HTML report shows these as collapsible nested entries with per-step timing — critical for human-readable test reports (reviewers can immediately see which phase of a test passed/failed and how long each step took).
+The Playwright HTML report shows `test.step` blocks as collapsible entries with per-step timing — critical for human-readable reports. **This framework puts those steps on the Page Object's composed action methods, not in the spec.** The step name lives where the action is defined, so every test that calls the method inherits the named step for free, and specs stay clean (just method calls + assertions).
+
+The spec is plain:
 
 ```ts
 test('@smoke standard_user logs in successfully', async ({ loginPage, page }) => {
-  await test.step('Navigate to the login page', async () => {
-    await loginPage.goto();
-  });
-
-  await test.step('Submit valid standard_user credentials', async () => {
-    await loginPage.loginAs('standard_user', env.password);
-  });
-
-  await test.step('Verify landing on the inventory page', async () => {
-    await expect(page).toHaveURL(/\/inventory\.html$/);
-  });
+  await loginPage.goto();
+  await loginPage.loginAs('standard_user', env.password);
+  await expect(page).toHaveURL(/\/inventory\.html$/);
 });
 ```
 
-**Step naming rules:**
+The named steps come from the Page Object methods:
 
-- Use **action-focused** descriptions (`'Submit valid credentials'`), not **implementation-focused** ones (`'Fill the username field then the password field then click the login button'`)
-- Step names appear verbatim in the HTML report — write them for a human reading test failures, not for the test code
-- One step per Arrange / Act / Assert phase is the minimum; split further if a phase has multiple distinct sub-actions worth surfacing
-- Setup helpers like `loginPage.loginAs(...)` are ALREADY one logical step — don't wrap each underlying `.fill()` / `.click()` separately
+```ts
+// LoginPage.ts — `test` is imported as a value from '@playwright/test'
+async goto(): Promise<void> {
+  await test.step('Navigate to the login page', async () => {
+    await this.page.goto('/');
+  });
+}
 
-**Why this matters:** without `test.step`, the HTML report shows each Page Object call as a flat list of `await locator.click()` / `await locator.fill()` entries with no semantic grouping. The reviewer has to mentally reconstruct which calls belonged to which test phase. `test.step` blocks make the report self-documenting.
+async loginAs(username: string, password: string): Promise<void> {
+  await test.step('Submit credentials', async () => {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  });
+}
+```
 
-One logical assertion per test (or one logical assertion per `test.step`). Don't pile multiple unrelated assertions into one test.
+**Placement rules:**
+
+- **Composed / intent-level methods** a test calls directly (`goto`, `loginAs`, `completeCheckout`) wrap their body in exactly **one** `test.step`. Depth 1 — a composed method calls unstepped primitives or raw locators inside its step, never other stepped methods.
+- **Single-element primitives** (`fillUsername`, `clickLogin`) are **never** wrapped. Playwright auto-records each `.fill()` / `.click()` in the trace; wrapping them just nests redundant entries.
+- **Specs never use `test.step`.** Assertions stay in the spec as plain `expect(...)` (auto-recorded). If a behavior needs a named action the Page Object doesn't expose, add a composed method to the Page Object — don't wrap raw calls in the spec.
+- Step names are **action-focused** (`'Submit credentials'`), present-tense, written for a human reading a failure — not implementation-focused (`'Fill username then password then click'`).
+
+**Why at the Page Object level:** in a generated framework the authoring cost of steps is paid by the machine, so the usual "steps are verbose boilerplate" objection doesn't apply. Defining the step once on the method (rather than in every spec that calls it) is DRY, keeps specs near-prose, and guarantees uniform report structure across every generated file.
+
+One logical assertion per test. Don't pile multiple unrelated assertions into one test.
 
 ## Test isolation
 
