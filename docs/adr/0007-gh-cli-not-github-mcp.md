@@ -1,7 +1,7 @@
 # 0007 — gh CLI for GitHub Operations (No GitHub MCP)
 
 **Date:** 2026-05-15
-**Status:** Accepted
+**Status:** Accepted — scoped by [ADR-0011](0011-jira-ticket-source.md) (Atlassian MCP adopted for Jira; gh CLI retained for GitHub)
 
 ## Context
 
