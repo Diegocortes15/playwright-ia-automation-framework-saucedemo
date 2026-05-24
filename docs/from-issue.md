@@ -91,6 +91,20 @@ Use this when the issue's Page Name field references a Page that doesn't yet exi
 
 Result: skill invokes `/scaffold-page-object` to create the new Page Object first, then generates tests against it. The PR includes BOTH the new `src/pages/<Name>.ts` file AND the new test file.
 
+### Augment an existing feature
+
+Use this when a new issue extends a feature that already has a generated spec.
+
+> Use the from-issue skill on issue #25.
+
+Result (per [ADR-0010](adr/0010-from-issue-augment-mode.md)): the skill detects `tests/login/login.spec.ts` already exists (from issue #7), and **augments** it — inserts the new test(s) into the correct `Positive`/`Negative`/`Edge` bucket, appends any new `LoginPage` method/locator the tests need (or modifies an existing method, which then triggers a full-suite run), and adds a `// Augmented by: #25 (<date>)` line to the header. The PR diff shows exactly what was inserted.
+
+Re-running a contributing issue (here, #7 or #25) refuses — the header contributor set is the guard. To force a separate file instead, pass `--new-file`:
+
+> Use the from-issue skill on issue #25 with --new-file.
+
+This writes `tests/login/login-25.spec.ts` (the pre-D.2 behavior), for when the new ACs are a genuinely distinct sub-area.
+
 ### Experiment before committing (dry-run)
 
 Use this to see what the skill produces without pushing or opening a PR.
