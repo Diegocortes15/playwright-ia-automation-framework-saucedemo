@@ -121,7 +121,10 @@ ls src/pages/<PageName>.ts 2>/dev/null
 ls src/pages/checkout/<PageName>.ts 2>/dev/null
 ```
 
-- **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. Continue.
+- **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
+  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched.
+  - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
+  - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting #<num> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
   - URL: inferred from the AC text (e.g., AC mentions "cart page" → `https://www.saucedemo.com/cart.html`)
@@ -254,9 +257,21 @@ Use the same `.tsconfig.scratch.json` pattern as C.1 step 11. A bare `npx tsc --
 
 ### 10. Run the generated tests
 
-```bash
-npx playwright test <testfile> --reporter=list
-```
+**Scope depends on whether an existing Page Object member was modified:**
+
+- CREATE-NEW, or AUGMENT that only **added** Page Object members (`po_modified` is false) → run the target spec:
+
+  ```bash
+  npx playwright test <testfile> --reporter=list
+  ```
+
+- AUGMENT where `po_modified` is **true** → a shared method changed, so run the **full suite** to catch dependent-spec regressions (the matrix is ~1 min):
+
+  ```bash
+  npx playwright test --reporter=list
+  ```
+
+  Record in the PR's Verification section that the full suite ran because an existing method was modified, plus per-spec PASS/FAIL.
 
 Capture per-test PASS/FAIL output. Record one line per test for the PR body's Verification section:
 
