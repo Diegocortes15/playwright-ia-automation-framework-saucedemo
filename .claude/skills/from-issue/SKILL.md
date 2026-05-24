@@ -32,6 +32,7 @@ The full 13-step procedural workflow is in [`references/workflow.md`](references
 - [`references/qa-analysis.md`](references/qa-analysis.md) — Senior QA SDET judgment: when to merge/split/skip ACs (D.1)
 - [`references/test-principles.md`](references/test-principles.md) — F.I.R.S.T. principles for generated tests (D.1)
 - [`references/playwright-conventions.md`](references/playwright-conventions.md) — Playwright best practices the skill follows (D.1)
+- [`references/data-placement.md`](references/data-placement.md) — inline vs. externalized (`data/`) test data decision rule (D.1.4)
 
 ## Composition
 
