@@ -11,8 +11,8 @@ It's a Claude Code custom skill that takes:
 
 …and produces:
 
-- A new test file at `tests/<feature>/<slug>.spec.ts`
-- A new branch `from-issue/<num>-<slug>`
+- A new test file at `tests/<feature>/<feature>.spec.ts`
+- A new branch `from-issue/<num>-<feature>`
 - A PR with a structured description (What I understood / AC coverage table / Verification / Collision warnings / Source link)
 - A comment on the source issue with the PR link
 
@@ -32,8 +32,8 @@ Distinction from `/scaffold-page-object`: **`/from-issue` is the orchestrator** 
   - `references/test-template.md` — canonical test file template
   - `references/pr-description-template.md` — structured PR body template
 - GitHub Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml` — the form BAs/reporters fill out
-- Generated tests land at `tests/<feature>/<slug>.spec.ts` (feature folder snake_case from the form; slug derived from the issue title — see workflow Step 8 for the rule)
-- Branch naming `from-issue/<num>-<slug>` includes the issue number to prevent slug collisions across issues
+- Generated tests land at `tests/<feature>/<feature>.spec.ts` (feature folder + filename both snake_case from the form's Feature field — see workflow Step 8 for the collision rule when a second issue targets the same feature)
+- Branch naming `from-issue/<num>-<feature>` includes the issue number to keep branches unique across issues that target the same feature
 
 ## Verifying the setup
 
@@ -65,7 +65,7 @@ Expected:
 - Skill executes the 13-step workflow
 - `LoginPage` already exists → reuse + collision warning surfaces in the PR body
 - LLM analyzes 2 ACs → generates 2 tests
-- Test file lands at `tests/login/<slug>.spec.ts`
+- Test file lands at `tests/login/login.spec.ts`
 - Isolated typecheck PASS
 - Test run PASS (both tests)
 - PR opens with the structured description (AC coverage table both ✅, collision warning for LoginPage)
@@ -97,7 +97,7 @@ Use this to see what the skill produces without pushing or opening a PR.
 
 > Use the from-issue skill on issue #42 with dry-run.
 
-Result: local branch + test file + (if applicable) new Page Object are written. Steps 11–13 (push, PR, issue comment) are skipped. Inspect the files locally; `git checkout main && git branch -D from-issue/42-<slug>` to discard.
+Result: local branch + test file + (if applicable) new Page Object are written. Steps 11–13 (push, PR, issue comment) are skipped. Inspect the files locally; `git checkout main && git branch -D from-issue/42-<feature>` to discard.
 
 ### Inspect a generated file's comment block
 
@@ -118,9 +118,9 @@ This block is mandatory per the skill's output template ([`.claude/skills/from-i
 A generated file with mixed Positive + Negative tests + smoke selection looks like:
 
 ```ts
-test.describe('login (@no-auth)', () => {
+test.describe('login @no-auth', () => {
   test.describe('Positive', () => {
-    test('@no-auth @smoke standard_user logs in successfully and lands on inventory', async ({
+    test('@smoke standard_user logs in successfully and lands on inventory', async ({
       loginPage,
       page,
     }) => {
@@ -129,10 +129,10 @@ test.describe('login (@no-auth)', () => {
   });
 
   test.describe('Negative', () => {
-    test('@no-auth @smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
+    test('@smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
       /* ... critical auth-rejection regression risk — selected as smoke */
     });
-    test('@no-auth invalid password shows generic error', async ({ loginPage }) => {
+    test('invalid password shows generic error', async ({ loginPage }) => {
       /* ... secondary error path — NOT smoke */
     });
   });
@@ -140,11 +140,11 @@ test.describe('login (@no-auth)', () => {
 });
 ```
 
-Bucket order is fixed (`Positive → Negative → Edge`). Empty buckets are omitted entirely. Reviewers see the per-test bucket in the PR body's AC coverage table (`AC | Test | Bucket | Status`) and smoke tests are flagged with `⚡` in the Test column.
+The auth-tag (`@no-auth`) lives **only** on the outer describe — never repeated in the test titles, where it would render as a duplicate tag chip in the Playwright report (the outer-describe tag and the Playwright project name already cover it). Bucket order is fixed (`Positive → Negative → Edge`); empty buckets are omitted entirely. Reviewers see the per-test bucket in the PR body's AC coverage table (`AC | Test | Bucket | Status`) and smoke tests are flagged with `⚡` in the Test column.
 
 ### Reviewer override: changing the smoke set on a PR
 
-If you disagree with the LLM's smoke picks on a PR, edit the generated file directly in the same PR — add `@smoke ` after the auth-tag of a test that should be smoke, or remove `@smoke ` from a test that shouldn't be. The orchestrator does NOT re-run on the same issue. The PR is the curation gate; the LLM is just the first draft.
+If you disagree with the LLM's smoke picks on a PR, edit the generated file directly in the same PR — add `@smoke ` at the start of the title of a test that should be smoke, or remove `@smoke ` from a test that shouldn't be. The orchestrator does NOT re-run on the same issue. The PR is the curation gate; the LLM is just the first draft.
 
 ## When NOT to use it
 
