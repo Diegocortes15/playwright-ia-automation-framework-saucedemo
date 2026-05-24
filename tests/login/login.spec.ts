@@ -42,8 +42,7 @@ const invalidCredentialScenarios = [
     smoke: true,
     username: 'invalid_user',
     password: 'wrong_password',
-    expectedError:
-      'Epic sadface: Username and password do not match any user in this service',
+    expectedError: 'Epic sadface: Username and password do not match any user in this service',
   },
 ];
 
@@ -51,21 +50,14 @@ test.describe('login @no-auth', () => {
   test.describe('Positive', () => {
     for (const user of validUsers) {
       const smokePrefix = user === 'standard_user' ? '@smoke ' : '';
+
       test(`${smokePrefix}${user} logs in successfully and lands on inventory page`, async ({
         loginPage,
         page,
       }) => {
-        await test.step('Navigate to the login page', async () => {
-          await loginPage.goto();
-        });
-
-        await test.step(`Submit valid credentials for ${user}`, async () => {
-          await loginPage.loginAs(user, env.password);
-        });
-
-        await test.step('Verify landing on the inventory page', async () => {
-          await expect(page).toHaveURL(/\/inventory\.html$/);
-        });
+        await loginPage.goto();
+        await loginPage.loginAs(user, env.password);
+        await expect(page).toHaveURL(/\/inventory\.html$/);
       });
     }
   });
@@ -73,21 +65,12 @@ test.describe('login @no-auth', () => {
   test.describe('Negative', () => {
     for (const scenario of invalidCredentialScenarios) {
       const smokePrefix = scenario.smoke ? '@smoke ' : '';
+
       test(`${smokePrefix}${scenario.name}`, async ({ loginPage }) => {
-        await test.step('Navigate to the login page', async () => {
-          await loginPage.goto();
-        });
-
-        await test.step('Submit the credential variation', async () => {
-          await loginPage.fillUsername(scenario.username);
-          await loginPage.fillPassword(scenario.password);
-          await loginPage.clickLogin();
-        });
-
-        await test.step('Verify the expected error banner is shown', async () => {
-          await expect(loginPage.errorBanner).toBeVisible();
-          expect(await loginPage.getErrorText()).toContain(scenario.expectedError);
-        });
+        await loginPage.goto();
+        await loginPage.loginAs(scenario.username, scenario.password);
+        await expect(loginPage.errorBanner).toBeVisible();
+        expect(await loginPage.getErrorText()).toContain(scenario.expectedError);
       });
     }
   });

@@ -3,7 +3,7 @@
 // from labeled GitHub Issues. Manual edits are welcome — this file is
 // not regenerated automatically.
 
-import { type Locator, type Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
 
 export class LoginPage {
   readonly usernameInput: Locator;
@@ -18,10 +18,22 @@ export class LoginPage {
     this.errorBanner = page.locator('[data-test="error"]');
   }
 
+  // Composed / intent-level actions — one test.step each (named report steps).
   async goto(): Promise<void> {
-    await this.page.goto('/');
+    await test.step('Navigate to the login page', async () => {
+      await this.page.goto('/');
+    });
   }
 
+  async loginAs(username: string, password: string): Promise<void> {
+    await test.step('Submit credentials', async () => {
+      await this.fillUsername(username);
+      await this.fillPassword(password);
+      await this.clickLogin();
+    });
+  }
+
+  // Primitives — single-element actions, NOT wrapped (Playwright auto-records them).
   async fillUsername(value: string): Promise<void> {
     await this.usernameInput.fill(value);
   }
@@ -34,12 +46,7 @@ export class LoginPage {
     await this.loginButton.click();
   }
 
-  async loginAs(username: string, password: string): Promise<void> {
-    await this.fillUsername(username);
-    await this.fillPassword(password);
-    await this.clickLogin();
-  }
-
+  // Query — returns data, no step.
   async getErrorText(): Promise<string> {
     return (await this.errorBanner.textContent()) ?? '';
   }
