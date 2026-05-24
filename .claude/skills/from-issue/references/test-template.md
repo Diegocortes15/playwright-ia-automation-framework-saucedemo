@@ -14,28 +14,33 @@ The `/from-issue` skill renders generated test files following this template. Th
 import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 
-test.describe('<feature> (<auth-tag>)', () => {
+test.describe('<feature> <auth-tag>', () => {
   test.describe('Positive', () => {
-    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // Arrange
-      await <pageFixture>.goto();
-      await <pageFixture>.loginAs('<user>', env.password); // if @no-auth, omit this
-      // Act
-      await <pageFixture>.<action>();
-      // Assert
-      await expect(<pageFixture>.<locator>).toBeVisible();
+    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+      await test.step('<Arrange step name>', async () => {
+        await <pageFixture>.goto();
+        await <pageFixture>.loginAs('<user>', env.password); // if @no-auth, omit this
+      });
+
+      await test.step('<Act step name>', async () => {
+        await <pageFixture>.<action>();
+      });
+
+      await test.step('<Assert step name>', async () => {
+        await expect(<pageFixture>.<locator>).toBeVisible();
+      });
     });
   });
 
   test.describe('Negative', () => {
-    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Negative record from Step 6
+    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+      // ... one `test(...)` per Negative record from Step 6, each wrapped in test.step blocks
     });
   });
 
   test.describe('Edge', () => {
-    test('<auth-tag> [@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Edge record from Step 6
+    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
+      // ... one `test(...)` per Edge record from Step 6, each wrapped in test.step blocks
     });
   });
   // Omit any bucket describe whose record list is empty.
@@ -48,20 +53,21 @@ test.describe('<feature> (<auth-tag>)', () => {
 - **Imports**:
   - Always `import { test, expect } from '@fixtures/test'` — NEVER from `@playwright/test` (per CLAUDE.md "Where things live").
   - `import { env } from '@utils/env'` only when a test calls `loginAs(...)` and needs the password.
-- **Describe wrap** — exactly one outer `test.describe('<feature> (<auth-tag>)', () => { ... })` block per file. `<feature>` matches the issue template's Feature field; `<auth-tag>` is the dominant auth tag across tests in the file (e.g., `@standard`, `@no-auth`).
+- **Describe wrap** — exactly one outer `test.describe('<feature> <auth-tag>', () => { ... })` block per file. `<feature>` matches the issue template's Feature field; `<auth-tag>` is the dominant auth tag across tests in the file (e.g., `@standard`, `@no-auth`). **NO PARENTHESES around the auth-tag** — `(@no-auth)` would leak the closing paren into Playwright's tag chip rendering (the tag becomes `@no-auth)`). Use a plain space separator: `'login @no-auth'`, not `'login (@no-auth)'`.
 - **Bucket structure** — inside the outer describe, group tests into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` blocks. Order is fixed: **Positive → Negative → Edge**. Omit a bucket describe entirely if it has zero tests (do not render empty describes). The bucket label is exactly one of `Positive` / `Negative` / `Edge` — no other strings, no tags on the describe, no description suffix. Classification rules live in [`bucket-classification.md`](bucket-classification.md).
-- **Per-test title** — `'<auth-tag> [@smoke] [<user-tag>] <behavior description>'` (square brackets = optional). `@smoke` slots in immediately after the auth-tag when the test is smoke-worthy per [`smoke-policy.md`](smoke-policy.md); otherwise omit it. Examples:
-  - `'@no-auth @smoke standard_user logs in successfully and lands on inventory'` (smoke = true)
-  - `'@no-auth invalid password shows generic error'` (smoke = false; secondary error path)
-  - `'@standard @smoke checkout with valid info completes successfully'` (smoke = true)
-  - The `<user-tag>` is the saucedemo user name (e.g., `standard_user`, `locked_out_user`); omit if the test is user-agnostic.
+- **Per-test title** — `'[@smoke] [<user-tag>] <behavior description>'` (square brackets = optional). **DO NOT repeat the `<auth-tag>` in the test title** — it's already on the outer describe and would render as a duplicate chip in the Playwright report. `@smoke` slots in at the start when the test is smoke-worthy per [`smoke-policy.md`](smoke-policy.md); otherwise omit it. The `<user-tag>` is the saucedemo user name (e.g., `standard_user`, `locked_out_user`); omit if the test is user-agnostic. Examples:
+  - `'@smoke standard_user logs in successfully and lands on inventory'` (smoke = true)
+  - `'invalid password shows generic error'` (smoke = false; user-agnostic in title)
+  - `'@smoke checkout with valid info completes successfully'` (smoke = true)
+- **Test step organization** — every generated test wraps its actions in `await test.step('<descriptive step name>', async () => { ... })` blocks per [`playwright-conventions.md`](playwright-conventions.md). At minimum, use one step per Arrange / Act / Assert phase. The Playwright HTML report shows these as collapsible nested entries with per-step timing — critical for human-readable test reports. Step names should be ACTION-FOCUSED, not implementation-focused: prefer `'Submit valid credentials'` over `'Fill username and password then click login'`.
 - **Tag selection** — per CLAUDE.md "Tag conventions" table:
-  - Login/logout tests with no pre-existing session → `@no-auth`
-  - User-agnostic flows → `@all-users`
-  - Standard-user-only flows → `@standard`
-  - Problem/error/performance-glitch user-specific → `@problem` / `@error` / `@performance_glitch`
-  - Visual regression → `@visual`
-  - Sort dropdown tests → `@sort-functional`
+  - Login/logout tests with no pre-existing session → `@no-auth` (on outer describe)
+  - User-agnostic flows → `@all-users` (on outer describe)
+  - Standard-user-only flows → `@standard` (on outer describe)
+  - Problem/error/performance-glitch user-specific → `@problem` / `@error` / `@performance_glitch` (on outer describe)
+  - Visual regression → `@visual` (on outer describe)
+  - Sort dropdown tests → `@sort-functional` (on outer describe)
+  - Smoke selection → `@smoke` (on individual test titles per smoke-policy.md)
 - **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from [`src/fixtures/test.ts`](../../../src/fixtures/test.ts).
 - **No raw Locators in tests** — per ADR-0001 rule #4. Tests interact through Page methods, not `page.locator(...)`.
 - **No `await page.waitForTimeout(...)`** — per CLAUDE.md "What to NEVER do". Use Playwright auto-waiting assertions (`await expect(...).toBeVisible()`).
@@ -86,24 +92,40 @@ If the AC text doesn't declare a user, default to `standard_user` (spec §2 Deci
 import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 
-test.describe('login (@no-auth)', () => {
+test.describe('login @no-auth', () => {
   test.describe('Positive', () => {
-    test('@no-auth @smoke standard_user logs in successfully and lands on inventory', async ({
+    test('@smoke standard_user logs in successfully and lands on inventory', async ({
       loginPage,
       page,
     }) => {
-      await loginPage.goto();
-      await loginPage.loginAs('standard_user', env.password);
-      await expect(page).toHaveURL(/\/inventory\.html$/);
+      await test.step('Navigate to the login page', async () => {
+        await loginPage.goto();
+      });
+
+      await test.step('Submit valid standard_user credentials', async () => {
+        await loginPage.loginAs('standard_user', env.password);
+      });
+
+      await test.step('Verify landing on the inventory page', async () => {
+        await expect(page).toHaveURL(/\/inventory\.html$/);
+      });
     });
   });
 
   test.describe('Negative', () => {
-    test('@no-auth @smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
-      await loginPage.goto();
-      await loginPage.loginAs('locked_out_user', env.password);
-      await expect(loginPage.errorBanner).toBeVisible();
-      expect(await loginPage.getErrorText()).toContain('locked out');
+    test('@smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
+      await test.step('Navigate to the login page', async () => {
+        await loginPage.goto();
+      });
+
+      await test.step('Submit locked_out_user credentials', async () => {
+        await loginPage.loginAs('locked_out_user', env.password);
+      });
+
+      await test.step('Verify the lockout error banner is shown', async () => {
+        await expect(loginPage.errorBanner).toBeVisible();
+        expect(await loginPage.getErrorText()).toContain('locked out');
+      });
     });
   });
   // Edge describe omitted — no edge tests for this issue.
