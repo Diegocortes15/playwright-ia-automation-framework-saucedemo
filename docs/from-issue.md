@@ -175,7 +175,3 @@ If you disagree with the LLM's smoke picks on a PR, edit the generated file dire
 - [`references/workflow.md`](../.claude/skills/from-issue/references/workflow.md) — the procedural workflow
 - [`docs/jira-tickets.md`](jira-tickets.md) — how to author a parseable ticket
 - [`docs/scaffold-page-object.md`](scaffold-page-object.md) — the C.1 skill this orchestrator composes
-
-```
-
-```
