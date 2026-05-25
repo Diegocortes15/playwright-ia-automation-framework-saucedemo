@@ -39,16 +39,17 @@ This project ships custom skills under `.claude/skills/<skill-name>/` — domain
 Current custom skills:
 
 - **`/scaffold-page-object`** — generate a draft Page Object class from a live page snapshot. Full guide: [`docs/scaffold-page-object.md`](docs/scaffold-page-object.md).
-- **`/from-issue`** — generate a set of Playwright tests from a `to-be-automated`-labeled GitHub Issue and open a PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist. Full guide: [`docs/from-issue.md`](docs/from-issue.md).
+- **`/from-issue`** — generate a set of Playwright tests from a Jira ticket (read via the Atlassian MCP) and open a GitHub PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist. Full guide: [`docs/from-issue.md`](docs/from-issue.md).
 
-## GitHub operations
+## GitHub + Jira operations
 
-This project uses the `gh` CLI for all GitHub operations (issues, PRs, releases, workflow runs, arbitrary REST calls). `gh` is the user-installed GitHub CLI; assume it's authenticated (`gh auth login` is a one-time step).
+**Ticket reads come from Jira via the Atlassian MCP** (see [ADR-0011](docs/adr/0011-jira-ticket-source.md)) — `/from-issue SW-123` reads the ticket through the MCP, NOT `gh issue`. The GitHub-for-Jira app auto-links the PR onto the ticket (no write-back).
 
-- For issues: `gh issue view <num>`, `gh issue create`, `gh issue list`
+This project uses the `gh` CLI for GitHub operations (PRs, releases, workflow runs, arbitrary REST calls). `gh` is the user-installed GitHub CLI; assume it's authenticated (`gh auth login` is a one-time step).
+
 - For PRs: `gh pr create`, `gh pr view`, `gh pr comment`, `gh pr checks`
 - For arbitrary API: `gh api repos/<owner>/<repo>/...`
-- We do NOT install a GitHub MCP server — see [ADR-0007](docs/adr/0007-gh-cli-not-github-mcp.md) for the rationale (same logic as the Playwright CLI / MCP choice in ADR-0006).
+- We do NOT install a GitHub MCP server — see [ADR-0007](docs/adr/0007-gh-cli-not-github-mcp.md) (scoped by ADR-0011: gh for GitHub, Atlassian MCP for Jira).
 
 ## Composition rules (must follow)
 
