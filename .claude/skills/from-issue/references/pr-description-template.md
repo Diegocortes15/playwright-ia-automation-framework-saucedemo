@@ -7,9 +7,10 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 ```markdown
 ## What I understood from the ticket
 
+**Source ticket:** [<KEY>](<jira-issue-url>) — <issue-type>: "<summary>"
 **Feature:** <feature>
 **Page Name:** <page-name>
-**User Story:** <user-story-text or "(none provided)">
+**User Story:** <narrative, ONLY if the ticket has an "As a / I want / so that" statement — omit this line entirely when absent; never write "(none provided)">
 
 **Acceptance Criteria (normalized):**
 - AC 1: <normalized text>
@@ -60,6 +61,7 @@ Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
 ## Rules
 
 - **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional) → `Source`.
+- **"What I understood" block** — the `Source ticket:` line is **mandatory**: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"` (names the source Story/Task and links the PR to the ticket). The `User Story:` line is **optional**: include it only when the ticket carries an explicit "As a / I want / so that" narrative; **omit the line entirely** when the requirement is expressed as ACs/scenarios — never render "(none provided)" (a Story-type ticket whose body is GWT scenarios still *is* the user story; the `Source ticket:` line already conveys that).
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the ticket for full text.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for smoke tests (those with `@smoke` in the title), e.g., `` `⚡ @no-auth @smoke standard_user logs in...` ``. Non-smoke tests have no prefix.
@@ -94,9 +96,10 @@ Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
 ```markdown
 ## What I understood from the ticket
 
+**Source ticket:** [SW-1](https://your-site.atlassian.net/browse/SW-1) — Story: "Login in Saucedemo App"
 **Feature:** login
 **Page Name:** LoginPage
-**User Story:** (none provided)
+<!-- User Story line omitted: the ticket expresses the requirement as ACs, no "As a / I want" narrative -->
 
 **Acceptance Criteria (normalized):**
 - AC 1: User can log in with standard_user / secret_sauce and lands on inventory page.
