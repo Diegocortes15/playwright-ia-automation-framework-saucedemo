@@ -147,7 +147,7 @@ Data placement follows [`references/data-placement.md`](data-placement.md) — d
 
 Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles), [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices), and [`references/data-placement.md`](data-placement.md) (inline vs. externalized test data) to ensure the rendered tests comply with project quality standards:
 
-- Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
+- Top-of-file 5-line provenance block (substitute today's date, Jira key, URL, summary)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
 - Single outer `test.describe('<feature> <auth-tag>', ...)` wrap — **NO parentheses** around the auth-tag (a `(@no-auth)` wrap leaks the closing paren into Playwright's tag chip as `@no-auth)`; see test-template.md)
 - Inside the outer describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
