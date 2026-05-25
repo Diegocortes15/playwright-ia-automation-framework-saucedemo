@@ -1,41 +1,38 @@
 # from-issue Workflow
 
-The 13-step procedural workflow Claude follows when the `from-issue` skill is invoked.
+The procedural workflow Claude follows when the `from-issue` skill is invoked. The source ticket is a **Jira** issue (project `SW`), read via the Atlassian MCP — see [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md). (Originally 13 GitHub-Issue steps; Step 3 was dropped and Step 13's Jira write-back removed in Phase E.)
 
 ## Inputs
 
-- **Issue number** (required, positional) — e.g., `/from-issue 42`
-- **`dry-run`** (optional flag) — skip steps 11–13 (push, PR, issue comment). Files written and tests run locally only.
+- **Jira issue key** (required, positional) — e.g., `/from-issue SW-123` (project key `SW`).
+- **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), Step 8).
+- **`dry-run`** (optional flag) — skip steps 11–12 (branch, push, PR). Files written and tests run locally only.
 
 ## Steps
 
 ### 1. Validate inputs
 
-Check that an issue number is present and is a positive integer. If missing or malformed, ask the user — don't guess.
+Check that a Jira issue **key** is present and matches `^[A-Z][A-Z0-9]+-\d+$` (e.g. `SW-123`). If missing or malformed, ask the user — don't guess.
 
-Check `gh auth status` exits 0. If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
+Confirm the **Atlassian MCP** is connected (the skill reads tickets through it). If no Atlassian MCP tool is available, abort with: _"The Atlassian MCP isn't connected. Connect it in Claude Code (OAuth), then re-run."_
 
-### 2. Fetch issue
+Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
 
-```bash
-gh issue view <num> --json title,body,labels,number,url
-```
+### 2. Fetch the Jira ticket
 
-If the issue doesn't exist or you lack access, abort with the `gh` error verbatim.
+Read the ticket via the **Atlassian MCP's get-issue tool** for the key (e.g. `SW-123`), requesting the rendered/text form of the description.
 
-Parse the JSON. Capture: `title`, `body`, `labels[].name`, `number`, `url`.
+> The connected Atlassian MCP server exposes a get-issue tool; confirm its exact name from the available tool list once the MCP is connected (commonly `getJiraIssue` / `jira_get_issue`). Until connected, refer to it generically.
 
-### 3. Verify `to-be-automated` label present
+Capture: `<KEY>` (the issue key), `summary` (the title), and `description` (rendered text). If the ticket doesn't exist or you lack access, abort with the MCP error verbatim.
 
-If `to-be-automated` is NOT in `labels[].name`, abort with:
+### 3. (Removed in Phase E — no readiness gate)
 
-> _"Issue #N is missing the `to-be-automated` label. Add the label and re-run."_
-
-Do NOT add the label autonomously.
+There is no label/status gate. Explicitly invoking `/from-issue <KEY>` is the intent signal; the Step 4 "no ACs worth automating → abort" backstop fails safe if pointed at a non-spec ticket.
 
 ### 4. LLM normalization
 
-The issue body should follow the GitHub Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml`. Extract:
+The ticket's **summary + description** should follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md) (Feature + one AC per line; GWT acceptable). Extract from the description (and summary):
 
 - **Feature** (single-line) — drives `tests/<feature>/`
 - **User Story** (optional) — context only
@@ -61,41 +58,26 @@ For each Acceptance Criterion, build an internal record:
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
 
-**If the issue body is free-form (no template structure)**, attempt best-effort parse. If no ACs can be extracted, abort with:
+**If the ticket description is free-form (no clear structure)**, attempt best-effort parse. If no ACs can be extracted, abort with:
 
-> _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_
+> _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
 
-**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. If `dry-run` was passed, simply report the rationale to the user (no issue comment, no PR). Otherwise, post a comment on the source issue:
-
-```bash
-gh issue comment <num> --body "$(cat <<'EOF'
-/from-issue reviewed this issue but found no ACs worth automating:
-
-- AC 1: <rationale>
-- AC 2: <rationale>
-- ...
-
-Close this issue if the assessment is correct, or refile with more concrete ACs.
-EOF
-)"
-```
-
-Then stop. No PR.
+**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Report the per-AC rationale to the user, with the recommendation to close ticket `<KEY>` if the assessment is correct or refile with more concrete ACs. No Jira write-back is performed (per [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md)) and no PR is opened. Then stop.
 
 #### Free-form / GWT body handling
 
-The Issue Template at `.github/ISSUE_TEMPLATE/to-be-automated.yml` produces a structured body with `### Feature`, `### User Story`, `### Acceptance Criteria`, etc. headings. If the issue body uses a non-template format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
+A well-authored ticket (per [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)) has a `Feature:` line and one AC per line in the description. If the description uses a looser format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
 
 - Extract the **Feature** field from any heading or first line that looks like a feature name
 - Look for Acceptance Criteria in any list/bullet form, regardless of `### Acceptance Criteria` heading
 - Recognize GWT-style scenarios (`Given... When... Then...`) as ACs, one scenario = one AC candidate
-- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from issue body. Ask the reporter to refile using the `to-be-automated` template."_
+- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
 
 (Note: this subsection replaces an earlier shorter free-form note. The behavior was previously implicit — confirmed working in PR #8 of the experiment. Now documented explicitly.)
 
 #### Page inference from AC text
 
-The Issue Template does NOT include a Page Name field (removed in commit `fcc39e9` to support multi-page features). Extract Page Names from AC text by:
+Tickets do not carry a Page Name field. Extract Page Names from AC text by:
 
 - Scanning each AC for mentions of UI surfaces ("from the LoginPage", "on the cart page", "checkout overview", etc.)
 - Mapping each mention to a PascalCase Page Object name (e.g., "login page" → `LoginPage`, "cart page" → `CartPage`)
@@ -124,7 +106,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 - **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
   - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched.
   - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
-  - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting #<num> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
+  - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting <KEY> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
   - URL: inferred from the AC text (e.g., AC mentions "cart page" → `https://www.saucedemo.com/cart.html`)
@@ -165,7 +147,7 @@ Data placement follows [`references/data-placement.md`](data-placement.md) — d
 
 Apply [`references/test-template.md`](test-template.md). Also consult [`references/test-principles.md`](test-principles.md) (F.I.R.S.T. principles), [`references/playwright-conventions.md`](playwright-conventions.md) (Playwright best practices), and [`references/data-placement.md`](data-placement.md) (inline vs. externalized test data) to ensure the rendered tests comply with project quality standards:
 
-- Top-of-file 5-line provenance block (substitute today's date, issue number, URL, title)
+- Top-of-file 5-line provenance block (substitute today's date, Jira key, URL, summary)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
 - Single outer `test.describe('<feature> <auth-tag>', ...)` wrap — **NO parentheses** around the auth-tag (a `(@no-auth)` wrap leaks the closing paren into Playwright's tag chip as `@no-auth)`; see test-template.md)
 - Inside the outer describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
@@ -189,14 +171,14 @@ Where `<feature>` is the snake_case Feature field. Example: Feature `login` → 
 
 #### Collision handling
 
-Resolve the target path **and the write mode**. Read the contributor set of `tests/<feature>/<feature>.spec.ts` if it exists — that is the origin issue on line 1 (`// Generated by /from-issue ... from GitHub Issue #M.`) **plus** every `#<num>` on the `// Augmented by:` line (if present). Then:
+Resolve the target path **and the write mode**. Read the contributor set of `tests/<feature>/<feature>.spec.ts` if it exists — that is the origin key on line 1 (`// Generated by /from-issue ... from Jira <KEY>.`) **plus** every key on the `// Augmented by:` line (if present). Then:
 
 | Condition                                              | Mode                                                                                                                                                                               |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--new-file` flag passed                               | **CREATE-NEW** — use `tests/<feature>/<feature>.spec.ts`, or `tests/<feature>/<feature>-<num>.spec.ts` if that exists (refuse if the suffixed path also exists for this same issue) |
+| `--new-file` flag passed                               | **CREATE-NEW** — use `tests/<feature>/<feature>.spec.ts`, or `tests/<feature>/<feature>-<KEY>.spec.ts` if that exists (refuse if the suffixed path also exists for this same issue) |
 | File does **not** exist                                | **CREATE-NEW** — write a fresh `tests/<feature>/<feature>.spec.ts`                                                                                                                  |
-| File exists, `<num>` **is** in the contributor set     | **REFUSE** — _"issue #<num> already contributed to `tests/<feature>/<feature>.spec.ts`. `rm` the relevant tests or edit it directly."_ No PR.                                       |
-| File exists, `<num>` is **not** a contributor          | **AUGMENT** — go to Step 8.5                                                                                                                                                        |
+| File exists, `<KEY>` **is** in the contributor set     | **REFUSE** — _"issue <KEY> already contributed to `tests/<feature>/<feature>.spec.ts`. `rm` the relevant tests or edit it directly."_ No PR.                                       |
+| File exists, `<KEY>` is **not** a contributor          | **AUGMENT** — go to Step 8.5                                                                                                                                                        |
 
 For **CREATE-NEW**, ensure `tests/<feature>/` exists (`mkdir -p` if needed), then Write the file. For **AUGMENT**, Step 8.5 edits the existing file in place. In both cases, call the resolved path **`<testfile>`** — later steps reference it.
 
@@ -218,10 +200,10 @@ For each new test record (already bucket-classified in Step 6):
    - Block absent → insert a new bucket describe in the fixed **Positive → Negative → Edge** order, positioned correctly relative to existing buckets.
 3. **Render the test body** exactly as Step 7 would (no spec-level `test.step`; steps live in Page Object methods per [`playwright-conventions.md`](playwright-conventions.md)).
 
-**Update the header.** Append this issue to the `// Augmented by:` line as `#<num> (YYYY-MM-DD)` (comma-separated). If the line doesn't exist yet, add it directly below the `// Title:` line:
+**Update the header.** Append this issue to the `// Augmented by:` line as `<KEY> (YYYY-MM-DD)` (comma-separated). If the line doesn't exist yet, add it directly below the `// Title:` line:
 
 ```ts
-// Augmented by: #<num> (YYYY-MM-DD)
+// Augmented by: <KEY> (YYYY-MM-DD)
 ```
 
 Record which records were `added` vs `skipped` for the PR body (Step 12).
@@ -282,15 +264,15 @@ DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate mod
 
 ### 11. Branch + commit + push
 
-**Dry-run check:** If `dry-run` was passed, SKIP this step and Steps 12–13. Report the local file path and verification status only.
+**Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
 
 ```bash
-git checkout -b from-issue/<num>-<feature>
+git checkout -b from-issue/<KEY>-<feature>
 ```
 
-The branch is named `from-issue/<num>-<feature>` (e.g., `from-issue/7-login`). The `<num>` keeps branches unique across issues that target the same feature.
+The branch is named `from-issue/<KEY>-<feature>` (e.g., `from-issue/SW-123-login`). The Jira key keeps branches unique and — critically — is what the **GitHub-for-Jira app** matches to auto-link this PR onto ticket `<KEY>`.
 
-If the branch already exists, abort with: _"Branch `from-issue/<num>-<feature>` exists — delete it and re-run."_ No PR.
+If the branch already exists, abort with: _"Branch `from-issue/<KEY>-<feature>` exists — delete it and re-run."_ No PR.
 
 ```bash
 git add <testfile>
@@ -302,8 +284,8 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-git commit -m "feat: add generated tests from #<num>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
-git push -u origin from-issue/<num>-<feature>
+git commit -m "feat: add generated tests from <KEY>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+git push -u origin from-issue/<KEY>-<feature>
 ```
 
 **Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
@@ -318,9 +300,11 @@ Render the PR body using [`references/pr-description-template.md`](pr-descriptio
 2. Open the PR:
 
    ```bash
-   # Title: "feat: tests from #<num> — <issue-title>"; truncate the title portion to ≤ 60 chars (break on a word boundary if possible).
-   gh pr create --title "feat: tests from #<num> — <truncated-title>" --body-file .pr-body.md
+   # Title: "feat: tests from <KEY> — <summary>"; truncate the summary so the title stays ≤ ~60 chars after the key.
+   gh pr create --title "feat: tests from <KEY> — <truncated-summary>" --body-file .pr-body.md
    ```
+
+   The PR body MUST reference the Jira key `<KEY>` (the GitHub-for-Jira app matches the key in the branch + title + body to link the PR onto the ticket).
 
 3. After PR creation succeeds, delete the temp file:
 
@@ -334,13 +318,11 @@ If `gh pr create` fails (no remote, no permission), abort with the `gh` error ve
 
 **Why `--body-file` instead of `--body "$(cat <<'EOF' ... EOF)"`:** the inline heredoc pattern (used in earlier workflow versions) is fragile when the PR body contains backtick-wrapped code spans (e.g., `` `/from-issue` ``, `` `LoginPage` ``, `` `src/fixtures/test.ts` ``). The skill can mis-escape the backticks and leak template-literal-style syntax (`` ` + "..." + ` ``) into the rendered PR body. Writing to a file first eliminates the escaping problem entirely. (Surfaced as D1-OBS-001 during the v2 experiment verification of D.1.)
 
-### 13. Comment on source issue + report to user
+### 13. Report to user
 
-```bash
-gh issue comment <num> --body "🤖 /from-issue opened <pr-url> with generated tests for review."
-```
+No Jira write-back is performed: the **GitHub-for-Jira app** auto-links the PR to ticket `<KEY>` from the key in the branch + PR title/body. _(If the link doesn't appear on the ticket, the app isn't connected to this repo's org — post a comment-back via the Atlassian MCP as a fallback.)_
 
-Then report to the user:
+Report to the user:
 
 - PR URL
 - Test count (generated)

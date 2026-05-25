@@ -45,7 +45,7 @@ Every test ends with an `expect(...)` assertion. Pass/fail is unambiguous.
 Tests are written close in time to the code change they verify.
 
 - For this framework: generated tests ship in the same PR as the Page Object scaffold (or shortly after)
-- Don't accumulate untested code — file an `to-be-automated` issue when a feature lands
+- Don't accumulate untested code — file a Jira ticket when a feature lands
 
 ## Anti-pattern gallery
 

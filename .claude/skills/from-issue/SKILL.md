@@ -1,34 +1,36 @@
 ---
 name: from-issue
-description: Generate Playwright tests from a `to-be-automated`-labeled GitHub Issue, composing /scaffold-page-object when a target Page Object doesn't yet exist, and open a PR with the generated tests for review.
+description: Generate Playwright tests from a Jira ticket (read via the Atlassian MCP), composing /scaffold-page-object when a target Page Object doesn't yet exist, and open a GitHub PR with the generated tests for review.
 allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write
 ---
 
 # from-issue
 
-Given a GitHub Issue number, this skill reads the issue (which must carry the `to-be-automated` label), analyzes its Acceptance Criteria, generates a set of Playwright tests, runs them locally, and opens a PR with a structured description. The PR is the review gate.
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, analyzes its Acceptance Criteria, generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
 
 ## How to use it
 
 Tell Claude what you want:
 
-> Use the from-issue skill on issue #42.
+> Use the from-issue skill on SW-123.
 
-Or for experimentation (skip push/PR/issue-comment):
+Or for experimentation (skip push/PR):
 
-> Use the from-issue skill on issue #42 with dry-run.
+> Use the from-issue skill on SW-123 with dry-run.
 
-If the issue's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md). Re-running any issue that already contributed to the file refuses. To force a separate file instead of augmenting:
+If the ticket's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md). Re-running any ticket that already contributed to the file refuses. To force a separate file instead of augmenting:
 
-> Use the from-issue skill on issue #42 with --new-file.
+> Use the from-issue skill on SW-123 with --new-file.
 
 ## Workflow
 
-The full 13-step procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
+The full procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
+
+> **Setup note:** the Atlassian MCP must be connected (OAuth) for the Step 2 ticket read. Once connected, add its get-issue tool id to this skill's `allowed-tools` frontmatter so reads don't prompt each run.
 
 ## References
 
-- [`references/workflow.md`](references/workflow.md) — the 13-step procedural workflow
+- [`references/workflow.md`](references/workflow.md) — the procedural workflow
 - [`references/test-template.md`](references/test-template.md) — canonical test-file template
 - [`references/pr-description-template.md`](references/pr-description-template.md) — structured PR body template
 - [`references/bucket-classification.md`](references/bucket-classification.md) — Positive/Negative/Edge bucket definitions + worked examples (C.2.b)

@@ -5,7 +5,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 ## Template
 
 ```markdown
-## What I understood from the issue
+## What I understood from the ticket
 
 **Feature:** <feature>
 **Page Name:** <page-name>
@@ -37,7 +37,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
 - ⚠️ **Side effect:** the workflow modified `<file>` to make the generated test runnable. Verify the change is reasonable.
 - ⚠️ **Side effect (externalized data):** per [`data-placement.md`](data-placement.md), N `<feature>` scenario(s) were externalized to `data/scenarios/<feature>/` + a loader in `data/fixtures.ts` (reused/large/named-scenario data). Reviewer: verify the loader + payloads. _(Omit when data stayed inline — the default for small, test-local parameterization.)_
-- 🔁 **Augment:** this PR **augmented** an existing spec `tests/<feature>/<feature>.spec.ts` (prior contributors: `#<list>`) rather than creating a new file. AC-coverage rows below are marked `added` or `skipped (already covered)`.
+- 🔁 **Augment:** this PR **augmented** an existing spec `tests/<feature>/<feature>.spec.ts` (prior contributors: `<KEY-list>`) rather than creating a new file. AC-coverage rows below are marked `added` or `skipped (already covered)`.
 - ➕ **Page Object additions:** appended `<members>` to `<PageObject>` for the new tests (existing members untouched).
 - ⚠️ **Page Object modification:** modified existing method `<Method>` on `<PageObject>`. Because other specs may call it, the **full suite** ran locally (see Verification). Reviewer: confirm no dependent spec regressed.
 - ⏭️ **Skipped (duplicate):** AC <id> maps to a test already present (`<existing test>`); not re-added. Reviewer: push back if the existing test doesn't actually cover it.
@@ -50,18 +50,18 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
 (omit this section entirely if no collisions)
 
-- ⚠️ **Page Name collision** — `<PageName>` already exists at `<resolved-path>` (e.g., `src/pages/<PageName>.ts` or `src/pages/checkout/<PageName>.ts`). Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the issue with a different Page Name.
+- ⚠️ **Page Name collision** — `<PageName>` already exists at `<resolved-path>` (e.g., `src/pages/<PageName>.ts` or `src/pages/checkout/<PageName>.ts`). Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
 
 ## Source
 
-Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
+Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
 ```
 
 ## Rules
 
 - **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional) → `Source`.
 - **AC coverage table**:
-  - Truncate long AC text to ≤80 chars; reviewers can click through to the issue for full text.
+  - Truncate long AC text to ≤80 chars; reviewers can click through to the ticket for full text.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for smoke tests (those with `@smoke` in the title), e.g., `` `⚡ @no-auth @smoke standard_user logs in...` ``. Non-smoke tests have no prefix.
   - "Bucket" column: exactly one of `Positive` / `Negative` / `Edge` for generated tests; em-dash `—` for skipped ACs. Classification follows [`bucket-classification.md`](bucket-classification.md).
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`. **For AUGMENT runs:** use `✅ added` for tests inserted into an existing file, and `⏭️ skipped (already covered)` for duplicate-guard skips.
@@ -87,12 +87,12 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
     ```
 
 - **Collision warnings section is omitted entirely when no collisions occur** — don't render an empty header.
-- **Source line** — always include, always last. Use the issue number (auto-renders as a GitHub cross-reference link).
+- **Source line** — always include, always last. Use the Jira key `<KEY>` (the GitHub-for-Jira app matches it in the PR body to link the PR onto the ticket).
 
 ## Example: 2-test PR with one collision
 
 ```markdown
-## What I understood from the issue
+## What I understood from the ticket
 
 **Feature:** login
 **Page Name:** LoginPage
@@ -118,9 +118,9 @@ Generated from #<issue-number> by `/from-issue` on YYYY-MM-DD.
 
 ## Collision warnings
 
-- ⚠️ **Page Name collision** — `LoginPage` already exists at `src/pages/LoginPage.ts`. Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the issue with a different Page Name.
+- ⚠️ **Page Name collision** — `LoginPage` already exists at `src/pages/LoginPage.ts`. Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
 
 ## Source
 
-Generated from #42 by `/from-issue` on 2026-05-18.
+Generated from SW-42 by `/from-issue` on 2026-05-18.
 ```
