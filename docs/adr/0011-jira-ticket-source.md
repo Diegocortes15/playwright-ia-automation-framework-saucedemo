@@ -29,6 +29,8 @@ Jira fully replaces GitHub Issues as the ticket source for `/from-issue` (invoke
 
 This **scopes**, not reverses, [ADR-0007](0007-gh-cli-not-github-mcp.md): `gh` CLI remains the choice for GitHub; the Atlassian MCP is adopted _only_ for Jira, justified by token-free OAuth and the absence of a first-class Jira CLI as ubiquitous as `gh`. ADR-0007's status is marked "scoped by ADR-0011".
 
+**Scoped by:** [ADR-0013](0013-refine-ticket-jira-writeback.md) — `/refine-ticket` may write refined ACs back to the ticket on approval; `/from-issue` itself stays read-only.
+
 ## Supersedes
 
 The implicit GitHub-Issues-as-source assumption (from the C2a from-issue skeleton design and `docs/from-issue.md`) and the `to-be-automated` label gate in `workflow.md` Step 3.

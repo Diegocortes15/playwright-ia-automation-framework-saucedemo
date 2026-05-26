@@ -1,0 +1,64 @@
+# /refine-ticket — procedural workflow
+
+Read this file before executing the skill. The skill hardens a Jira ticket against the rubric, looping until no gaps remain, then writes the refined ACs back to the ticket on approval. It does NOT generate tests — that is `/from-issue`'s job.
+
+## 1. Parse arguments
+
+- Required: a Jira issue key `<KEY>` (e.g. `SW-123`).
+- Optional: `dry-run` — do everything except the Jira writes (see [`writeback-template.md`](writeback-template.md)).
+
+## 2. Read the ticket
+
+```bash
+# Resolve the Atlassian cloudId, then fetch the issue.
+```
+
+Call `getAccessibleAtlassianResources` (cloudId), then `getJiraIssue` for `<KEY>`. Capture the summary + description (the raw requirement). **If the ticket can't be read**, abort with the MCP error verbatim.
+
+## 3. Discover sources
+
+Per [`sources.md`](sources.md), consult sources in cheap→expensive order (repo reads → app docs → conventions). Do not yet ask the user — gather what ground truth exists first.
+
+## 4. Score against the rubric
+
+Apply every item in [`rubric.md`](rubric.md) to the Feature + each AC. Produce a **gap list**: each unmet item, tagged with which AC it belongs to. Also build the `assumptions[]` running list (every inference made from a source rather than the ticket).
+
+## 5. Refinement loop
+
+Repeat until the gap list is empty (or the user says "good enough"):
+
+1. **Auto-resolve** every gap a source can answer; record each as an assumption.
+2. **For residual gaps with no source**, ask the user a targeted, clustered question — offering **(a) answer directly** or **(b) point at a source** (Confluence / URL / live app / path), per [`sources.md`](sources.md). Ingest any provided source.
+3. **Re-score** (Step 4) with the new information.
+
+**Never** silently guess a residual gap; either a source closes it or the user does. Abort ONLY if the ticket has no extractable behavior at all and the user provides nothing: _"Nothing testable in `<KEY>` and no source provided — cannot refine."_
+
+## 6. Present for approval
+
+Show the user, in one message:
+
+- **Before → After** of the ACs (the hardened set).
+- **Resolved assumptions** — the `assumptions[]` list (what was inferred and from where).
+- **Coverage flags** — any rubric item-9 overlaps ("AC2 looks already covered by …").
+- The exact `## Refined Acceptance Criteria` block (from [`writeback-template.md`](writeback-template.md)) that will be written.
+
+Ask: **"Write this back to `<KEY>`? (yes / edit / no)"**
+
+## 7. Write back (on approval)
+
+- **yes** → apply the idempotent description update via `editJiraIssue`, then the audit comment via `addCommentToJiraIssue` (per [`writeback-template.md`](writeback-template.md)). Per [ADR-0013](../../../../docs/adr/0013-refine-ticket-jira-writeback.md). If a write fails, report the MCP error verbatim and emit the block locally so nothing is lost.
+- **edit** → apply the user's tweaks, return to Step 6.
+- **no** → emit the block in-session for manual paste; make NO Jira calls.
+- **dry-run mode** → never write; print what would be written.
+
+## 8. Hand off
+
+Suggest the next step: _"`<KEY>` is refined. Run `/from-issue <KEY>` to generate tests — its Assumptions block should now be near-empty."_
+
+## Error handling (summary)
+
+- Ticket unreadable → abort with MCP error verbatim.
+- No sources + user provides none → still score + ask per gap; never invent ground truth.
+- Decline at approval → no mutation; emit locally.
+- Write fails → report verbatim; result preserved in-session.
+- Live-app exploration via `playwright-cli` is read-only; never mutate app state.

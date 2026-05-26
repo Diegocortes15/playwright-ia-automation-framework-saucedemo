@@ -40,6 +40,7 @@ Current custom skills:
 
 - **`/scaffold-page-object`** — generate a draft Page Object class from a live page snapshot. Full guide: [`docs/scaffold-page-object.md`](docs/scaffold-page-object.md).
 - **`/from-issue`** — generate a set of Playwright tests from a Jira ticket (read via the Atlassian MCP) and open a GitHub PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist. Full guide: [`docs/from-issue.md`](docs/from-issue.md).
+- **`/refine-ticket`** — iteratively harden a Jira ticket against a "bulletproof" rubric (grounded in existing automation + docs + sources you point it at) and write the refined acceptance criteria back to the ticket on approval, so `/from-issue` has nothing left to guess. Writes to Jira ([ADR-0013](docs/adr/0013-refine-ticket-jira-writeback.md)) — the only skill that does. Full guide: [`docs/refine-ticket.md`](docs/refine-ticket.md).
 
 ## GitHub + Jira operations
 
