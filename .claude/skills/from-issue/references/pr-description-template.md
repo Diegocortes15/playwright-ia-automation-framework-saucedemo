@@ -7,15 +7,20 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 ```markdown
 ## What I understood from the ticket
 
+> Automated Playwright coverage for `<KEY>` (`<feature>`): <N> tests, all passing.
+
 **Source ticket:** [<KEY>](<jira-issue-url>) — <issue-type>: "<summary>"
 **Feature:** <feature>
-**Page Name:** <page-name>
-**User Story:** <narrative, ONLY if the ticket has an "As a / I want / so that" statement — omit this line entirely when absent; never write "(none provided)">
+**Requirement (as written):** <restatement shaped by `requirement_form` — restate the narrative if present; summarize the GWT scenarios; paraphrase prose into intent>
 
 **Acceptance Criteria (normalized):**
 - AC 1: <normalized text>
 - AC 2: <normalized text>
 - ...
+
+**⚠️ Assumptions & open questions:** <render this block ONLY when `assumptions[]` is non-empty; omit entirely otherwise>
+
+- <each inference/ambiguity, one per bullet, inviting reviewer confirmation — e.g. "Ticket didn't name a user → assumed `standard_user`. Reviewer: confirm.">
 
 ## AC coverage
 
@@ -52,16 +57,18 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 (omit this section entirely if no collisions)
 
 - ⚠️ **Page Name collision** — `<PageName>` already exists at `<resolved-path>` (e.g., `src/pages/<PageName>.ts` or `src/pages/checkout/<PageName>.ts`). Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
-
-## Source
-
-Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
 ```
 
 ## Rules
 
-- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional) → `Source`.
-- **"What I understood" block** — the `Source ticket:` line is **mandatory**: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"` (names the source Story/Task and links the PR to the ticket). The `User Story:` line is **optional**: include it only when the ticket carries an explicit "As a / I want / so that" narrative; **omit the line entirely** when the requirement is expressed as ACs/scenarios — never render "(none provided)" (a Story-type ticket whose body is GWT scenarios still *is* the user story; the `Source ticket:` line already conveys that).
+- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional). (No `## Source` footer — the `Source ticket:` line in "What I understood" already names + links the ticket.)
+- **"What I understood" block** (adaptive, per [ADR-0012](../../../docs/adr/0012-from-issue-conventions.md)):
+  - **Summary** lead (`> `) — one TL;DR line: `Automated Playwright coverage for <KEY> (<feature>): N tests, all passing.`
+  - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`. This is the key the GitHub-for-Jira app matches in the PR body to link the PR onto the ticket — so no separate `## Source` footer is needed.
+  - **`Feature:`** — the snake_case feature.
+  - **`Requirement (as written):`** — restate the requirement in whatever form the ticket used (`requirement_restated` from Step 4): the narrative if present, a scenario summary for GWT, a paraphrase for prose. Never assert a fixed structure.
+  - **`⚠️ Assumptions & open questions:`** — render ONLY when Step 4's `assumptions[]` is non-empty; one bullet per inference/ambiguity, each inviting reviewer confirmation. Omit the whole block when the ticket was fully explicit.
+  - There is no `Page Name` or `User Story` line — the Page Object is covered by the Notes-for-reviewer scaffold/collision note, and the requirement is conveyed by `Requirement (as written)`.
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the ticket for full text.
   - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for smoke tests (those with `@smoke` in the title), e.g., `` `⚡ @no-auth @smoke standard_user logs in...` ``. Non-smoke tests have no prefix.
@@ -89,17 +96,19 @@ Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
     ```
 
 - **Collision warnings section is omitted entirely when no collisions occur** — don't render an empty header.
-- **Source line** — always include, always last. Use the Jira key `<KEY>` (the GitHub-for-Jira app matches it in the PR body to link the PR onto the ticket).
 
 ## Example: 2-test PR with one collision
 
 ```markdown
 ## What I understood from the ticket
 
+> Automated Playwright coverage for `SW-1` (`login`): 2 tests, all passing.
+
 **Source ticket:** [SW-1](https://your-site.atlassian.net/browse/SW-1) — Story: "Login in Saucedemo App"
 **Feature:** login
-**Page Name:** LoginPage
-<!-- User Story line omitted: the ticket expresses the requirement as ACs, no "As a / I want" narrative -->
+**Requirement (as written):** four Given/When/Then scenarios — successful login for the valid users, empty/missing-field validation, and invalid-credential rejection.
+
+<!-- Assumptions block omitted: the ticket was fully explicit (no inferences). -->
 
 **Acceptance Criteria (normalized):**
 - AC 1: User can log in with standard_user / secret_sauce and lands on inventory page.
@@ -122,8 +131,4 @@ Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
 ## Collision warnings
 
 - ⚠️ **Page Name collision** — `LoginPage` already exists at `src/pages/LoginPage.ts`. Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
-
-## Source
-
-Generated from SW-42 by `/from-issue` on 2026-05-18.
 ```

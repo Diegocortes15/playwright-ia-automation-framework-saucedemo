@@ -6,7 +6,7 @@ allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(
 
 # from-issue
 
-Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, analyzes its Acceptance Criteria, generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, normalizes its requirement in whatever form it was written (narrative, Given/When/Then, bullet ACs, prose, or mixed), generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
 
 ## How to use it
 
@@ -42,7 +42,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 
 ## Composition
 
-This skill invokes [`/scaffold-page-object`](../scaffold-page-object/SKILL.md) (C.1) when the issue's Page Name field has no matching file in `src/pages/`.
+This skill invokes [`/scaffold-page-object`](../scaffold-page-object/SKILL.md) (C.1) when a Page Object inferred from the AC text has no matching file in `src/pages/`.
 
 ## See also
 
