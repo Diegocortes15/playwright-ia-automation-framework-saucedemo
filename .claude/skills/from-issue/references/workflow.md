@@ -266,13 +266,16 @@ DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate mod
 
 **Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
 
+First record the branch you're on — the PR will target it (Step 12):
+
 ```bash
-git checkout -b from-issue/<KEY>-<feature>
+git branch --show-current   # capture as <base-branch> (e.g. e2e-jira-from-issues, or main)
+git checkout -b <KEY>-<feature>
 ```
 
-The branch is named `from-issue/<KEY>-<feature>` (e.g., `from-issue/SW-123-login`). The Jira key keeps branches unique and — critically — is what the **GitHub-for-Jira app** matches to auto-link this PR onto ticket `<KEY>`.
+The branch is named **`<KEY>-<feature>`** — the exact uppercase Jira key first, then the feature slug (e.g., `SW-1-login`). Key-first per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md); the GitHub-for-Jira app matches the key (case-insensitively) to auto-link the PR onto ticket `<KEY>`.
 
-If the branch already exists, abort with: _"Branch `from-issue/<KEY>-<feature>` exists — delete it and re-run."_ No PR.
+If the branch already exists, abort with: _"Branch `<KEY>-<feature>` exists — delete it and re-run."_ No PR.
 
 ```bash
 git add <testfile>
@@ -284,9 +287,15 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-git commit -m "feat: add generated tests from <KEY>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
-git push -u origin from-issue/<KEY>-<feature>
+git commit \
+  -m "feat(<feature>): automate <KEY> <feature> scenarios" \
+  -m "<body: 1–3 sentences — coverage added (N tests across buckets), the scenarios/ACs covered, and any scaffold/side-effects (new Page Object, fixture registration, externalized data, augment)>" \
+  -m "Refs: <KEY>" \
+  -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+git push -u origin <KEY>-<feature>
 ```
+
+**Conventional Commit (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)):** subject `feat(<feature>): automate <KEY> <feature> scenarios` — imperative, ≤ ~72 chars; `<feature>` is the scope. Body explains what + why. `Refs: <KEY>` trailer ties the commit to the ticket. Each block is a **separate `-m`** flag.
 
 **Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
 
