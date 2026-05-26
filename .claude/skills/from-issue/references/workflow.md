@@ -309,11 +309,15 @@ Render the PR body using [`references/pr-description-template.md`](pr-descriptio
 2. Open the PR:
 
    ```bash
-   # Title: "feat: tests from <KEY> — <summary>"; truncate the summary so the title stays ≤ ~60 chars after the key.
-   gh pr create --title "feat: tests from <KEY> — <truncated-summary>" --body-file .pr-body.md
+   # If <base-branch> (captured in Step 11) isn't on the remote yet, push it first so the PR can target it:
+   #   git push -u origin <base-branch>
+   gh pr create --base <base-branch> \
+     --title "feat(<feature>): automate <KEY> <feature> scenarios" \
+     --body-file .pr-body.md
    ```
 
-   The PR body MUST reference the Jira key `<KEY>` (the GitHub-for-Jira app matches the key in the branch + title + body to link the PR onto the ticket).
+   - **`--base <base-branch>`** = the branch recorded in Step 11 (the one you branched from) — the integration branch during a build-up, `main` in normal use. Never hardcode `main`.
+   - **Title** is the Conventional-Commit form (matches the commit subject), per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md). The PR body MUST also reference `<KEY>` so the GitHub-for-Jira app links it.
 
 3. After PR creation succeeds, delete the temp file:
 
