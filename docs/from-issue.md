@@ -12,11 +12,13 @@ It's a Claude Code custom skill that takes:
 …and produces:
 
 - A new test file at `tests/<feature>/<feature>.spec.ts`
-- A new branch `from-issue/<KEY>-<feature>`
-- A PR with a structured description (What I understood / AC coverage table / Verification / Collision warnings / Source link)
+- A new branch `<KEY>-<feature>` (key-first, e.g. `SW-1-login`)
+- A PR with a structured description (What I understood — incl. the source ticket + any assumptions / AC coverage table / Verification / Collision warnings)
 - The **GitHub-for-Jira app** auto-links the PR onto the ticket (no comment is posted)
 
 The skill is **fully autonomous** by default. The PR is the review gate — no interactive checkpoints during execution.
+
+The skill normalizes any ticket format/quality (narrative, GWT, bullet ACs, prose, mixed); for thin tickets it generates best-effort and surfaces its inferences as an **Assumptions & open questions** block in the PR for review (per [ADR-0012](adr/0012-from-issue-conventions.md)).
 
 **Test bucketing (since C.2.b):** Generated tests are grouped into up to three nested describe blocks — `Positive`, `Negative`, `Edge` — based on the LLM's classification of each test (rules in [`.claude/skills/from-issue/references/bucket-classification.md`](../.claude/skills/from-issue/references/bucket-classification.md)). Empty buckets are omitted. The PR description's AC coverage table includes a `Bucket` column so reviewers see the classification at a glance.
 
@@ -34,7 +36,7 @@ Distinction from `/scaffold-page-object`: **`/from-issue` is the orchestrator** 
 - Jira ticket-authoring guide at [`docs/jira-tickets.md`](jira-tickets.md) — how reporters should write a ticket (Feature + ACs in the description) so the skill can parse it
 - Reads tickets via the **Atlassian MCP** (OAuth, no token); `gh` opens the PR
 - Generated tests land at `tests/<feature>/<feature>.spec.ts` (feature folder + filename both snake_case from the ticket's Feature line — see workflow Step 8 for the collision rule when a second ticket targets the same feature)
-- Branch naming `from-issue/<KEY>-<feature>` includes the Jira key — which is also what the GitHub-for-Jira app matches to auto-link the PR onto the ticket
+- Branch naming `<KEY>-<feature>` (key-first, e.g. `SW-1-login`) leads with the Jira key — which is also what the GitHub-for-Jira app matches to auto-link the PR onto the ticket (per [ADR-0012](adr/0012-from-issue-conventions.md))
 
 ## Verifying the setup
 
@@ -111,7 +113,7 @@ Use this to see what the skill produces without pushing or opening a PR.
 
 > Use the from-issue skill on SW-1 with dry-run.
 
-Result: local branch + test file + (if applicable) new Page Object are written. Steps 11–12 (push, PR) are skipped. Inspect the files locally; `git checkout main && git branch -D from-issue/SW-1-<feature>` to discard.
+Result: local branch + test file + (if applicable) new Page Object are written. Steps 11–12 (push, PR) are skipped. Inspect the files locally; `git checkout main && git branch -D SW-1-<feature>` to discard.
 
 ### Inspect a generated file's comment block
 
