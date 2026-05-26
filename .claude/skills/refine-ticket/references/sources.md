@@ -13,22 +13,22 @@
    - `src/fixtures/`, `src/components/` — what's wired.
 4. **App domain knowledge** — `docs/app/` when present: `users.md` (the real users), `flows.md`, `overview.md`, `glossary.md`.
 5. **Framework judgment** — `CLAUDE.md`, [`../../from-issue/references/bucket-classification.md`](../../from-issue/references/bucket-classification.md), [`../../from-issue/references/smoke-policy.md`](../../from-issue/references/smoke-policy.md), [`../../from-issue/references/qa-analysis.md`](../../from-issue/references/qa-analysis.md).
-6. **The live app** — when a real selector or error string must be confirmed and isn't in code/docs, use `playwright-cli` **read-only** (snapshot / DOM read). Never mutate app state.
-7. **User-supplied** — anything the user points at mid-loop (next section).
+6. **User-supplied** — anything the user points at mid-loop (next section).
+
+> **Not a source: the live app.** `/refine-ticket` never drives a running app (no `playwright-cli`). Refinement is **shift-left** — it must work for a ticket whose feature isn't built yet. Exact selectors and live strings are confirmed by `/from-issue` at generation time, never baked into the ticket. Any fact the ticket / docs / existing automation don't carry is asked of the user.
 
 ## User-supplied-source protocol
 
-When a gap cannot be closed from sources 1–6, ask the user a **targeted** question and offer two response modes:
+When a gap cannot be closed from sources 1–5, ask the user a **targeted** question and offer two response modes:
 
 - **(a) Answer directly** — the user states the fact ("use `standard_user`"; "the error is `Epic sadface: ...`").
 - **(b) Point at a source** — the user names where the knowledge lives. Ingest it, then re-resolve the gap:
   - **Confluence page** → fetch via `getConfluencePage` (or locate via `searchConfluenceUsingCql`).
   - **A URL** → fetch and read it.
-  - **"Check the live app" / a path** → drive `playwright-cli` read-only, or `Read` the given file.
-  - **A repo path not yet read** → `Read`/`Grep` it.
+  - **A repo path or doc** → `Read` / `Grep` it.
 
 Ask one cluster of related gaps at a time; do not interrogate one field per message. Record every assumption made when the user says "default it / your call" so it can be shown at the approval gate.
 
 ## Greenfield behavior
 
-On a repo with no `docs/app/` and an empty suite, sources 3–4 yield little; the skill leans on 5–7. It still scores the ticket against the rubric and closes gaps via user input — it does **not** abort for lack of docs, and it does **not** invent ground truth silently.
+On a repo with no `docs/app/` and an empty suite, sources 3–4 yield little; the skill leans on 5–6 (conventions + you). It still scores the ticket against the rubric and closes gaps via user input — it does **not** abort for lack of docs, and it does **not** invent ground truth silently.

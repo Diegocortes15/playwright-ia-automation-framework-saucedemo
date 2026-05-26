@@ -1,7 +1,7 @@
 ---
 name: refine-ticket
 description: Iteratively harden a Jira automation ticket against a "bulletproof" rubric — grounded in existing automation, app docs, and user-supplied sources — then write the refined acceptance criteria back to the ticket on approval, so /from-issue has nothing left to guess.
-allowed-tools: Read Glob Grep Bash(playwright-cli:*) Bash(npx:*) mcp__atlassian__getAccessibleAtlassianResources mcp__atlassian__getJiraIssue mcp__atlassian__editJiraIssue mcp__atlassian__addCommentToJiraIssue mcp__atlassian__getConfluencePage mcp__atlassian__searchConfluenceUsingCql
+allowed-tools: Read Glob Grep mcp__atlassian__getAccessibleAtlassianResources mcp__atlassian__getJiraIssue mcp__atlassian__editJiraIssue mcp__atlassian__addCommentToJiraIssue mcp__atlassian__getConfluencePage mcp__atlassian__searchConfluenceUsingCql
 ---
 
 # refine-ticket
@@ -18,7 +18,7 @@ Or to preview without writing to Jira:
 
 > Use the refine-ticket skill on SW-123 with dry-run.
 
-During the loop, when asked about a gap you can either answer directly or point the skill at a source ("it's in Confluence page X", a URL, "check the live app"). The skill ingests it and continues. It stops when the ticket has no open gaps, then asks before writing anything back.
+During the loop, when asked about a gap you can either answer directly or point the skill at a source ("it's in Confluence page X", a URL, a doc path). The skill ingests it and continues. It does NOT inspect a running app — it's shift-left, so it works even before the feature is built. It stops when the ticket has no open gaps, then asks before writing anything back.
 
 ## Workflow
 

@@ -3,6 +3,8 @@
 **Status:** Approved (brainstorm) — pending implementation plan.
 **Date:** 2026-05-26
 
+> **Update (2026-05-26, post-build):** The **live app was removed as a source** (revises Decisions 4–5) — `/refine-ticket` is fully shift-left (works before the feature exists) and never drives `playwright-cli`. Exact selectors/strings are `/from-issue`'s job at generation time; any fact the ticket/docs/automation don't carry is asked of the user. Also (revises Decision 6): the write-back uses a visible `---` + heading anchor rather than HTML-comment sentinels, because Jira stores HTML comments as literal visible text (confirmed on the first live write to SW-2).
+
 ## Goal
 
 Add a new custom skill, **`/refine-ticket <KEY>`**, that iteratively hardens a Jira automation ticket until it is "bulletproof" — unambiguous enough that `/from-issue` has nothing left to guess. It grounds every refinement in **what already exists** (the automated suite, app docs, framework conventions, and — in a professional setting — Confluence and the live app), and it is **reusable on a greenfield project**: when a source doesn't exist, the user points the skill at one (a doc, a URL, the live app) rather than the skill failing.
