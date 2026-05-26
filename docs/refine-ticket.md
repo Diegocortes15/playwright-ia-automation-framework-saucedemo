@@ -12,7 +12,7 @@ Phase F made `/from-issue` _tolerant_ of vague tickets — it generates best-eff
 
 ## Sources it uses
 
-It grounds refinements in **what exists** — `src/pages/`, `tests/`, `data/`, `docs/app/`, framework conventions, and (in a real org) Confluence and the live app. When something isn't anywhere, it asks you, and you can either answer or **point it at a source** ("it's in Confluence page X", a URL, "check the live app"). On a brand-new project with no docs, this is how you teach it the domain. See [sources.md](../.claude/skills/refine-ticket/references/sources.md).
+It grounds refinements in **what exists** — `src/pages/`, `tests/`, `data/`, `docs/app/`, framework conventions, and (in a real org) Confluence. It does **not** inspect a running app: refinement is shift-left, so it works even when the feature isn't built yet — exact selectors/strings are `/from-issue`'s job at generation time. When something isn't anywhere, it asks you, and you can either answer or **point it at a source** ("it's in Confluence page X", a URL, a doc path). On a brand-new project with no docs, this is how you teach it the domain. See [sources.md](../.claude/skills/refine-ticket/references/sources.md).
 
 ## Worked example
 

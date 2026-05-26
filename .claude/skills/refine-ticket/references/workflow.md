@@ -28,7 +28,7 @@ Apply every item in [`rubric.md`](rubric.md) to the Feature + each AC. Produce a
 Repeat until the gap list is empty (or the user says "good enough"):
 
 1. **Auto-resolve** every gap a source can answer; record each as an assumption.
-2. **For residual gaps with no source**, ask the user a targeted, clustered question — offering **(a) answer directly** or **(b) point at a source** (Confluence / URL / live app / path), per [`sources.md`](sources.md). Ingest any provided source.
+2. **For residual gaps with no source**, ask the user a targeted, clustered question — offering **(a) answer directly** or **(b) point at a source** (Confluence / URL / doc path), per [`sources.md`](sources.md). Ingest any provided source.
 3. **Re-score** (Step 4) with the new information.
 
 **Never** silently guess a residual gap; either a source closes it or the user does. Abort ONLY if the ticket has no extractable behavior at all and the user provides nothing: _"Nothing testable in `<KEY>` and no source provided — cannot refine."_
@@ -61,4 +61,4 @@ Suggest the next step: _"`<KEY>` is refined. Run `/from-issue <KEY>` to generate
 - No sources + user provides none → still score + ask per gap; never invent ground truth.
 - Decline at approval → no mutation; emit locally.
 - Write fails → report verbatim; result preserved in-session.
-- Live-app exploration via `playwright-cli` is read-only; never mutate app state.
+- No live app: `/refine-ticket` never drives a running app. Facts not in the ticket/docs/automation are asked of the user; exact selectors/strings are `/from-issue`'s job at generation time.
