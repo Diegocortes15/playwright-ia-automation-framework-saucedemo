@@ -32,14 +32,19 @@ There is no label/status gate. Explicitly invoking `/from-issue <KEY>` is the in
 
 ### 4. LLM normalization
 
-The ticket's **summary + description** should follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md) (Feature + one AC per line; GWT acceptable). Extract from the description (and summary):
+Tickets are authored many ways and at any quality (trainee → senior BA). **Normalize whatever the ticket contains — format- AND quality-agnostic** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): a formal "As a / I want / so that" narrative, Given/When/Then scenarios, a bullet/numbered AC list, plain prose, structured fields, or a partial/mixed blob all reduce to the same internal AC records. Extract from the summary + description:
 
-- **Feature** (single-line) — drives `tests/<feature>/`
-- **User Story** (optional) — context only
-- **Acceptance Criteria** (multi-line, one AC per line)
-- **Notes** (optional) — context only
+- **Feature** (single-line slug) — drives `tests/<feature>/`. If not stated, infer it from the summary/subject (and record the inference as an assumption, below).
+- **Acceptance Criteria** — one behavior each, derived from whatever form the ticket used.
+- **Notes** (optional) — context only.
 
-(Note: a `Page Name` field used to exist in the template but was removed in commit `fcc39e9`. Page Object names are now inferred from AC text — see "Page inference from AC text" subsection below.)
+While normalizing, also capture (used by the PR's "What I understood", Step 7 / `pr-description-template.md`):
+
+- **`requirement_form`** — one of `narrative` / `gwt` / `bullets` / `prose` / `structured` / `mixed`.
+- **`requirement_restated`** — a faithful restatement of what the ticket actually says (the narrative if one is present; a scenario summary for GWT; a paraphrase for prose).
+- **`assumptions[]`** — every inference or ambiguity resolution **not explicit** in the ticket (e.g. "user unspecified → defaulted to `standard_user`"; "'works correctly' interpreted as lands on inventory"). Empty when the ticket was fully explicit.
+
+(Page Object names are inferred from AC text — see "Page inference from AC text" below.)
 
 For each Acceptance Criterion, build an internal record:
 
@@ -58,9 +63,9 @@ For each Acceptance Criterion, build an internal record:
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
 
-**If the ticket description is free-form (no clear structure)**, attempt best-effort parse. If no ACs can be extracted, abort with:
+**Vague / low-quality tickets** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): do NOT abort and do NOT pause to ask. Produce a **best-effort** normalization, record every inference in `assumptions[]`, and let the PR's **⚠️ Assumptions & open questions** block surface them for the reviewer (the PR is the review gate). Abort **only** when nothing testable can be extracted at all:
 
-> _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
+> _"Couldn't extract any testable behavior from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
 
 **If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Report the per-AC rationale to the user, with the recommendation to close ticket `<KEY>` if the assessment is correct or refile with more concrete ACs. No Jira write-back is performed (per [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md)) and no PR is opened. Then stop.
 
