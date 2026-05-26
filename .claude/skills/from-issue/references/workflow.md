@@ -32,14 +32,19 @@ There is no label/status gate. Explicitly invoking `/from-issue <KEY>` is the in
 
 ### 4. LLM normalization
 
-The ticket's **summary + description** should follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md) (Feature + one AC per line; GWT acceptable). Extract from the description (and summary):
+Tickets are authored many ways and at any quality (trainee → senior BA). **Normalize whatever the ticket contains — format- AND quality-agnostic** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): a formal "As a / I want / so that" narrative, Given/When/Then scenarios, a bullet/numbered AC list, plain prose, structured fields, or a partial/mixed blob all reduce to the same internal AC records. Extract from the summary + description:
 
-- **Feature** (single-line) — drives `tests/<feature>/`
-- **User Story** (optional) — context only
-- **Acceptance Criteria** (multi-line, one AC per line)
-- **Notes** (optional) — context only
+- **Feature** (single-line slug) — drives `tests/<feature>/`. If not stated, infer it from the summary/subject (and record the inference as an assumption, below).
+- **Acceptance Criteria** — one behavior each, derived from whatever form the ticket used.
+- **Notes** (optional) — context only.
 
-(Note: a `Page Name` field used to exist in the template but was removed in commit `fcc39e9`. Page Object names are now inferred from AC text — see "Page inference from AC text" subsection below.)
+While normalizing, also capture (used by the PR's "What I understood", Step 7 / `pr-description-template.md`):
+
+- **`requirement_form`** — one of `narrative` / `gwt` / `bullets` / `prose` / `structured` / `mixed`.
+- **`requirement_restated`** — a faithful restatement of what the ticket actually says (the narrative if one is present; a scenario summary for GWT; a paraphrase for prose).
+- **`assumptions[]`** — every inference or ambiguity resolution **not explicit** in the ticket (e.g. "user unspecified → defaulted to `standard_user`"; "'works correctly' interpreted as lands on inventory"). Empty when the ticket was fully explicit.
+
+(Page Object names are inferred from AC text — see "Page inference from AC text" below.)
 
 For each Acceptance Criterion, build an internal record:
 
@@ -58,9 +63,9 @@ For each Acceptance Criterion, build an internal record:
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
 
-**If the ticket description is free-form (no clear structure)**, attempt best-effort parse. If no ACs can be extracted, abort with:
+**Vague / low-quality tickets** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): do NOT abort and do NOT pause to ask. Produce a **best-effort** normalization, record every inference in `assumptions[]`, and let the PR's **⚠️ Assumptions & open questions** block surface them for the reviewer (the PR is the review gate). Abort **only** when nothing testable can be extracted at all:
 
-> _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
+> _"Couldn't extract any testable behavior from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
 
 **If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Report the per-AC rationale to the user, with the recommendation to close ticket `<KEY>` if the assessment is correct or refile with more concrete ACs. No Jira write-back is performed (per [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md)) and no PR is opened. Then stop.
 
@@ -266,13 +271,16 @@ DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate mod
 
 **Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
 
+First record the branch you're on — the PR will target it (Step 12):
+
 ```bash
-git checkout -b from-issue/<KEY>-<feature>
+git branch --show-current   # capture as <base-branch> (e.g. e2e-jira-from-issues, or main)
+git checkout -b <KEY>-<feature>
 ```
 
-The branch is named `from-issue/<KEY>-<feature>` (e.g., `from-issue/SW-123-login`). The Jira key keeps branches unique and — critically — is what the **GitHub-for-Jira app** matches to auto-link this PR onto ticket `<KEY>`.
+The branch is named **`<KEY>-<feature>`** — the exact uppercase Jira key first, then the feature slug (e.g., `SW-1-login`). Key-first per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md); the GitHub-for-Jira app matches the key (case-insensitively) to auto-link the PR onto ticket `<KEY>`.
 
-If the branch already exists, abort with: _"Branch `from-issue/<KEY>-<feature>` exists — delete it and re-run."_ No PR.
+If the branch already exists, abort with: _"Branch `<KEY>-<feature>` exists — delete it and re-run."_ No PR.
 
 ```bash
 git add <testfile>
@@ -284,9 +292,15 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-git commit -m "feat: add generated tests from <KEY>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
-git push -u origin from-issue/<KEY>-<feature>
+git commit \
+  -m "feat(<feature>): automate <KEY> <feature> scenarios" \
+  -m "<body: 1–3 sentences — coverage added (N tests across buckets), the scenarios/ACs covered, and any scaffold/side-effects (new Page Object, fixture registration, externalized data, augment)>" \
+  -m "Refs: <KEY>" \
+  -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+git push -u origin <KEY>-<feature>
 ```
+
+**Conventional Commit (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)):** subject `feat(<feature>): automate <KEY> <feature> scenarios` — imperative, ≤ ~72 chars; `<feature>` is the scope. Body explains what + why. `Refs: <KEY>` trailer ties the commit to the ticket. Each block is a **separate `-m`** flag.
 
 **Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
 
@@ -300,11 +314,15 @@ Render the PR body using [`references/pr-description-template.md`](pr-descriptio
 2. Open the PR:
 
    ```bash
-   # Title: "feat: tests from <KEY> — <summary>"; truncate the summary so the title stays ≤ ~60 chars after the key.
-   gh pr create --title "feat: tests from <KEY> — <truncated-summary>" --body-file .pr-body.md
+   # If <base-branch> (captured in Step 11) isn't on the remote yet, push it first so the PR can target it:
+   #   git push -u origin <base-branch>
+   gh pr create --base <base-branch> \
+     --title "feat(<feature>): automate <KEY> <feature> scenarios" \
+     --body-file .pr-body.md
    ```
 
-   The PR body MUST reference the Jira key `<KEY>` (the GitHub-for-Jira app matches the key in the branch + title + body to link the PR onto the ticket).
+   - **`--base <base-branch>`** = the branch recorded in Step 11 (the one you branched from) — the integration branch during a build-up, `main` in normal use. Never hardcode `main`.
+   - **Title** is the Conventional-Commit form (matches the commit subject), per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md). The PR body MUST also reference `<KEY>` so the GitHub-for-Jira app links it.
 
 3. After PR creation succeeds, delete the temp file:
 

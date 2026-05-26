@@ -1,12 +1,12 @@
 ---
 name: from-issue
 description: Generate Playwright tests from a Jira ticket (read via the Atlassian MCP), composing /scaffold-page-object when a target Page Object doesn't yet exist, and open a GitHub PR with the generated tests for review.
-allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write
+allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write mcp__atlassian__getAccessibleAtlassianResources mcp__atlassian__getJiraIssue
 ---
 
 # from-issue
 
-Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, analyzes its Acceptance Criteria, generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, normalizes its requirement in whatever form it was written (narrative, Given/When/Then, bullet ACs, prose, or mixed), generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
 
 ## How to use it
 
@@ -26,7 +26,7 @@ If the ticket's feature already has a generated spec, the skill **augments** tha
 
 The full procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
 
-> **Setup note:** the Atlassian MCP must be connected (OAuth) for the Step 2 ticket read. Once connected, add its get-issue tool id to this skill's `allowed-tools` frontmatter so reads don't prompt each run.
+> **Setup note:** the Atlassian MCP must be connected (OAuth) for the Step 2 ticket read — defined at project scope in [`.mcp.json`](../../../.mcp.json). Its read tools (`mcp__atlassian__getAccessibleAtlassianResources`, `mcp__atlassian__getJiraIssue`) are pre-authorized in `allowed-tools` above so reads don't prompt each run. If a future Atlassian MCP build renames those tools, update the `allowed-tools` line to match.
 
 ## References
 
@@ -42,7 +42,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 
 ## Composition
 
-This skill invokes [`/scaffold-page-object`](../scaffold-page-object/SKILL.md) (C.1) when the issue's Page Name field has no matching file in `src/pages/`.
+This skill invokes [`/scaffold-page-object`](../scaffold-page-object/SKILL.md) (C.1) when a Page Object inferred from the AC text has no matching file in `src/pages/`.
 
 ## See also
 
