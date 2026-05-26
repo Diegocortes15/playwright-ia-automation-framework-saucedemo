@@ -320,7 +320,7 @@ Replace with:
 ```markdown
 - **"What I understood" block** (adaptive, per [ADR-0012](../../../docs/adr/0012-from-issue-conventions.md)):
   - **Summary** lead (`> `) — one TL;DR line: `Automated Playwright coverage for <KEY> (<feature>): N tests, all passing.`
-  - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`.
+  - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`. This is the key the GitHub-for-Jira app matches in the PR body to link the PR onto the ticket — so no separate `## Source` footer is needed.
   - **`Feature:`** — the snake_case feature.
   - **`Requirement (as written):`** — restate the requirement in whatever form the ticket used (`requirement_restated` from Step 4): the narrative if present, a scenario summary for GWT, a paraphrase for prose. Never assert a fixed structure.
   - **`⚠️ Assumptions & open questions:`** — render ONLY when Step 4's `assumptions[]` is non-empty; one bullet per inference/ambiguity, each inviting reviewer confirmation. Omit the whole block when the ticket was fully explicit.
@@ -343,13 +343,45 @@ Example target:
 <!-- Assumptions block omitted: the ticket was fully explicit (no inferences). -->
 ```
 
-- [ ] **Step 5: Format, consistency, commit**
+- [ ] **Step 5: Remove the now-redundant `## Source` footer + update Source-related rules**
+
+The bottom `## Source` section duplicates the top `Source ticket:` line (added in phase-e.1), so remove it.
+
+a) **Template** — delete the section:
+
+```markdown
+## Source
+
+Generated from <KEY> by `/from-issue` on YYYY-MM-DD.
+```
+
+b) **Example** — delete the section:
+
+```markdown
+## Source
+
+Generated from SW-42 by `/from-issue` on 2026-05-18.
+```
+
+c) **Section-order rule** — drop the trailing `→ Source`:
+
+Find: `- **Section order is mandatory** — `What I understood`→`AC coverage`→`Verification`→`Notes for reviewer`(optional) →`Collision warnings`(optional) →`Source`.`
+Replace: `- **Section order is mandatory** — `What I understood`→`AC coverage`→`Verification`→`Notes for reviewer`(optional) →`Collision warnings`(optional). (No`## Source`footer — the`Source ticket:` line in "What I understood" already names + links the ticket.)`
+
+d) **Source-line rule** — delete this bullet entirely (its app-linking note moved to the `Source ticket:` rule in Step 3):
+
+```markdown
+- **Source line** — always include, always last. Use the Jira key `<KEY>` (the GitHub-for-Jira app matches it in the PR body to link the PR onto the ticket).
+```
+
+- [ ] **Step 6: Format, consistency, commit**
 
 ```bash
 npx prettier --check .claude/skills/from-issue/references/pr-description-template.md
 grep -n "User Story\|Page Name\|none provided" .claude/skills/from-issue/references/pr-description-template.md   # expect: none
+grep -n "^## Source\|Generated from <KEY>\|Source line" .claude/skills/from-issue/references/pr-description-template.md   # expect: none
 git add .claude/skills/from-issue/references/pr-description-template.md
-git commit -m "feat(f): PR template — adaptive What-I-understood (Summary, Requirement-as-written, Assumptions)" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+git commit -m "feat(f): PR template — adaptive What-I-understood + drop redundant Source footer" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
 ---
