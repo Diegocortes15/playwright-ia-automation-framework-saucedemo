@@ -39,6 +39,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 - [`references/test-principles.md`](references/test-principles.md) — F.I.R.S.T. principles for generated tests (D.1)
 - [`references/playwright-conventions.md`](references/playwright-conventions.md) — Playwright best practices the skill follows (D.1)
 - [`references/data-placement.md`](references/data-placement.md) — inline vs. externalized (`data/`) test data decision rule (D.1.4)
+- [`references/harness.md`](references/harness.md) — data-driven config + autonomous harness growth (Phase H / ADR-0014)
 
 ## Composition
 
