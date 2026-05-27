@@ -1,11 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
+import { AUTH_USERS } from './tests/users';
 
-// Clean-room config (e2e-jira-from-issues branch), grown ticket-by-ticket.
-// SW-1 (login) needed only @no-auth. SW-2 (footer) is the first ticket on an
-// authenticated page (inventory), so it introduces the `setup` + `standard`
-// projects. Further user projects (problem/error/visual/firefox/webkit) get
-// added as later tickets require them.
+// Clean-room config (e2e-jira-from-issues), data-driven from tests/users.ts
+// (Phase H / ADR-0014). Projects derive from AUTH_USERS, which /from-issue grows
+// one user at a time as tickets require authenticated pages. Cross-browser
+// (firefox/webkit-standard) + @sort-functional remain a separate ADR-0004 decision.
 
 export default defineConfig({
   testDir: './tests',
@@ -37,15 +37,15 @@ export default defineConfig({
       grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'standard',
+    ...AUTH_USERS.map((user) => ({
+      name: user,
       testIgnore: /.*\.setup\.ts/,
-      grep: /@all-users|@standard/,
+      grep: new RegExp(`@all-users|@${user}`),
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'auth/standard.json',
+        storageState: `auth/${user}.json`,
       },
-    },
+    })),
   ],
 });

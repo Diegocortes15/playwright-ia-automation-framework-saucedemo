@@ -1,14 +1,13 @@
 import { test as setup } from '@playwright/test';
 import path from 'path';
 import { env } from '@utils/env';
+import { AUTH_USERS } from './users';
 
 // Generates per-user storageState consumed by the authenticated projects in
-// playwright.config.ts. The clean-room branch grows ticket-by-ticket: only
-// `standard` is wired so far (first needed by SW-2 / footer). Add users here
-// as later tickets introduce their projects.
-const users = ['standard'] as const;
+// playwright.config.ts. Both derive from tests/users.ts (AUTH_USERS) — the
+// single source of truth /from-issue grows one user at a time (Phase H / ADR-0014).
 
-for (const user of users) {
+for (const user of AUTH_USERS) {
   setup(`authenticate as ${user}`, async ({ page }) => {
     await page.goto('/');
     await page.locator('[data-test="username"]').fill(`${user}_user`);
