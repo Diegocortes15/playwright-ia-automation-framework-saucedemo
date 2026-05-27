@@ -3,15 +3,18 @@
 // from Jira tickets. Manual edits are welcome — this file is
 // not regenerated automatically.
 
-import { test, type Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
 import { Footer } from '@components/Footer';
 
 export class InventoryPage {
   // Composed components first (ADR-0001 rule #6).
   readonly footer: Footer;
+  // Page-direct locators second.
+  private readonly productImages: Locator;
 
   constructor(public readonly page: Page) {
     this.footer = new Footer(page);
+    this.productImages = page.locator('img.inventory_item_img');
   }
 
   // Composed / intent-level action — body wrapped in exactly one test.step.
@@ -19,5 +22,12 @@ export class InventoryPage {
     await test.step('Navigate to the inventory page', async () => {
       await this.page.goto('/inventory.html');
     });
+  }
+
+  // Query — returns data, never a Locator (ADR-0001 rule #8).
+  async getProductImageSources(): Promise<string[]> {
+    return this.productImages.evaluateAll((imgs) =>
+      imgs.map((img) => img.getAttribute('src') ?? ''),
+    );
   }
 }
