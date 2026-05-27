@@ -1,9 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
-// Blank-slate config (e2e-jira-from-issues branch, off phase-e-complete main).
-// Single no-auth chromium project. Staged for the first Jira-driven /from-issue
-// run: /from-issue SW-1 (login) once the Atlassian MCP is connected.
+// Clean-room config (e2e-jira-from-issues branch), grown ticket-by-ticket.
+// SW-1 (login) needed only @no-auth. SW-2 (footer) is the first ticket on an
+// authenticated page (inventory), so it introduces the `setup` + `standard`
+// projects. Further user projects (problem/error/visual/firefox/webkit) get
+// added as later tickets require them.
 
 export default defineConfig({
   testDir: './tests',
@@ -28,9 +30,22 @@ export default defineConfig({
   },
 
   projects: [
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'no-auth',
+      testIgnore: /.*\.setup\.ts/,
+      grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'standard',
+      testIgnore: /.*\.setup\.ts/,
+      grep: /@all-users|@standard/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'auth/standard.json',
+      },
     },
   ],
 });

@@ -12,6 +12,7 @@ The **canonical list of components** is `src/components/*.ts` — this doc holds
 | `CartBadge`    | `@components/CartBadge`    | `[data-test="shopping-cart-badge"]` (when count>0) | the badge counter span                                                                      |
 | `ProductCard`  | `@components/ProductCard`  | `[data-test="inventory-item"]` (multiple)          | per-card name, price, add/remove buttons (use `new ProductCard(page, productName)` instead) |
 | `SortDropdown` | `@components/SortDropdown` | `[data-test="product-sort-container"]`             | the sort `<select>` element                                                                 |
+| `Footer`       | `@components/Footer`       | `[data-test="footer"]`                             | the social links (twitter/facebook/linkedin) and the copyright line                         |
 
 Header always implies CartBadge availability (Header composes CartBadge per Phase A).
 
