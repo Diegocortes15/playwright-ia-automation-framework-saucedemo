@@ -115,7 +115,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
   - URL: inferred from the AC text (e.g., AC mentions "cart page" → `https://www.saucedemo.com/cart.html`)
-  - storageState: `auth/standard.json` by default. Override only if ALL Step 4 AC records share the same non-standard user (the storageState is only used for the snapshot; tests pick their own user via tag→project mapping).
+  - storageState: `auth/standard.json` by default. Override only if ALL Step 4 AC records share the same non-standard user (the storageState is only used for the snapshot; tests pick their own user via tag→project mapping). The project that actually runs each test is wired in Step 6.5 — see [`references/harness.md`](harness.md).
 
   If `/scaffold-page-object` fails, abort with the subprocess error verbatim. No PR.
 
@@ -147,6 +147,16 @@ Data placement follows [`references/data-placement.md`](data-placement.md) — d
 **If `references/bucket-classification.md` is missing or unreadable**, abort with: _"`.claude/skills/from-issue/references/bucket-classification.md` not found. Re-install the skill or restore from git."_ Do not fall back to inline rules — the doc is the source of truth.
 
 **If `references/smoke-policy.md` is missing or unreadable**, abort with: _"`.claude/skills/from-issue/references/smoke-policy.md` not found. Re-install the skill or restore from git."_ Do not fall back to inline rules.
+
+### 6.5. Resolve & grow the harness
+
+Per [`references/harness.md`](harness.md) (read it before this step). From the Step 6 test records, compute the **required user set**: `@no-auth` tests need no user; user-agnostic tests (`@all-users`/`@standard`) need only `standard`; a test targeting a specific user needs that user.
+
+For each required user **not** wired in `tests/users.ts` `AUTH_USERS`, **append it autonomously** — no mid-run question, no recovering config from git history. The data-driven `playwright.config.ts` + `tests/auth.setup.ts` derive the project + storageState from the array. If `tests/users.ts` / the data-driven config / `auth.setup.ts` don't exist yet, create all three from the canonical shapes in `harness.md`, seeded with the required users.
+
+**Guardrail ([ADR-0004](../../../../docs/adr/0004-cross-browser-smoke-pattern.md)):** never pre-create unused users; never add `<browser>-<non-standard>` projects. Cross-browser stays out.
+
+Record a side-effect note for the PR body: `⚙️ Harness grew: wired the <user> project + auth setup (first ticket needing <user>). Reviewer: confirm.`
 
 ### 7. Render test file
 
@@ -292,6 +302,10 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
+# If Step 6.5 grew the harness (per harness.md), also stage the changed source of truth
+# (and, on first-time creation, the config + auth setup):
+#   git add tests/users.ts
+#   git add playwright.config.ts tests/auth.setup.ts   # first-time creation only
 git commit \
   -m "feat(<feature>): automate <KEY> <feature> scenarios" \
   -m "<body: 1–3 sentences — coverage added (N tests across buckets), the scenarios/ACs covered, and any scaffold/side-effects (new Page Object, fixture registration, externalized data, augment)>" \
