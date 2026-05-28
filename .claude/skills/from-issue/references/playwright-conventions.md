@@ -162,6 +162,50 @@ if (await loginPage.errorBanner.isVisible()) {
 
 Use auto-waiting assertions and let them fail loudly.
 
+## Computed-style / pseudo-state assertions (hover / focus / active)
+
+Some ACs assert a style that only appears in a pseudo-state — e.g. "the title turns green on hover." Read the **computed** style and let the state settle:
+
+```ts
+// Page Object — return the computed value as data (ADR-0001 rule #8)
+async getProductTitleColor(productName: string): Promise<string> {
+  return this.page
+    .getByText(productName, { exact: true })
+    .evaluate((el) => getComputedStyle(el).color);
+}
+```
+
+```ts
+// Spec
+const resting = await inventoryPage.getProductTitleColor(name);
+expect(resting).not.toBe('rgb(61, 220, 145)'); // sanity: not already the target
+await inventoryPage.hoverProductTitle(name); // trigger the pseudo-state
+await expect
+  .poll(() => inventoryPage.getProductTitleColor(name)) // re-reads until it settles
+  .toBe('rgb(61, 220, 145)');
+```
+
+Rules:
+
+- Compare in **computed form** — browsers report color as `rgb(...)` / `rgba(...)`, never the source hex. Convert `#3ddc91` → `rgb(61, 220, 145)` in the expectation.
+- **Sanity-check the resting value ≠ the target** first, so the test proves the state _changed_ it (not that it was always green).
+- Use **`expect.poll(...)`** (not a one-shot read) so a CSS transition can finish — `expect.poll` retries like a web-first assertion.
+- The hover/focus trigger is a composed Page Object action (one `test.step`); the computed-style read is a query returning data.
+
+## Exact-match for named-element filters
+
+When a query targets ONE element identified by a human name, match it **exactly** — a substring match would also catch a longer name that contains it.
+
+```ts
+// GOOD: exact — only the card titled exactly this
+this.page.getByText(productName, { exact: true });
+
+// RISKY: substring — a short name matches every longer name that contains it
+this.productNames.filter({ hasText: productName });
+```
+
+Prefer `getByText(name, { exact: true })` or an anchored regex. Substring `filter({ hasText })` is fine only when matching a _group_ deliberately (e.g. "all cards mentioning 'Sauce'").
+
 ## See also
 
 - [`test-principles.md`](test-principles.md) — F.I.R.S.T. (overlap on Fast / Repeatable)
