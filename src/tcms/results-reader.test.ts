@@ -76,3 +76,36 @@ test('hook steps and timedOut status are handled defensively', () => {
   expect(hit.steps).toEqual(['Real step']);
   expect(hit.status).toBe('failed');
 });
+
+test('skipped status maps through; all hook titles are filtered', () => {
+  const idx = indexResults({
+    suites: [
+      {
+        title: 's',
+        specs: [
+          {
+            title: 'y',
+            tests: [
+              {
+                results: [
+                  {
+                    status: 'skipped',
+                    steps: [
+                      { title: 'Before Hooks', duration: 1 },
+                      { title: 'Kept step', duration: 2 },
+                      { title: 'After Hooks', duration: 1 },
+                      { title: 'Worker Cleanup', duration: 1 },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const hit = idx.get('y')!;
+  expect(hit.steps).toEqual(['Kept step']);
+  expect(hit.status).toBe('skipped');
+});

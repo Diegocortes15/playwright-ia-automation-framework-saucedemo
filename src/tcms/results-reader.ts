@@ -10,6 +10,7 @@ const HOOK_TITLES = new Set(['Before Hooks', 'After Hooks', 'Worker Cleanup']);
 interface PwStep {
   title: string;
   category?: string;
+  duration?: number;
 }
 interface PwResult {
   status?: string;
@@ -28,7 +29,9 @@ interface PwSuite {
 // file and passes the parsed object.
 export function indexResults(report: unknown): Map<string, IndexedResult> {
   const out = new Map<string, IndexedResult>();
-  for (const suite of (report as { suites?: PwSuite[] }).suites ?? []) walk(suite, out);
+  // Non-object / malformed input yields an empty map; no throw by design.
+  const root = report as { suites?: PwSuite[] };
+  for (const suite of root.suites ?? []) walk(suite, out);
   return out;
 }
 
