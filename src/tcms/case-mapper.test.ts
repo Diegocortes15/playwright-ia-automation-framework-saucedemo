@@ -1,3 +1,5 @@
+// Pure unit test: assertions come from '@playwright/test' on purpose, not
+// '@fixtures/test' (that wrapper injects browser/page-object fixtures for e2e specs).
 import { test, expect } from '@playwright/test';
 import { mapToCase } from './case-mapper';
 import type { TestRecord } from './types';
