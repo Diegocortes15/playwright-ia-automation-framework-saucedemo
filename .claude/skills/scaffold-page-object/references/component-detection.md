@@ -19,3 +19,12 @@ Header always implies CartBadge availability (Header composes CartBadge per Phas
 ## Adding a new component
 
 When a new component lands in `src/components/`, **append a row here BEFORE running the skill against any page that contains the new component.** Otherwise the skill aborts at step 4 with the auto-discover warning, listing the missing component file and pointing here.
+
+## Parallel-array queries vs a discriminator component
+
+When a feature involves many similar elements (product cards, table rows), choose by **what the tests do with them**, not by how many there are:
+
+- **Uniform assertions across all N** (every product's name / price / image) → **page-direct parallel-array queries** on the Page Object that return `T[]`: `getProductNames(): Promise<string[]>`, `getProductPrices(): Promise<string[]>`. Simpler than a component, reads clearly (`expect(await inventoryPage.getProductNames()).toEqual(...)`), and is the right default.
+- **Per-instance interaction or state** (add _this_ product to the cart, assert _this_ card's badge/button state) → a **Component with a discriminator** (`new ProductCard(page, productName)`, composition rule #9 / [ADR-0001](../../../../docs/adr/0001-pom-by-component.md)). The `ProductCard` row above is for exactly this case.
+
+Rule of thumb: reach for the discriminator component the first time a test must act on — or assert the internal state of — **one** of the N (not the set). Until then, parallel-array queries are correct; don't pre-build the component (YAGNI).

@@ -50,6 +50,29 @@ Per CLAUDE.md "When extending the framework":
 - **Typed loader** → add to `data/fixtures.ts`, import via the `@data/*` alias
 - The spec imports the loader (`import { validCheckout } from '@data/fixtures'`), never reads JSON directly.
 
+### Canonical loader (`data/fixtures.ts`)
+
+The loader reads JSON via `fs` — **NOT `import … from './x.json'`**. The project runs as native ESM, where a JSON import needs an `with { type: 'json' }` attribute and is brittle through Playwright's config/test loader; `fs` + `import.meta.url` is robust and version-stable.
+
+```ts
+// data/fixtures.ts — typed loaders for externalized test data.
+// Specs import named datasets from '@data/fixtures'; never read JSON directly.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import type { Product } from './types';
+
+const dataDir = dirname(fileURLToPath(import.meta.url));
+
+function load<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(join(dataDir, relativePath), 'utf-8')) as T;
+}
+
+export const products: readonly Product[] = load<Product[]>('shared/products.json');
+```
+
+Each dataset gets a type in `data/types.ts` and a named `export const` here. Adding a dataset = add the JSON + a type + one `load(...)` line.
+
 When the skill externalizes, it MUST also:
 
 1. Create the `data/...` file(s) and the `data/fixtures.ts` loader entry (with a matching type in `data/types.ts` if the framework keeps types there).
