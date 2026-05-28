@@ -14,6 +14,7 @@
     "test:debug": "playwright test --project=standard --debug",
     "test:headed": "playwright test --project=standard --headed",
     "test:smoke": "playwright test --grep \"@smoke\"",
+    "test:unit": "playwright test -c playwright.unit.config.ts",
     "report": "playwright show-report",
     "codegen": "playwright codegen https://www.saucedemo.com",
     "typecheck": "tsc --noEmit",
