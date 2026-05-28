@@ -72,7 +72,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
   - There is no `Page Name` or `User Story` line — the Page Object is covered by the Notes-for-reviewer scaffold/collision note, and the requirement is conveyed by `Requirement (as written)`.
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the ticket for full text.
-  - "Test" column: backtick-wrapped test title for generated ACs; em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for smoke tests (those with `@smoke` in the title), e.g., `` `⚡ @no-auth @smoke standard_user logs in...` ``. Non-smoke tests have no prefix.
+  - "Test" column: backtick-wrapped **prose** test title for generated ACs (titles no longer contain tags — tags live in the `{ tag }` option per [ADR-0015](../../../docs/adr/0015-spec-tags-via-tag-option.md)); em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for tests tagged `@smoke` (the test's `{ tag }`), e.g., `` `⚡ standard_user logs in and lands on inventory` ``. Non-smoke tests have no prefix.
   - "Bucket" column: exactly one of `Positive` / `Negative` / `Edge` for generated tests; em-dash `—` for skipped ACs. Classification follows [`bucket-classification.md`](bucket-classification.md).
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`. **For AUGMENT runs:** use `✅ added` for tests inserted into an existing file, and `⏭️ skipped (already covered)` for duplicate-guard skips.
 - **Verification — bucket warnings**: If workflow Step 6 emitted any "invalid bucket" soft warnings (per [`bucket-classification.md`](bucket-classification.md)), append them as additional bullets at the END of the Verification section, after the Test run list. Example: `- ⚠️ LLM emitted invalid bucket "Boundary" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`
@@ -119,15 +119,15 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
 | AC | Test | Bucket | Status |
 |----|------|--------|--------|
-| AC 1: User can log in with standard_user / secret_sauce and lands... | `⚡ @no-auth @smoke standard_user logs in successfully and lands on inventory` | Positive | ✅ generated |
-| AC 2: Locked-out user sees an error message. | `⚡ @no-auth @smoke locked_out_user sees the lockout error` | Negative | ✅ generated |
+| AC 1: User can log in with standard_user / secret_sauce and lands... | `⚡ standard_user logs in successfully and lands on inventory` | Positive | ✅ generated |
+| AC 2: Locked-out user sees an error message. | `⚡ locked_out_user sees the lockout error` | Negative | ✅ generated |
 
 ## Verification
 
 - **Typecheck:** ✅ PASS
 - **Test run:**
-  - `@no-auth standard_user logs in successfully and lands on inventory` — ✅ PASS
-  - `@no-auth locked_out_user sees the lockout error` — ✅ PASS
+  - `standard_user logs in successfully and lands on inventory` — ✅ PASS
+  - `locked_out_user sees the lockout error` — ✅ PASS
 
 ## Collision warnings
 

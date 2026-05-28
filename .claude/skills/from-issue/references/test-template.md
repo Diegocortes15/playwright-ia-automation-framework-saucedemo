@@ -14,27 +14,34 @@ The `/from-issue` skill renders generated test files following this template. Th
 import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 
-test.describe('<feature> <auth-tag>', () => {
+// One tagged describe per user-context. The routing tag lives in the { tag }
+// OPTION (not the title) — Playwright's project grep matches option-tags, and
+// they render as report chips. A SECOND context for the same feature is a
+// sibling describe in THIS file, never a new file (see Rules).
+test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   test.describe('Positive', () => {
-    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // Specs DO NOT use test.step. The named, timed report steps come from the
-      // Page Object's composed action methods (each wraps its body in one
-      // test.step). The spec just calls those methods and owns the assertions.
+    test('<behavior description>', async ({ <pageFixture>, page }) => {
+      // Specs DO NOT use test.step. Named, timed report steps come from the
+      // Page Object's composed action methods. The spec calls those + asserts.
       await <pageFixture>.goto();
       await <pageFixture>.<action>(); // e.g. loginAs('<user>', env.password)
       await expect(<pageFixture>.<locator>).toBeVisible();
     });
+
+    test('<behavior description>', { tag: '@smoke' }, async ({ <pageFixture> }) => {
+      // A smoke test carries @smoke via the test-level { tag } option.
+    });
   });
 
   test.describe('Negative', () => {
-    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Negative record from Step 6 (no spec-level test.step)
+    test('<behavior description>', async ({ <pageFixture> }) => {
+      // ... one test(...) per Negative record (no spec-level test.step)
     });
   });
 
   test.describe('Edge', () => {
-    test('[@smoke] [<user-tag>] <behavior description>', async ({ <pageFixture>, page }) => {
-      // ... one `test(...)` per Edge record from Step 6 (no spec-level test.step)
+    test('<behavior description>', async ({ <pageFixture> }) => {
+      // ... one test(...) per Edge record
     });
   });
   // Omit any bucket describe whose record list is empty.
@@ -61,70 +68,89 @@ test.describe('<feature> <auth-tag>', () => {
   ```
 
   The **contributor set** the skill uses for idempotency (Step 8) = the origin `<KEY>` on line 1 ∪ every key on the `Augmented by:` line. The last header line reads `against a contributing issue` (not `against the same issue`) to reflect that any contributor re-run refuses.
+
 - **Imports**:
   - Always `import { test, expect } from '@fixtures/test'` — NEVER from `@playwright/test` (per CLAUDE.md "Where things live").
   - `import { env } from '@utils/env'` only when a test calls `loginAs(...)` and needs the password.
-- **Describe wrap** — exactly one outer `test.describe('<feature> <auth-tag>', () => { ... })` block per file. `<feature>` matches the issue template's Feature field; `<auth-tag>` is the dominant auth tag across tests in the file (e.g., `@standard`, `@no-auth`). **NO PARENTHESES around the auth-tag** — `(@no-auth)` would leak the closing paren into Playwright's tag chip rendering (the tag becomes `@no-auth)`). Use a plain space separator: `'login @no-auth'`, not `'login (@no-auth)'`.
-- **Bucket structure** — inside the outer describe, group tests into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` blocks. Order is fixed: **Positive → Negative → Edge**. Omit a bucket describe entirely if it has zero tests (do not render empty describes). The bucket label is exactly one of `Positive` / `Negative` / `Edge` — no other strings, no tags on the describe, no description suffix. Classification rules live in [`bucket-classification.md`](bucket-classification.md).
-- **Per-test title** — `'[@smoke] [<user-tag>] <behavior description>'` (square brackets = optional). **DO NOT repeat the `<auth-tag>` in the test title** — it's already on the outer describe and would render as a duplicate chip in the Playwright report. `@smoke` slots in at the start when the test is smoke-worthy per [`smoke-policy.md`](smoke-policy.md); otherwise omit it. The `<user-tag>` is the saucedemo user name (e.g., `standard_user`, `locked_out_user`); omit if the test is user-agnostic. Examples:
-  - `'@smoke standard_user logs in successfully and lands on inventory'` (smoke = true)
-  - `'invalid password shows generic error'` (smoke = false; user-agnostic in title)
-  - `'@smoke checkout with valid info completes successfully'` (smoke = true)
-- **Test step organization — steps live in the Page Object, NOT the spec.** Generated specs contain NO `test.step` calls. The named, timed entries in the Playwright HTML report come from the composed action methods the spec calls (`goto`, `loginAs`, etc.), each of which wraps its body in one `test.step` (see [`playwright-conventions.md`](playwright-conventions.md) and `scaffold-page-object`'s `page-object-template.md`). The spec is just method calls + assertions. Assertions stay in the spec as plain `expect(...)` (Playwright auto-records them). If a behavior needs a named action the Page Object doesn't expose yet, add a composed method to the Page Object (with its own `test.step`) rather than wrapping raw calls in the spec.
-- **Tag selection** — per CLAUDE.md "Tag conventions" table:
-  - Login/logout tests with no pre-existing session → `@no-auth` (on outer describe)
-  - User-agnostic flows → `@all-users` (on outer describe)
-  - Standard-user-only flows → `@standard` (on outer describe)
-  - Problem/error/performance-glitch user-specific → `@problem` / `@error` / `@performance_glitch` (on outer describe)
-  - Visual regression → `@visual` (on outer describe)
-  - Sort dropdown tests → `@sort-functional` (on outer describe)
-  - Smoke selection → `@smoke` (on individual test titles per smoke-policy.md)
+
+- **Describe wrap — one tagged describe per user-context** (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)). Each context is a `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => { ... })`. The routing tag lives in the **`{ tag }` option, NOT the title** — Playwright's project `grep` matches option-tags (verified) and renders them as report chips. The title is human prose: `'<feature> — <context-label>'`.
+
+- **Context-label mapping** (routing tag → label in the describe title):
+
+  | Routing tag           | Context label             |
+  | --------------------- | ------------------------- |
+  | `@no-auth`            | `no auth`                 |
+  | `@all-users`          | `all users`               |
+  | `@standard`           | `standard_user`           |
+  | `@problem`            | `problem_user`            |
+  | `@performance_glitch` | `performance_glitch_user` |
+  | `@error`              | `error_user`              |
+  | `@visual`             | `visual_user`             |
+
+  `@sort-functional` is a secondary routing tag — combine it via an array on the relevant context, e.g. `{ tag: ['@standard', '@sort-functional'] }` (label by the user: `'inventory — standard_user'`).
+
+- **Multiple contexts in one file** — when a feature has tests for more than one user-context, emit **one sibling `test.describe` per context** in the same file, each with its own `{ tag }` and bucket children. Do NOT split into per-user files. `/from-issue` augment (workflow Step 8.5) finds-or-creates the context describe by its tag.
+
+- **Bucket structure** — inside each context describe, group tests into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` blocks. Order is fixed: **Positive → Negative → Edge**. Omit a bucket describe with zero tests. The bucket label is exactly `Positive` / `Negative` / `Edge` — no tags on the bucket describe. Classification rules: [`bucket-classification.md`](bucket-classification.md).
+
+- **Per-test title — pure prose, NO tags in the string.** Behavior-only (AC traceability lives in the PR's AC-coverage table). `@smoke` (and any other test-level tag) goes in the test's **`{ tag }` option**, never the title:
+  - smoke: `test('standard_user logs in and lands on inventory', { tag: '@smoke' }, async ({ loginPage, page }) => { ... })`
+  - not smoke: `test('invalid password shows generic error', async ({ loginPage }) => { ... })`
+
+  Do NOT put the routing tag on the test — it's already on the context describe (Playwright merges describe + test tags).
+
+- **Tag selection** — per CLAUDE.md "Tag conventions" table; applied via the `{ tag }` option:
+  - routing tag on the **describe**: `@no-auth` / `@all-users` / `@standard` / `@problem` / `@error` / `@performance_glitch` / `@visual` / `@sort-functional`
+  - `@smoke` on the individual **test** (per [`smoke-policy.md`](smoke-policy.md))
+
 - **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from [`src/fixtures/test.ts`](../../../../src/fixtures/test.ts).
 - **No raw Locators in tests** — per ADR-0001 rule #4. Tests interact through Page methods, not `page.locator(...)`.
 - **No `await page.waitForTimeout(...)`** — per CLAUDE.md "What to NEVER do". Use Playwright auto-waiting assertions (`await expect(...).toBeVisible()`).
 - **Selector preference order** is the Page Object's concern, not the test's.
-- **Behavior-only test titles** (spec §2 Decision 12) — AC traceability lives in the PR description's AC-coverage table, NOT in the test title.
 
 ## Auth resolution and storageState
 
-Saucedemo's per-user storageState files live under `auth/<user>.json` (e.g., `auth/standard.json`). The orchestrator does NOT load storageState explicitly in the test code — it picks the right Playwright project tag (`@standard`, `@problem`, etc.) and the framework's `playwright.config.ts` wires up the right session via the project's `storageState` config.
+Saucedemo's per-user storageState files live under `auth/<user>.json` (e.g., `auth/standard.json`). The orchestrator does NOT load storageState explicitly in the test code — the describe's routing tag routes the test to the matching Playwright project, whose `storageState` config (derived from `tests/users.ts` `AUTH_USERS`, per [ADR-0014](../../../../docs/adr/0014-from-issue-harness-growth.md)) wires the session.
 
 If the AC text doesn't declare a user, default to `standard_user` (spec §2 Decision 13).
 
-## Example: 2-test file for a login feature
+## Example: multi-context inventory file (two user-contexts, one file)
 
 ```typescript
-// Generated by /from-issue on 2026-05-18 from Jira SW-42.
-// Source: https://your-site.atlassian.net/browse/SW-42
-// Title: Login coverage for standard and locked-out users
+// Generated by /from-issue on 2026-05-26 from Jira SW-3.
+// Source: https://diegocortes15.atlassian.net/browse/SW-3
+// Title: [SW][QA][Inventory] problem_user sees broken product images
+// Augmented by: SW-4 (2026-05-27)
 // Manual edits are welcome — this file is not regenerated automatically.
 // Re-running /from-issue against a contributing issue will refuse to overwrite.
 
 import { test, expect } from '@fixtures/test';
-import { env } from '@utils/env';
 
-test.describe('login @no-auth', () => {
+test.describe('inventory — problem_user', { tag: '@problem' }, () => {
+  test.describe('Edge', () => {
+    test('every product image is the same broken placeholder', async ({ inventoryPage }) => {
+      await inventoryPage.goto();
+      const sources = await inventoryPage.getProductImageSources();
+      expect(new Set(sources).size).toBe(1);
+    });
+  });
+});
+
+test.describe('inventory — standard_user', { tag: '@standard' }, () => {
   test.describe('Positive', () => {
-    test('@smoke standard_user logs in successfully and lands on inventory', async ({
-      loginPage,
-      page,
-    }) => {
-      await loginPage.goto();
-      await loginPage.loginAs('standard_user', env.password);
-      await expect(page).toHaveURL(/\/inventory\.html$/);
+    test('all six product titles render exactly', async ({ inventoryPage }) => {
+      await inventoryPage.goto();
+      expect(await inventoryPage.getProductNames()).toEqual([
+        'Sauce Labs Backpack',
+        'Sauce Labs Bike Light',
+        'Sauce Labs Bolt T-Shirt',
+        'Sauce Labs Fleece Jacket',
+        'Sauce Labs Onesie',
+        'Test.allTheThings() T-Shirt (Red)',
+      ]);
     });
   });
-
-  test.describe('Negative', () => {
-    test('@smoke locked_out_user sees the lockout error', async ({ loginPage }) => {
-      await loginPage.goto();
-      await loginPage.loginAs('locked_out_user', env.password);
-      await expect(loginPage.errorBanner).toBeVisible();
-      expect(await loginPage.getErrorText()).toContain('locked out');
-    });
-  });
-  // Edge describe omitted — no edge tests for this issue.
 });
 ```
 
-The report's named steps — "Navigate to the login page", "Submit credentials" — are produced by `LoginPage.goto()` and `LoginPage.loginAs()`, not by the spec. The two `expect(...)` calls appear as Playwright's auto-recorded assertion entries.
+The report's named steps come from the Page Object's composed methods (each wraps its body in one `test.step`), not the spec. Tag chips (`@problem`, `@standard`, `@smoke`) come from the `{ tag }` options.
