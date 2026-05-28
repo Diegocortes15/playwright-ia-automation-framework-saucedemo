@@ -78,6 +78,8 @@ Never use XPath.
 
 ## Tag conventions (Playwright Projects + storageState + role tags)
 
+> Tags are applied via Playwright's **`{ tag }` option** — routing tags on `test.describe`, `@smoke` on the `test` — NOT in the title string (per [ADR-0015](docs/adr/0015-spec-tags-via-tag-option.md)). Project `grep` matches option-tags, so routing is unchanged. One feature file holds one tagged describe per user-context.
+
 | Tag                   | Runs on project(s)                                                                | Purpose                                                                                                       |
 | --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                                   |
