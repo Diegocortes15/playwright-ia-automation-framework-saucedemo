@@ -9,7 +9,7 @@ import { test, expect } from '@fixtures/test';
 // problem_user is one of saucedemo's intentionally-broken accounts: the inventory
 // page serves the same placeholder image (sl-404) for every product instead of a
 // distinct image per product. This characterization test locks that defect in.
-test.describe('inventory @problem', () => {
+test.describe('inventory — problem_user', { tag: '@problem' }, () => {
   test.describe('Edge', () => {
     test('problem_user sees one identical broken image for every product', async ({
       inventoryPage,

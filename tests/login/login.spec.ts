@@ -7,7 +7,7 @@
 import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 
-test.describe('login @no-auth', () => {
+test.describe('login — no auth', { tag: '@no-auth' }, () => {
   test.describe('Positive', () => {
     // Scenario 1: every valid user logs in and lands on the Products page.
     const validUsers = [
@@ -20,15 +20,15 @@ test.describe('login @no-auth', () => {
 
     for (const user of validUsers) {
       // Keep the smoke set tight: only the canonical standard_user gates builds.
-      const smoke = user === 'standard_user' ? '@smoke ' : '';
-      test(`${smoke}${user} logs in successfully and lands on inventory`, async ({
-        loginPage,
-        page,
-      }) => {
-        await loginPage.goto();
-        await loginPage.loginAs(user, env.password);
-        await expect(page).toHaveURL(/\/inventory\.html$/);
-      });
+      test(
+        `${user} logs in successfully and lands on inventory`,
+        user === 'standard_user' ? { tag: '@smoke' } : {},
+        async ({ loginPage, page }) => {
+          await loginPage.goto();
+          await loginPage.loginAs(user, env.password);
+          await expect(page).toHaveURL(/\/inventory\.html$/);
+        },
+      );
     }
   });
 
@@ -65,7 +65,7 @@ test.describe('login @no-auth', () => {
     }
 
     // Scenario 4: invalid credentials are rejected with the standard error.
-    test('@smoke invalid credentials are rejected', async ({ loginPage }) => {
+    test('invalid credentials are rejected', { tag: '@smoke' }, async ({ loginPage }) => {
       await loginPage.goto();
       await loginPage.loginAs('invalid_user', 'wrong_password');
       await expect(loginPage.errorBanner).toBeVisible();

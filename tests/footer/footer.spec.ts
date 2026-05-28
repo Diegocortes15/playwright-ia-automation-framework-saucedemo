@@ -8,7 +8,7 @@ import { test, expect } from '@fixtures/test';
 
 // Footer content is identical for every user, so it is verified once as
 // standard_user (@standard) rather than per-user.
-test.describe('footer @standard', () => {
+test.describe('footer — standard_user', { tag: '@standard' }, () => {
   test.describe('Positive', () => {
     // AC 1–3: each social link points to its canonical Sauce Labs URL.
     // Asserts the anchor's href — we don't navigate to the third-party sites.
