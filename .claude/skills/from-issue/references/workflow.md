@@ -164,13 +164,13 @@ Apply [`references/test-template.md`](test-template.md). Also consult [`referenc
 
 - Top-of-file 5-line provenance block (substitute today's date, Jira key, URL, summary)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
-- Single outer `test.describe('<feature> <auth-tag>', ...)` wrap — **NO parentheses** around the auth-tag (a `(@no-auth)` wrap leaks the closing paren into Playwright's tag chip as `@no-auth)`; see test-template.md)
-- Inside the outer describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
+- One `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)) — the routing tag lives in the **`{ tag }` option, not the title** (see test-template.md for the context-label mapping). Multiple contexts in one feature = sibling tagged describes in the same file.
+- Inside each context describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
 - Bucket describes appear in fixed order: **Positive → Negative → Edge** (even if Negative tests outnumber Positive)
 - **Omit empty buckets entirely** — if no tests were classified into a bucket, don't emit its describe block at all
 - Within each bucket describe, tests appear in their Step 6 emission order
 
-Each `test(...)` title is `'[@smoke] [<user-tag>] <behavior>'` (square brackets = optional). **Do NOT repeat the `<auth-tag>` in the test title** — it lives on the outer describe only; repeating it renders a duplicate tag chip in the Playwright report. If `smoke: true`, prepend `@smoke `; if `smoke: false`, omit it. Omit `<user-tag>` for user-agnostic tests like `@all-users`. This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
+Each `test(...)` title is **pure prose** (behavior-only) — NO tags in the title. If `smoke: true`, attach `{ tag: '@smoke' }` as the test's options arg: `test('<behavior>', { tag: '@smoke' }, async (...) => {...})`; if `smoke: false`, omit the options arg entirely. The routing tag is NOT repeated on the test — it's on the context describe. This is the format defined in [`references/test-template.md`](test-template.md) "Rules".
 
 Render to an in-memory string. Do NOT Write yet — Step 8 handles overwrite refusal first.
 
@@ -203,14 +203,17 @@ The new test title format, bucket structure, and the header block are unchanged 
 
 Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` in place with targeted `Edit` calls — never regenerate the whole file (that would destroy manual edits, per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md)).
 
-**Pre-check — auth-tag match.** The outer describe of the existing file carries one auth-tag (`test.describe('<feature> <auth-tag>', ...)`). If the new tests' dominant auth-tag differs (e.g. the file is `@no-auth` but the new ACs are `@standard`), they cannot share one describe — **abort**: _"new tests are `<tag>` but `<testfile>` is `<existing-tag>`; re-run with `--new-file`."_
+**Resolve the context describe by tag (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)).** The file holds one `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context. Find the sibling describe whose `{ tag }` equals the new tests' routing tag:
+
+- **Match found** → insert the new tests into THAT describe's bucket blocks (the bucket logic below operates within it).
+- **No match** → add a NEW sibling `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` (with its own bucket children) after the existing context describes. This is the multi-user case (e.g. file has `@problem`, new tests are `@standard`) — no abort, no `--new-file` needed.
 
 **Pre-check — structure recognizable.** If the file has no locatable outer `test.describe` or its bucket describes can't be found (hand-restructured beyond recognition), **abort**: _"couldn't locate insertion point in `<testfile>`; add the tests manually or re-run with `--new-file`."_
 
 For each new test record (already bucket-classified in Step 6):
 
 1. **Duplicate guard.** Normalize the record's title (lowercase, strip leading tags like `@smoke`/`@<user>`, collapse whitespace) and compare against the normalized titles already in the file. On a clear match, **skip** the record and record a note: `⏭️ skipped "<title>" — already covered by "<existing test>"`. When unsure, include it and let the reviewer decide (matches [`qa-analysis.md`](qa-analysis.md)'s conservative "default NOT skip").
-2. **Locate the bucket.** Find the `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` block matching the record's `bucket`.
+2. **Locate the bucket** _within the resolved context describe_ (above). Find the `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` block matching the record's `bucket`.
    - Block exists → `Edit` to insert the new `test(...)` at the end of that block (before its closing `});`).
    - Block absent → insert a new bucket describe in the fixed **Positive → Negative → Edge** order, positioned correctly relative to existing buckets.
 3. **Render the test body** exactly as Step 7 would (no spec-level `test.step`; steps live in Page Object methods per [`playwright-conventions.md`](playwright-conventions.md)).
