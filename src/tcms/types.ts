@@ -3,6 +3,7 @@
 // same TcmsSeam (per the Phase K design — the "thin seam").
 
 export type TcmsStatus = 'passed' | 'failed' | 'skipped';
+export type TcmsBucket = 'Positive' | 'Negative' | 'Edge';
 
 export interface TcmsStep {
   action: string;
@@ -16,7 +17,8 @@ export interface TcmsCase {
   description: string; // provenance + AC text
   preconditions: string; // user/context, e.g. 'Session: standard_user'
   tags: string[];
-  bucket: string; // 'Positive' | 'Negative' | 'Edge'
+  bucket: TcmsBucket;
+  // Structured provenance — some seams (Xray/Zephyr) link test↔requirement by Jira key.
   jiraKey: string;
   sourceUrl: string;
   status: TcmsStatus;
@@ -29,7 +31,7 @@ export interface TestRecord {
   acText: string; // normalized AC text → the human-readable expected outcome
   user: string; // 'standard_user' | 'problem_user' | … | 'no-auth'
   tags: string[];
-  bucket: string;
+  bucket: TcmsBucket;
   feature: string; // suite root, e.g. 'login'
   contextLabel: string; // e.g. 'no auth', 'problem_user'
 }
