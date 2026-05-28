@@ -61,17 +61,22 @@ export class InventoryPage {
     );
   }
 
+  // Exact-match title locator — substring hasText could match two cards when one
+  // product name contains another (per playwright-conventions.md "Exact-match for
+  // named-element filters").
+  private productTitle(productName: string): Locator {
+    return this.page.getByText(productName, { exact: true });
+  }
+
   // Computed text color of a single product's title — used to verify the hover state.
   async getProductTitleColor(productName: string): Promise<string> {
-    return this.productNames
-      .filter({ hasText: productName })
-      .evaluate((el) => getComputedStyle(el).color);
+    return this.productTitle(productName).evaluate((el) => getComputedStyle(el).color);
   }
 
   // Composed action — wrapped in exactly one test.step (playwright-conventions).
   async hoverProductTitle(productName: string): Promise<void> {
     await test.step(`Hover the "${productName}" product title`, async () => {
-      await this.productNames.filter({ hasText: productName }).hover();
+      await this.productTitle(productName).hover();
     });
   }
 }
