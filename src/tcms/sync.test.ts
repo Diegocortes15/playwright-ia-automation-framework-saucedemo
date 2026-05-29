@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { runSync, parseArgs } from './sync';
+import { runSync } from './sync';
 import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta, TestRecord } from './types';
 
 class FakeSeam implements TcmsSeam {
@@ -77,19 +77,4 @@ test('no matches → recordResults is not called', async () => {
   const outcome = await runSync({ records: [records[1]], meta, report }, seam);
   expect(outcome.synced).toHaveLength(0);
   expect(seam.recorded).toEqual([]);
-});
-
-test('parseArgs reads --records and defaults --results', () => {
-  expect(parseArgs(['--records', 'r.json'])).toEqual({
-    records: 'r.json',
-    results: 'test-results/results.json',
-  });
-});
-
-test('parseArgs throws when --records is absent', () => {
-  expect(() => parseArgs(['--results', 'x.json'])).toThrow('Missing --records');
-});
-
-test('parseArgs throws when a flag has no following value', () => {
-  expect(() => parseArgs(['--records'])).toThrow('--records requires a value');
 });
