@@ -47,6 +47,8 @@ What the HTML report shows that a TCMS typically charges for:
 
 ## Why no TCMS?
 
+> **Update (ADR-0016, 2026-05-28):** TCMS remains **off by default** for the reasons below. An **opt-in one-way mirror** (default: Qase) is now available via `/from-issue` — see [`docs/tcms.md`](tcms.md) and [ADR-0016](adr/0016-tcms-mirror.md). The reasoning below is why it is opt-in, not on by default.
+
 Test Case Management Systems (TestRail, Xray, Zephyr, Kiwi) shine when:
 
 1. **Non-engineering stakeholders** (QA managers, PMs, auditors) need a UI to browse test cases and results without reading code
