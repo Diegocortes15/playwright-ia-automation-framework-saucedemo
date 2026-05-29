@@ -65,5 +65,7 @@ Commit the updated `qase-map.json`.
 
 `src/tcms/qase-client.ts` is the only Qase-aware file; it implements `TcmsSeam`
 (`src/tcms/types.ts`). To target Xray/Zephyr/self-hosted Kiwi, add a sibling client
-implementing the same interface and construct it in `src/tcms/sync.ts`. Teams who
+implementing the same interface and construct it in `src/tcms/suite-sync.ts`. Teams who
 prefer a typed SDK can swap the hand-rolled `fetch` for the official `qaseio` client.
+
+Manual (non-automated) cases and bidirectional sync remain unsupported — see [ADR-0017](adr/0017-tcms-sync-at-merge.md) consequences.

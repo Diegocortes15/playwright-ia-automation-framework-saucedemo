@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TcmsSeam, TestRecord, SyncMeta, CaseResult, QaseMap } from './types';
 import { indexResults, normalizeTitle } from './results-reader';
@@ -9,8 +9,11 @@ import { qaseConfig } from '../utils/qase-env';
 
 const REGRESSION_ROOT = 'Regression';
 
+// A record plus its file-level provenance (from the records file's meta block).
+export type EnrichedRecord = TestRecord & { jiraKey: string; sourceUrl: string };
+
 export interface SuiteSyncInput {
-  records: TestRecord[];
+  records: EnrichedRecord[];
   report: unknown; // parsed test-results/results.json
   oldMap: QaseMap;
   meta: SyncMeta;
@@ -38,7 +41,10 @@ export async function runSuiteSync(
       outcome.unlinked.push(record.title);
       continue;
     }
-    const base = mapToCase(record, hit.steps, hit.status, input.meta);
+    const base = mapToCase(record, hit.steps, hit.status, {
+      jiraKey: record.jiraKey,
+      sourceUrl: record.sourceUrl,
+    });
     const c = { ...base, suitePath: [REGRESSION_ROOT, ...base.suitePath] };
     const key = logicalKey(c.suitePath, c.title);
     const suiteId = await seam.ensureSuitePath(c.suitePath);
@@ -73,14 +79,14 @@ interface RecordsFile {
   records: TestRecord[];
 }
 
-export function loadRecords(dir: string): TestRecord[] {
+export function loadRecords(dir: string): EnrichedRecord[] {
   let files: string[] = [];
   try {
     files = readdirSync(dir).filter((f) => f.endsWith('.json'));
   } catch {
     return []; // no .tcms/records dir → nothing to sync
   }
-  const all: TestRecord[] = [];
+  const all: EnrichedRecord[] = [];
   for (const f of files) {
     let parsed: RecordsFile;
     try {
@@ -88,7 +94,13 @@ export function loadRecords(dir: string): TestRecord[] {
     } catch (e) {
       throw new Error(`Failed to parse records file ${join(dir, f)}: ${e}`);
     }
-    all.push(...parsed.records);
+    all.push(
+      ...parsed.records.map((r) => ({
+        ...r,
+        jiraKey: parsed.meta.jiraKey,
+        sourceUrl: parsed.meta.sourceUrl,
+      })),
+    );
   }
   return all;
 }
@@ -104,6 +116,10 @@ async function main(): Promise<void> {
   const records = loadRecords(recordsDir);
   if (records.length === 0) {
     console.log(`No records under ${recordsDir} — nothing to sync.`);
+    return;
+  }
+  if (!existsSync('test-results/results.json')) {
+    console.log('No test-results/results.json — run the suite first; skipping Qase sync.');
     return;
   }
   const report = JSON.parse(readFileSync('test-results/results.json', 'utf-8'));

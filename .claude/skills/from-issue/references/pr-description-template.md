@@ -36,7 +36,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - **Test run:**
   - `<test title 1>` — ✅ PASS
   - `<test title 2>` — ✅ PASS
-- 🗂️ **TCMS sync (Qase):** <synced N / unmatched M, or "skipped — not configured", or "⚠️ failed: <error>">. <Include the `po_modified` stale-steps warning here when applicable.>
+- 🗂️ **TCMS records:** `.tcms/records/<KEY>.json` written + committed (Qase syncs at merge — see [ADR-0017](../../../docs/adr/0017-tcms-sync-at-merge.md)).
 
 ## Notes for reviewer
 

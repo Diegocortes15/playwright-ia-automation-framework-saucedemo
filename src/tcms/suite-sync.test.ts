@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { runSuiteSync } from './suite-sync';
-import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta, TestRecord, QaseMap } from './types';
+import type { EnrichedRecord } from './suite-sync';
+import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta, QaseMap } from './types';
 
 class FakeSeam implements TcmsSeam {
   public upserted: { suiteId: number; c: TcmsCase }[] = [];
@@ -22,7 +23,7 @@ class FakeSeam implements TcmsSeam {
   }
 }
 
-const records: TestRecord[] = [
+const records: EnrichedRecord[] = [
   {
     title: 'standard_user logs in',
     acText: 'Lands on inventory',
@@ -31,6 +32,8 @@ const records: TestRecord[] = [
     bucket: 'Positive',
     feature: 'login',
     contextLabel: 'no auth',
+    jiraKey: 'SW-1',
+    sourceUrl: 'u',
   },
 ];
 const report = {
@@ -83,7 +86,7 @@ test('archives orphans: an old map entry with no current record', async () => {
 
 test('a record with no matching result is reported unlinked, not synced', async () => {
   const seam = new FakeSeam();
-  const orphanRecord: TestRecord = { ...records[0], title: 'never ran' };
+  const orphanRecord: EnrichedRecord = { ...records[0], title: 'never ran' };
   const out = await runSuiteSync({ records: [orphanRecord], report, oldMap: {}, meta }, seam);
   expect(seam.upserted).toHaveLength(0);
   expect(out.unlinked).toEqual(['never ran']);
