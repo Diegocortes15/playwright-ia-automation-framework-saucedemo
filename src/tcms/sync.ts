@@ -38,15 +38,21 @@ export async function runSync(input: SyncInput, seam: TcmsSeam): Promise<SyncOut
 }
 
 // ---- CLI (run via tsx): src/tcms/sync.ts --records <file> [--results <file>] ----
-function parseArgs(argv: string[]): { records: string; results: string } {
+export function parseArgs(argv: string[]): { records: string; results: string } {
   let records = '';
   let results = 'test-results/results.json';
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--records') records = argv[++i];
-    else if (argv[i] === '--results') results = argv[++i];
+    if (argv[i] === '--records') records = takeValue(argv, ++i, '--records');
+    else if (argv[i] === '--results') results = takeValue(argv, ++i, '--results');
   }
   if (!records) throw new Error('Missing --records <file>');
   return { records, results };
+}
+
+function takeValue(argv: string[], i: number, flag: string): string {
+  const value = argv[i];
+  if (value === undefined) throw new Error(`${flag} requires a value`);
+  return value;
 }
 
 async function main(): Promise<void> {
