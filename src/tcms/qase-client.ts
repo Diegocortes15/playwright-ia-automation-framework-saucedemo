@@ -1,5 +1,5 @@
 import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta } from './types';
-import type { QaseConfig } from '../utils/env';
+import type { QaseConfig } from '../utils/qase-env';
 
 interface Entity {
   id: number;

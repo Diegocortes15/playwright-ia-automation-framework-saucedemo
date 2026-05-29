@@ -21,7 +21,7 @@ export interface TcmsCase {
   // Structured provenance — some seams (Xray/Zephyr) link test↔requirement by Jira key.
   jiraKey: string;
   sourceUrl: string;
-  status: TcmsStatus;
+  status: TcmsStatus; // run outcome; carried for seams that can set case status (e.g. Xray). sync.ts records run status via CaseResult.
 }
 
 // One per-test record from /from-issue's Step 6 semantic model, written to the

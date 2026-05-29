@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { QaseClient } from './qase-client';
-import type { QaseConfig } from '../utils/env';
+import type { QaseConfig } from '../utils/qase-env';
 import type { TcmsCase } from './types';
 
 const cfg: QaseConfig = {

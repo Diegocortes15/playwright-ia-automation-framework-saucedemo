@@ -23,7 +23,7 @@ A failure here NEVER aborts the run or blocks the PR (it is a downstream mirror)
      "meta": { "jiraKey": "SW-1", "sourceUrl": "https://…/browse/SW-1", "runTitle": "from-issue SW-1 — 2026-05-28" },
      "records": [
        {
-         "title": "<prose test title, exactly as written in the spec>",
+         "title": "<the prose test title, with any embedded @tag tokens stripped>",
          "acText": "<the normalized AC text this test covers — the human-readable expected outcome>",
          "user": "standard_user | … | no-auth",
          "tags": ["@no-auth", "@smoke"],

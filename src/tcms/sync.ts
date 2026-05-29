@@ -3,7 +3,7 @@ import type { TcmsSeam, TestRecord, SyncMeta, CaseResult, TcmsStatus } from './t
 import { indexResults, normalizeTitle } from './results-reader';
 import { mapToCase } from './case-mapper';
 import { QaseClient } from './qase-client';
-import { qaseConfig } from '../utils/env';
+import { qaseConfig } from '../utils/qase-env';
 
 export interface SyncInput {
   records: TestRecord[];
