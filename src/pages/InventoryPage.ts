@@ -11,10 +11,18 @@ export class InventoryPage {
   readonly footer: Footer;
   // Page-direct locators second.
   private readonly productImages: Locator;
+  private readonly productNames: Locator;
+  private readonly productDescriptions: Locator;
+  private readonly productPrices: Locator;
+  private readonly addToCartButtons: Locator;
 
   constructor(public readonly page: Page) {
     this.footer = new Footer(page);
     this.productImages = page.locator('img.inventory_item_img');
+    this.productNames = page.locator('[data-test="inventory-item-name"]');
+    this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');
+    this.productPrices = page.locator('[data-test="inventory-item-price"]');
+    this.addToCartButtons = page.getByRole('button', { name: /^Add to cart$/i });
   }
 
   // Composed / intent-level action — body wrapped in exactly one test.step.
@@ -29,5 +37,46 @@ export class InventoryPage {
     return this.productImages.evaluateAll((imgs) =>
       imgs.map((img) => img.getAttribute('src') ?? ''),
     );
+  }
+
+  async getProductNames(): Promise<string[]> {
+    return (await this.productNames.allTextContents()).map((name) => name.trim());
+  }
+
+  async getProductDescriptions(): Promise<string[]> {
+    return (await this.productDescriptions.allTextContents()).map((desc) => desc.trim());
+  }
+
+  async getProductPrices(): Promise<string[]> {
+    return (await this.productPrices.allTextContents()).map((price) => price.trim());
+  }
+
+  async getAddToCartButtonCount(): Promise<number> {
+    return this.addToCartButtons.count();
+  }
+
+  async getEnabledAddToCartButtonCount(): Promise<number> {
+    return this.addToCartButtons.evaluateAll(
+      (buttons) => buttons.filter((button) => !(button as HTMLButtonElement).disabled).length,
+    );
+  }
+
+  // Exact-match title locator — substring hasText could match two cards when one
+  // product name contains another (per playwright-conventions.md "Exact-match for
+  // named-element filters").
+  private productTitle(productName: string): Locator {
+    return this.page.getByText(productName, { exact: true });
+  }
+
+  // Computed text color of a single product's title — used to verify the hover state.
+  async getProductTitleColor(productName: string): Promise<string> {
+    return this.productTitle(productName).evaluate((el) => getComputedStyle(el).color);
+  }
+
+  // Composed action — wrapped in exactly one test.step (playwright-conventions).
+  async hoverProductTitle(productName: string): Promise<void> {
+    await test.step(`Hover the "${productName}" product title`, async () => {
+      await this.productTitle(productName).hover();
+    });
   }
 }
