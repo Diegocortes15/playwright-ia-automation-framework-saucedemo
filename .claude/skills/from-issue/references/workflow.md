@@ -323,6 +323,10 @@ git push -u origin <KEY>-<feature>
 
 If `git push` fails (no remote, no auth), abort with the git error verbatim. The local branch and files remain on disk.
 
+### 11.5. Sync test cases to the TCMS (optional, Qase)
+
+**Skip entirely** if `dry-run` was passed OR `QASE_API_TOKEN`/`QASE_PROJECT_CODE` are unset. Per [`references/tcms-sync.md`](tcms-sync.md) (read it before this step): write `.tcms-records.json` from the Step 6 model, run `npx tsx src/tcms/sync.ts --records .tcms-records.json`, capture stdout for the PR body, then `rm .tcms-records.json`. A non-zero/failed sync is recorded as a PR warning and **never aborts** the run or blocks the PR (it is a one-way downstream mirror).
+
 ### 12. Open PR
 
 Render the PR body using [`references/pr-description-template.md`](pr-description-template.md). **Use the Write tool to put the body in a temporary file**, then pass it to `gh pr create --body-file` (do NOT use bash heredoc — see note below):
