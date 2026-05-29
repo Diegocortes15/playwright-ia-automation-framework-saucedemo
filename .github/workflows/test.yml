@@ -39,6 +39,15 @@ jobs:
           CI: 'true'
         run: npm test
 
+      # Note: qase-map.json updates here are ephemeral on CI. The committed map is
+      # refreshed when a developer runs `npm run tcms:sync` locally (see docs/tcms.md).
+      - name: Sync test cases to Qase (merge only)
+        if: ${{ always() && github.event_name == 'push' }}
+        env:
+          QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+          QASE_PROJECT_CODE: ${{ secrets.QASE_PROJECT_CODE }}
+        run: npm run tcms:sync
+
       - name: Upload HTML report on failure
         if: failure()
         uses: actions/upload-artifact@v4

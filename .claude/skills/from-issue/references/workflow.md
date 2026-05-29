@@ -323,9 +323,9 @@ git push -u origin <KEY>-<feature>
 
 If `git push` fails (no remote, no auth), abort with the git error verbatim. The local branch and files remain on disk.
 
-### 11.5. Sync test cases to the TCMS (optional, Qase)
+### 11.5. Write the TCMS records artifact (Qase, at-merge model)
 
-**Skip entirely** if `dry-run` was passed OR `QASE_API_TOKEN`/`QASE_PROJECT_CODE` are unset. Per [`references/tcms-sync.md`](tcms-sync.md) (read it before this step): write `.tcms-records.json` from the Step 6 model, run `npx tsx src/tcms/sync.ts --records .tcms-records.json`, capture stdout for the PR body, then `rm .tcms-records.json`. A non-zero/failed sync is recorded as a PR warning and **never aborts** the run or blocks the PR (it is a one-way downstream mirror).
+**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to `.tcms/records/<KEY>.json` (a committed file — one object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`; plus a `meta` block with `jiraKey`/`sourceUrl`), and `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
 
 ### 12. Open PR
 
