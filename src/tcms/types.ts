@@ -45,6 +45,7 @@ export interface SyncMeta {
 export interface CaseResult {
   caseId: number;
   status: TcmsStatus;
+  comment?: string; // e.g. which projects failed (multi-project aggregation)
 }
 
 // The seam every TCMS backend implements. qase-client.ts is the first impl.
@@ -52,4 +53,9 @@ export interface TcmsSeam {
   ensureSuitePath(path: string[]): Promise<number>; // create-as-needed → leaf suite id
   upsertCase(suiteId: number, c: TcmsCase): Promise<number>; // find-or-create by (suite,title)
   recordResults(results: CaseResult[], meta: SyncMeta): Promise<void>; // create run + results
+  archiveCase(caseId: number): Promise<void>; // deprecate/archive a case whose test was removed
 }
+
+// qase-map.json shape: logical test key → Qase case id. Auto-written by suite-sync;
+// read by humans as a test↔case lookup index. Never hand-edited.
+export type QaseMap = Record<string, number>;

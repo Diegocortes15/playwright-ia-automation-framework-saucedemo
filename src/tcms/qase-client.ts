@@ -67,6 +67,7 @@ export class QaseClient implements TcmsSeam {
       suite_id: suiteId,
       description: c.description,
       preconditions: c.preconditions,
+      automation: 2, // 2 = "automated" (Qase integer enum: 0=not automated, 1=to be automated, 2=automated)
       steps_type: 'classic',
       steps: c.steps.map((s, i) => ({
         position: i + 1,
@@ -95,7 +96,15 @@ export class QaseClient implements TcmsSeam {
       await this.rpc('POST', `/result/${code}/${run.result.id}`, {
         case_id: r.caseId,
         status: r.status,
+        ...(r.comment === undefined ? {} : { comment: r.comment }),
       });
     }
+  }
+
+  async archiveCase(caseId: number): Promise<void> {
+    const code = this.cfg.projectCode;
+    // Archive mechanism per the live probe. DELETE is the least-destructive option
+    // Qase exposes if no deprecate/status flag exists on a case.
+    await this.rpc('DELETE', `/case/${code}/${caseId}`);
   }
 }
