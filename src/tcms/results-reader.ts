@@ -3,6 +3,7 @@ import type { TcmsStatus } from './types';
 export interface IndexedResult {
   steps: string[];
   status: TcmsStatus;
+  failedProjects: string[]; // project names where the test did not pass (for the run comment)
 }
 
 const HOOK_TITLES = new Set(['Before Hooks', 'After Hooks', 'Worker Cleanup']);
@@ -18,7 +19,7 @@ interface PwResult {
 }
 interface PwSpec {
   title: string;
-  tests?: { results?: PwResult[] }[];
+  tests?: { projectName?: string; results?: PwResult[] }[];
 }
 interface PwSuite {
   suites?: PwSuite[];
@@ -38,13 +39,31 @@ export function indexResults(report: unknown): Map<string, IndexedResult> {
 function walk(suite: PwSuite, out: Map<string, IndexedResult>): void {
   for (const child of suite.suites ?? []) walk(child, out);
   for (const spec of suite.specs ?? []) {
-    const result = spec.tests?.[0]?.results?.[0];
-    if (!result) continue;
-    out.set(normalizeTitle(spec.title), {
-      steps: extractSteps(result.steps ?? []),
-      status: mapStatus(result.status),
-    });
+    const perProject = (spec.tests ?? []).map((t) => ({
+      project: t.projectName,
+      status: mapStatus(t.results?.[0]?.status),
+      steps: extractSteps(t.results?.[0]?.steps ?? []),
+    }));
+    if (perProject.length === 0) continue;
+    out.set(normalizeTitle(spec.title), aggregate(perProject));
   }
+}
+
+// Collapse one logical test's per-project results into a single IndexedResult.
+// passed only if every project passed; skipped only if every project skipped;
+// otherwise failed. Steps are identical across projects — take the first non-empty.
+function aggregate(
+  perProject: { project?: string; status: TcmsStatus; steps: string[] }[],
+): IndexedResult {
+  const failedProjects = perProject
+    .filter((p) => p.status !== 'passed')
+    .map((p) => p.project)
+    .filter((p): p is string => Boolean(p));
+  const allPassed = perProject.every((p) => p.status === 'passed');
+  const allSkipped = perProject.every((p) => p.status === 'skipped');
+  const status: TcmsStatus = allPassed ? 'passed' : allSkipped ? 'skipped' : 'failed';
+  const steps = perProject.find((p) => p.steps.length > 0)?.steps ?? [];
+  return { steps, status, failedProjects };
 }
 
 // PW 1.59 top-level steps are the test.step calls. Defensively drop hook entries
