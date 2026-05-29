@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "jiraKey": "SW-2",
+    "sourceUrl": "https://diegocortes15.atlassian.net/browse/SW-2"
+  },
+  "records": [
+    {
+      "title": "footer Twitter link points to its Sauce Labs URL",
+      "acText": "The footer Twitter link's href is https://twitter.com/saucelabs.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "footer",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "footer Facebook link points to its Sauce Labs URL",
+      "acText": "The footer Facebook link's href is https://www.facebook.com/saucelabs.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "footer",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "footer LinkedIn link points to its Sauce Labs URL",
+      "acText": "The footer LinkedIn link's href is https://www.linkedin.com/company/sauce-labs/.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "footer",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "footer shows the Sauce Labs copyright text",
+      "acText": "The footer shows '© 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "footer",
+      "contextLabel": "standard_user"
+    }
+  ]
+}

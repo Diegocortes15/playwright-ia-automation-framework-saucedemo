@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "jiraKey": "SW-3",
+    "sourceUrl": "https://diegocortes15.atlassian.net/browse/SW-3"
+  },
+  "records": [
+    {
+      "title": "problem_user sees one identical broken image for every product",
+      "acText": "For problem_user, every product image collapses to the same broken placeholder (sl-404) instead of a distinct image per product.",
+      "user": "problem_user",
+      "tags": ["@problem"],
+      "bucket": "Edge",
+      "feature": "inventory",
+      "contextLabel": "problem_user"
+    },
+    {
+      "title": "all six product images render with distinct, non-empty sources",
+      "acText": "All six products show distinct, non-empty image sources (one image per product).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "all six product titles render exactly and in catalog order",
+      "acText": "The six product titles match the catalog exactly, in Name A→Z display order.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "every product shows its exact description",
+      "acText": "Each product's description matches the catalog reference data exactly.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "every product price is formatted with a leading dollar sign",
+      "acText": "Each product price matches the catalog and is formatted as $NN.NN.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "every product offers an enabled Add to cart button",
+      "acText": "All six products show an enabled 'Add to cart' button.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "hovering a product title turns its text the brand green (#3ddc91)",
+      "acText": "Hovering a product title changes its computed text color to the brand green rgb(61, 220, 145).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    }
+  ]
+}
