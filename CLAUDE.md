@@ -39,7 +39,7 @@ This project ships custom skills under `.claude/skills/<skill-name>/` — domain
 Current custom skills:
 
 - **`/scaffold-page-object`** — generate a draft Page Object class from a live page snapshot. Full guide: [`docs/scaffold-page-object.md`](docs/scaffold-page-object.md).
-- **`/from-issue`** — generate a set of Playwright tests from a Jira ticket (read via the Atlassian MCP) and open a GitHub PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist, and grows the harness autonomously (data-driven `tests/users.ts` `AUTH_USERS`, [ADR-0014](docs/adr/0014-from-issue-harness-growth.md)) when a ticket needs an unwired auth user. Full guide: [`docs/from-issue.md`](docs/from-issue.md).
+- **`/from-issue`** — generate a set of Playwright tests from a Jira ticket (read via the Atlassian MCP) and open a GitHub PR with the result. Composes `/scaffold-page-object` when a target Page Object doesn't yet exist, and grows the harness autonomously (data-driven `tests/users.ts` `AUTH_USERS`, [ADR-0014](docs/adr/0014-from-issue-harness-growth.md)) when a ticket needs an unwired auth user. Full guide: [`docs/from-issue.md`](docs/from-issue.md). Optionally mirrors generated tests into a TCMS (Qase) at PR time when `QASE_*` is set — opt-in, one-way, [ADR-0016](docs/adr/0016-tcms-mirror.md) / [`docs/tcms.md`](docs/tcms.md).
 - **`/refine-ticket`** — iteratively harden a Jira ticket against a "bulletproof" rubric (grounded in existing automation + docs + sources you point it at) and write the refined acceptance criteria back to the ticket on approval, so `/from-issue` has nothing left to guess. Writes to Jira ([ADR-0013](docs/adr/0013-refine-ticket-jira-writeback.md)) — the only skill that does. Full guide: [`docs/refine-ticket.md`](docs/refine-ticket.md).
 
 ## GitHub + Jira operations
@@ -104,6 +104,7 @@ Never use XPath.
 | Specs                                        | `tests/<feature>/*.spec.ts`                                                                         |
 | Auth setup (generates storageState per user) | `tests/auth.setup.ts`                                                                               |
 | Playwright config (9 projects)               | `playwright.config.ts`                                                                              |
+| TCMS mirror (optional Qase seam)             | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `sync.ts`)        |
 
 ## Path aliases
 
