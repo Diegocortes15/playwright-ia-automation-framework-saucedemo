@@ -110,7 +110,7 @@ test('upsertCase marks the case automated', async () => {
 test('archiveCase issues the archive call for the id', async () => {
   const calls = stubFetch(() => ({ result: { id: 1 } }));
   await new QaseClient(cfg).archiveCase(55);
-  expect(calls.some((c) => c.url.endsWith('/case/SAUCE/55'))).toBe(true);
+  expect(calls.some((c) => c.url.endsWith('/case/SAUCE/55') && c.method === 'DELETE')).toBe(true);
 });
 
 test('recordResults forwards a per-result comment when present', async () => {
