@@ -56,7 +56,7 @@ function aggregate(
   perProject: { project?: string; status: TcmsStatus; steps: string[] }[],
 ): IndexedResult {
   const failedProjects = perProject
-    .filter((p) => p.status !== 'passed')
+    .filter((p) => p.status === 'failed')
     .map((p) => p.project)
     .filter((p): p is string => Boolean(p));
   const allPassed = perProject.every((p) => p.status === 'passed');

@@ -173,7 +173,7 @@ test('skipped only when every project skipped', () => {
         title: 's',
         specs: [
           {
-            title: 't',
+            title: 'all-skip',
             tests: [
               { projectName: 'a', results: [{ status: 'skipped', steps: [] }] },
               { projectName: 'b', results: [{ status: 'skipped', steps: [] }] },
@@ -183,5 +183,7 @@ test('skipped only when every project skipped', () => {
       },
     ],
   });
-  expect(idx.get('t')!.status).toBe('skipped');
+  const hit = idx.get('all-skip')!;
+  expect(hit.status).toBe('skipped');
+  expect(hit.failedProjects).toEqual([]);
 });
