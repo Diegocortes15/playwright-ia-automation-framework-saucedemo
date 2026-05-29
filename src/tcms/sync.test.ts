@@ -15,6 +15,9 @@ class FakeSeam implements TcmsSeam {
   async recordResults(results: CaseResult[], _meta: SyncMeta): Promise<void> {
     this.recorded = results;
   }
+  async archiveCase(_caseId: number): Promise<void> {
+    // no-op stub — archiveCase not exercised in sync.test.ts
+  }
 }
 
 const records: TestRecord[] = [

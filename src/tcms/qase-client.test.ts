@@ -97,3 +97,34 @@ test('recordResults creates a run then posts each result with a valid status', a
   const result = calls.find((c) => c.url === 'https://api.qase.io/v1/result/SAUCE/5')!;
   expect(result.body).toEqual({ case_id: 42, status: 'passed' });
 });
+
+test('upsertCase marks the case automated', async () => {
+  const calls = stubFetch((c) =>
+    c.method === 'GET' ? { result: { entities: [] } } : { result: { id: 7 } },
+  );
+  await new QaseClient(cfg).upsertCase(3, baseCase);
+  const post = calls.find((c) => c.method === 'POST')!;
+  expect(post.body!.automation).toBe(2); // 2 = "automated"
+});
+
+test('archiveCase issues the archive call for the id', async () => {
+  const calls = stubFetch(() => ({ result: { id: 1 } }));
+  await new QaseClient(cfg).archiveCase(55);
+  expect(calls.some((c) => c.url.endsWith('/case/SAUCE/55'))).toBe(true);
+});
+
+test('recordResults forwards a per-result comment when present', async () => {
+  const calls = stubFetch((c) =>
+    c.url.includes('/run/') ? { result: { id: 9 } } : { result: { id: 1 } },
+  );
+  await new QaseClient(cfg).recordResults(
+    [{ caseId: 7, status: 'failed', comment: 'failed on: problem' }],
+    {
+      jiraKey: 'SW-1',
+      sourceUrl: 'u',
+      runTitle: 'r',
+    },
+  );
+  const result = calls.find((c) => c.url === 'https://api.qase.io/v1/result/SAUCE/9')!;
+  expect(result.body).toEqual({ case_id: 7, status: 'failed', comment: 'failed on: problem' });
+});
