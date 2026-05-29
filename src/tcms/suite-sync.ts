@@ -54,6 +54,9 @@ export async function runSuiteSync(
     });
   }
 
+  // Assumes a full-suite report: a record whose test is absent from the report is
+  // treated as removed and its case archived. A partial run would wrongly archive
+  // unrun tests — the CI step always runs the full matrix (see ADR-0017).
   for (const id of orphanedIds(input.oldMap, Object.keys(outcome.newMap))) {
     await seam.archiveCase(id);
     outcome.archived.push(id);
@@ -79,7 +82,12 @@ export function loadRecords(dir: string): TestRecord[] {
   }
   const all: TestRecord[] = [];
   for (const f of files) {
-    const parsed = JSON.parse(readFileSync(join(dir, f), 'utf-8')) as RecordsFile;
+    let parsed: RecordsFile;
+    try {
+      parsed = JSON.parse(readFileSync(join(dir, f), 'utf-8')) as RecordsFile;
+    } catch (e) {
+      throw new Error(`Failed to parse records file ${join(dir, f)}: ${e}`);
+    }
     all.push(...parsed.records);
   }
   return all;
