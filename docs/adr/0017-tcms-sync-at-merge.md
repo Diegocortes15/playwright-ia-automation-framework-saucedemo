@@ -10,7 +10,7 @@ ADR-0016 pushed one ticket's tests from `/from-issue` at PR-creation time. That 
 ## Decision
 
 - **Mutate at merge.** `/from-issue` writes a committed `.tcms/records/<KEY>.json` artifact (no Qase calls). A merge-only, gated, fail-safe CI step runs `npm run tcms:sync`, which does the authoritative create/update/archive. A rejected/closed-unmerged PR never touches Qase.
-- **Whole-suite, records-driven.** One Qase case per logical test under `Regression › feature › context › bucket`, marked automated, deduped across projects (passed iff every project passed), expected = the record's AC text.
+- **Whole-suite, records-driven.** One Qase case per logical test under `feature › context › bucket`, marked automated, deduped across projects (passed iff every project passed), expected = the record's AC text. A dedicated `Regression` root suite was dropped as redundant — regression status is conveyed by the `automation` flag on every case and the regression-titled run.
 - **Hybrid linkage.** Find-or-create by suite-path + title (no hand-pasted IDs, so a dangling-ID blank run cannot happen), with an auto-written `qase-map.json` (test → case id) as the lookup/audit/delete index. (Rejected: the official Qase reporter — pinned mode recreates manual-ID tedium and does not write IDs back; auto-create is fragile and lacks the lifecycle features.)
 - **Archive, not delete (best effort).** Orphaned cases are removed via `DELETE /case/{code}/{id}` — the only removal mechanism Qase's REST API exposes (no non-destructive deprecate/archive flag on a case was found during the live probe). The map drops the entry. If Qase later exposes an archive flag, switch to it.
 

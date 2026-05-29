@@ -7,8 +7,6 @@ import { loadMap, saveMap, logicalKey, orphanedIds, mergeMap } from './map-store
 import { QaseClient } from './qase-client';
 import { qaseConfig } from '../utils/qase-env';
 
-const REGRESSION_ROOT = 'Regression';
-
 // A record plus its file-level provenance (from the records file's meta block).
 export type EnrichedRecord = TestRecord & { jiraKey: string; sourceUrl: string };
 
@@ -41,11 +39,10 @@ export async function runSuiteSync(
       outcome.unlinked.push(record.title);
       continue;
     }
-    const base = mapToCase(record, hit.steps, hit.status, {
+    const c = mapToCase(record, hit.steps, hit.status, {
       jiraKey: record.jiraKey,
       sourceUrl: record.sourceUrl,
     });
-    const c = { ...base, suitePath: [REGRESSION_ROOT, ...base.suitePath] };
     const key = logicalKey(c.suitePath, c.title);
     const suiteId = await seam.ensureSuitePath(c.suitePath);
     const caseId = await seam.upsertCase(suiteId, c);

@@ -56,18 +56,18 @@ const report = {
 };
 const meta: SyncMeta = { jiraKey: 'SW-1', sourceUrl: 'u', runTitle: 'Regression — 2026-05-29' };
 
-test('roots cases under Regression, records the run, writes the map', async () => {
+test('roots cases at feature › context › bucket, records the run, writes the map', async () => {
   const seam = new FakeSeam();
   const out = await runSuiteSync({ records, report, oldMap: {}, meta }, seam);
   expect(seam.upserted).toHaveLength(1);
-  expect(seam.upserted[0].c.suitePath).toEqual(['Regression', 'login', 'no auth', 'Positive']);
+  expect(seam.upserted[0].c.suitePath).toEqual(['login', 'no auth', 'Positive']);
   expect(seam.upserted[0].c.steps.at(-1)).toEqual({
     action: 'Submit',
     expected: 'Lands on inventory',
   });
   expect(seam.results).toEqual([{ caseId: 100, status: 'passed', comment: undefined }]);
   expect(out.newMap).toEqual({
-    'Regression › login › no auth › Positive › standard_user logs in': 100,
+    'login › no auth › Positive › standard_user logs in': 100,
   });
   expect(out.archived).toEqual([]);
 });
@@ -75,13 +75,13 @@ test('roots cases under Regression, records the run, writes the map', async () =
 test('archives orphans: an old map entry with no current record', async () => {
   const seam = new FakeSeam();
   const oldMap: QaseMap = {
-    'Regression › login › no auth › Positive › standard_user logs in': 100,
-    'Regression › login › no auth › Negative › gone test': 200,
+    'login › no auth › Positive › standard_user logs in': 100,
+    'login › no auth › Negative › gone test': 200,
   };
   const out = await runSuiteSync({ records, report, oldMap, meta }, seam);
   expect(seam.archived).toEqual([200]);
   expect(out.archived).toEqual([200]);
-  expect(out.newMap['Regression › login › no auth › Negative › gone test']).toBeUndefined();
+  expect(out.newMap['login › no auth › Negative › gone test']).toBeUndefined();
 });
 
 test('a record with no matching result is reported unlinked, not synced', async () => {

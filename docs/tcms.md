@@ -14,9 +14,10 @@ The mirror runs **at merge in CI**, not at PR-creation time:
 2. When a PR merges to `main`, the CI `test` workflow runs `npm run tcms:sync`
    (gated on a `push` event + `QASE_*` GitHub Actions secrets). A rejected or
    unmerged PR never touches Qase.
-3. The sync mirrors the **whole suite** under a `Regression` root suite, one case per
-   logical test, marked **automated**, deduped across Playwright projects (passed iff
-   every project passed), with AC text as the expected result.
+3. The sync mirrors the **whole suite** as `feature › context › bucket`, one case per
+   logical test, marked **automated** (which conveys regression status), deduped across
+   Playwright projects (passed iff every project passed), with AC text as the expected
+   result.
 4. `qase-map.json` (committed to the repo) is the authoritative link index mapping
    each logical test to its Qase case id. Orphaned cases — whose `.tcms/records/`
    entry has been removed — are deleted from Qase and dropped from the map.
@@ -52,8 +53,8 @@ Commit the updated `qase-map.json`.
 
 ## What gets synced (one-way, code → Qase)
 
-- A **suite tree** `Regression › feature › context › bucket`, one **case** per logical
-  test (prose title), marked **automated**.
+- A **suite tree** `feature › context › bucket`, one **case** per logical
+  test (prose title), marked **automated** (conveying regression status).
 - **Expected result** = the AC text from `.tcms/records/<KEY>.json`.
 - Cases are **found-or-created by suite-path + title** — no Qase id is ever
   hand-pasted in code (avoids the drift the no-TCMS doc warns about).

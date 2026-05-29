@@ -3,8 +3,8 @@ import { logicalKey, orphanedIds, mergeMap } from './map-store';
 import type { QaseMap } from './types';
 
 test('logicalKey joins suite path + title stably', () => {
-  expect(logicalKey(['Regression', 'login', 'no auth', 'Positive'], 'standard_user logs in')).toBe(
-    'Regression › login › no auth › Positive › standard_user logs in',
+  expect(logicalKey(['login', 'no auth', 'Positive'], 'standard_user logs in')).toBe(
+    'login › no auth › Positive › standard_user logs in',
   );
 });
 

@@ -28,7 +28,7 @@ Write it with the Write tool and `git add` it alongside the spec. Skip under `dr
 ## What the merge-time sync does (`src/tcms/suite-sync.ts`, run by CI)
 
 - Reads **all** `.tcms/records/*.json` + the full `test-results/results.json`.
-- One Qase case per logical test under **`Regression › feature › context › bucket`**, marked **automated**; steps from `test.step` names; **expected = the record's `acText`**; deduped across projects (passed only if every project passed).
+- One Qase case per logical test under **`feature › context › bucket`**, marked **automated**; steps from `test.step` names; **expected = the record's `acText`**; deduped across projects (passed only if every project passed).
 - Find-or-create (never references an unknown id), one run per sync, writes `qase-map.json` (test → case id), and **archives** cases whose records vanished.
 
 Mapping lives in `src/tcms/case-mapper.ts` + `suite-sync.ts` — do not re-derive.
