@@ -31,6 +31,7 @@ export class QaseClient implements TcmsSeam {
   }
 
   async ensureSuitePath(path: string[]): Promise<number> {
+    if (path.length === 0) throw new Error('ensureSuitePath: path must not be empty');
     let parentId: number | undefined;
     let suiteId = 0;
     for (const title of path) {
@@ -42,6 +43,7 @@ export class QaseClient implements TcmsSeam {
 
   private async ensureSuite(title: string, parentId?: number): Promise<number> {
     const code = this.cfg.projectCode;
+    // Title search is narrow at project scale; 100 is ample, so no pagination.
     const q = new URLSearchParams({ 'filters[search]': title, limit: '100' });
     const found = await this.rpc<ListResp>('GET', `/suite/${code}?${q}`);
     const match = found.result.entities.find(
@@ -57,6 +59,7 @@ export class QaseClient implements TcmsSeam {
 
   async upsertCase(suiteId: number, c: TcmsCase): Promise<number> {
     const code = this.cfg.projectCode;
+    // Title search is narrow at project scale; 100 is ample, so no pagination.
     const q = new URLSearchParams({ 'filters[search]': c.title, limit: '100' });
     const found = await this.rpc<ListResp>('GET', `/case/${code}?${q}`);
     const body = {
@@ -71,6 +74,7 @@ export class QaseClient implements TcmsSeam {
         expected_result: s.expected,
       })),
     };
+    // suiteId always comes from ensureSuitePath (> 0), so a raw === on suite_id is safe here.
     const match = found.result.entities.find((x) => x.title === c.title && x.suite_id === suiteId);
     if (match) {
       await this.rpc('PATCH', `/case/${code}/${match.id}`, body);

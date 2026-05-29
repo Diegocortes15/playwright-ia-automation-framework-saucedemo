@@ -76,7 +76,11 @@ test('upsertCase updates (PATCH) when a same-title/suite case exists', async () 
   );
   const id = await new QaseClient(cfg).upsertCase(7, baseCase);
   expect(id).toBe(99);
-  expect(calls.some((c) => c.method === 'PATCH' && c.url.endsWith('/case/SAUCE/99'))).toBe(true);
+  const patch = calls.find((c) => c.method === 'PATCH')!;
+  expect(patch.url.endsWith('/case/SAUCE/99')).toBe(true);
+  expect(patch.body!.steps_type).toBe('classic');
+  expect(patch.body!.suite_id).toBe(7);
+  expect((patch.body!.steps as { action: string }[])[0].action).toBe('Navigate to the login page');
 });
 
 test('recordResults creates a run then posts each result with a valid status', async () => {
