@@ -23,18 +23,29 @@ The mirror has two separate commands with distinct responsibilities:
 4. `qase-map.json` (committed to the repo) is the authoritative link index mapping
    each logical test to its Qase case id.
 
-### `tcms:run` — opt-in, record-only
+### `qase:smoke` / `qase:regression` — one-command run + auto-labeled Qase record
 
-Runs are intentional — recorded when a human decides a regression pass, a smoke check,
-or a subset needs to be shared with a stakeholder.
+For named runs, a single command runs the suite **and** records a Qase run with a fixed
+label — no two-step chain required:
 
 ```bash
-# Smoke + Qase:
-npm run test:smoke ; npm run tcms:run -- SMOKE
+# Run @smoke tests → Qase run titled "SMOKE — <date time ET>":
+npm run qase:smoke
 
-# Regression + Qase:
-npm run test:regression ; npm run tcms:run -- REGRESSION
+# Run full suite → Qase run titled "REGRESSION — <date time ET>":
+npm run qase:regression
+```
 
+These use `run-and-report.ts` which spawns `playwright test` (with the appropriate args),
+then calls `recordRun(label)` regardless of pass/fail — failures are recorded in Qase too.
+
+### `tcms:run` — opt-in, record-only (ad-hoc)
+
+Runs are intentional — recorded when a human decides a regression pass, a smoke check,
+or a subset needs to be shared with a stakeholder. Use this for ad-hoc folder/file runs
+where you want to control the Playwright invocation separately:
+
+```bash
 # A specific feature folder + Qase (→ title ON-DEMAND: FOOTER — <date time ET>):
 npx playwright test footer --project=standard ; npm run tcms:run
 
@@ -43,12 +54,18 @@ npm test
 npm run tcms:run
 ```
 
+**Summary of run commands:**
+
+- `npm run test:smoke` / `npm run test:regression` — **run only**, no Qase recording.
+- `npm run qase:smoke` / `npm run qase:regression` — **run + auto-labeled Qase record**.
+- `npx playwright test <folder> ; npm run tcms:run` — **ad-hoc record-only** (→ `ON-DEMAND: <features>`).
+
 `tcms:run` reads the **last** `test-results/results.json`, matches ran tests to existing
 cases via `qase-map.json`, records **one** Qase run, and prints the run URL. It is
 **record-only**: it never creates, updates, or archives cases. Tests not yet in
 `qase-map.json` are skipped with a note to run `npm run tcms:sync` first.
 
-Run titles are upper-cased with the current date + time in ET (e.g. `ON-DEMAND: FOOTER, LOGIN — 2026-05-30 14:15 ET`). Pass an optional label (`-- SMOKE` or `-- REGRESSION`) for named runs. The printed run link is purple and any "skipped" warning is amber (TTY only).
+Run titles are upper-cased with the current date + time in ET (e.g. `ON-DEMAND: FOOTER, LOGIN — 2026-05-30 14:15 ET`). Pass an optional label (`-- SMOKE` or `-- REGRESSION`) for named runs via `tcms:run`. The printed run link is purple and any "skipped" warning is amber (TTY only).
 
 ## Turn it on
 
