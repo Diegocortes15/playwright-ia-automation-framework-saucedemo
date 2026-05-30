@@ -92,7 +92,7 @@ const AMBER = '\x1b[38;5;214m'; // warning
 const RESET = '\x1b[0m';
 const color = (s: string, c: string): string => (process.stdout.isTTY ? `${c}${s}${RESET}` : s);
 
-async function main(): Promise<void> {
+export async function recordRun(label?: string): Promise<void> {
   const cfg = qaseConfig();
   if (!cfg) {
     console.log('TCMS off (QASE_API_TOKEN/QASE_PROJECT_CODE unset) — skipping Qase run.');
@@ -110,7 +110,7 @@ async function main(): Promise<void> {
     if (skipped.length) console.log(color(`Not in Qase: ${skipped.join('; ')}`, AMBER));
     return;
   }
-  const title = runTitle(map, results, nowET(), process.argv[2]);
+  const title = runTitle(map, results, nowET(), label);
   const runId = await new QaseClient(cfg).recordResults(results, {
     jiraKey: '',
     sourceUrl: '',
@@ -126,7 +126,7 @@ async function main(): Promise<void> {
 }
 
 if (process.argv[1]?.endsWith('run-report.ts')) {
-  main().catch((err) => {
+  recordRun(process.argv[2]).catch((err) => {
     console.error(`Qase run failed: ${err}`);
     process.exitCode = 0;
   });
