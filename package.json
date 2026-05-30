@@ -10,6 +10,7 @@
     "test:debug": "playwright test --project=standard --debug",
     "test:headed": "playwright test --project=standard --headed",
     "test:smoke": "playwright test --grep \"@smoke\"",
+    "test:regression": "playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
     "report": "playwright show-report",
     "codegen": "playwright codegen https://www.saucedemo.com",
