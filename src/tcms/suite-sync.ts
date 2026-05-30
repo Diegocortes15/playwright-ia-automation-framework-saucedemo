@@ -32,8 +32,14 @@ export async function runSuiteSync(
   const outcome: SuiteSyncOutcome = { synced: [], unlinked: [], archived: [], newMap: {} };
 
   for (const record of input.records) {
+    const key = logicalKey([record.feature, record.contextLabel, record.bucket], record.title);
     const hit = index.get(normalizeTitle(record.title));
     if (!hit) {
+      // This test exists (it has a record) but did not run in THIS invocation. Keep
+      // its case as-is by carrying its existing id forward, so a partial sync never
+      // archives it. (A brand-new record that hasn't run yet has no id to carry.)
+      const existing = input.oldMap[key];
+      if (existing !== undefined) outcome.newMap[key] = existing;
       outcome.unlinked.push(record.title);
       continue;
     }
@@ -41,16 +47,16 @@ export async function runSuiteSync(
       jiraKey: record.jiraKey,
       sourceUrl: record.sourceUrl,
     });
-    const key = logicalKey(c.suitePath, c.title);
     const suiteId = await seam.ensureSuitePath(c.suitePath);
     const caseId = await seam.upsertCase(suiteId, c);
     outcome.newMap[key] = caseId;
     outcome.synced.push(key);
   }
 
-  // Assumes a full-suite report: a record whose test is absent from the report is
-  // treated as removed and its case archived. A partial run would wrongly archive
-  // unrun tests — the CI step always runs the full matrix (see ADR-0017).
+  // Archive ONLY cases whose record no longer exists — i.e. a map key produced by NO
+  // current record (ran or carried-forward above). A test that merely didn't run this
+  // invocation is carried forward, so a partial sync archives nothing. Records drive
+  // existence; results only drive content refresh.
   for (const id of orphanedIds(input.oldMap, Object.keys(outcome.newMap))) {
     await seam.archiveCase(id);
     outcome.archived.push(id);

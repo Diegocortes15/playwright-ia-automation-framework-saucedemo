@@ -88,3 +88,26 @@ test('a record with no matching result is reported unlinked, not synced', async 
   expect(seam.upserted).toHaveLength(0);
   expect(out.unlinked).toEqual(['never ran']);
 });
+
+test('partial run carries forward non-ran records — archives nothing', async () => {
+  const seam = new FakeSeam();
+  // The login test exists (has a record + an existing case id 100) but does NOT run
+  // in this invocation (empty report). It must be carried forward, never archived.
+  const oldMap: QaseMap = { 'login › no auth › Positive › standard_user logs in': 100 };
+  const loginRecord: EnrichedRecord = {
+    title: 'standard_user logs in',
+    acText: 'x',
+    user: 'no-auth',
+    tags: [],
+    bucket: 'Positive',
+    feature: 'login',
+    contextLabel: 'no auth',
+    jiraKey: 'SW-1',
+    sourceUrl: 'u',
+  };
+  const out = await runSuiteSync({ records: [loginRecord], report: { suites: [] }, oldMap }, seam);
+  expect(seam.archived).toEqual([]); // nothing archived
+  expect(out.archived).toEqual([]);
+  expect(out.newMap['login › no auth › Positive › standard_user logs in']).toBe(100); // carried forward
+  expect(out.unlinked).toEqual(['standard_user logs in']);
+});
