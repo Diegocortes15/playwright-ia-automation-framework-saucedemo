@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectResults, runTitle } from './run-report';
+import { selectResults, runTitle, nowET } from './run-report';
 import type { QaseMap } from './types';
 
 const map: QaseMap = {
@@ -47,11 +47,45 @@ test('selectResults matches ran tests to existing case ids; unmapped go to skipp
   expect(skipped).toEqual(['a brand-new test not in the map']);
 });
 
-test('runTitle names the run by the features present (sorted, deduped)', () => {
+test('selectResults ignores auth.setup pseudo-tests (not reported as skipped)', () => {
+  const withSetup = {
+    suites: [
+      {
+        title: 's',
+        specs: [
+          {
+            title: 'authenticate as standard',
+            tests: [{ projectName: 'setup', results: [{ status: 'passed', steps: [] }] }],
+          },
+          {
+            title: 'a brand-new test not in the map',
+            tests: [{ projectName: 'standard', results: [{ status: 'passed', steps: [] }] }],
+          },
+        ],
+      },
+    ],
+  };
+  const { skipped } = selectResults(withSetup, map);
+  expect(skipped).toEqual(['a brand-new test not in the map']);
+});
+
+test('runTitle names the run by features, upper-cased, with the when string', () => {
   const results = selectResults(report, map).results;
-  expect(runTitle(map, results, '2026-05-29')).toBe('On-demand: footer, login — 2026-05-29');
+  expect(runTitle(map, results, '2026-05-30 14:00 ET')).toBe(
+    'ON-DEMAND: FOOTER, LOGIN — 2026-05-30 14:00 ET',
+  );
+});
+
+test('runTitle uses an explicit label (e.g. SMOKE/REGRESSION) when given', () => {
+  expect(runTitle(map, [], '2026-05-30 14:00 ET', 'regression')).toBe(
+    'REGRESSION — 2026-05-30 14:00 ET',
+  );
 });
 
 test('runTitle falls back to a generic scope when no features resolve', () => {
-  expect(runTitle(map, [], '2026-05-29')).toBe('On-demand: tests — 2026-05-29');
+  expect(runTitle(map, [], '2026-05-30 14:00 ET')).toBe('ON-DEMAND: TESTS — 2026-05-30 14:00 ET');
+});
+
+test('nowET returns a YYYY-MM-DD HH:MM ET string', () => {
+  expect(nowET(new Date('2026-05-30T18:15:00Z'))).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2} ET$/);
 });
