@@ -20,7 +20,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "tcms:sync": "tsx src/tcms/suite-sync.ts",
-    "tcms:run": "tsx src/tcms/run-report.ts"
+    "tcms:run": "tsx src/tcms/run-report.ts",
+    "qase:smoke": "tsx src/tcms/run-and-report.ts SMOKE --grep @smoke",
+    "qase:regression": "tsx src/tcms/run-and-report.ts REGRESSION"
   },
   "devDependencies": {
     "@playwright/cli": "^0.1.13",
