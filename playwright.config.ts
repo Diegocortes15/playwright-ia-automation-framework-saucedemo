@@ -30,7 +30,15 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    // One setup project per user (filtered by the auth.setup test title), so a
+    // user project authenticates ONLY its own user — not every AUTH_USER. A
+    // project dependency runs the whole dependency project, so per-user setup
+    // projects are how we scope auth to what each run actually needs.
+    ...AUTH_USERS.map((user) => ({
+      name: `setup-${user}`,
+      testMatch: /.*\.setup\.ts/,
+      grep: new RegExp(`authenticate as ${user}$`),
+    })),
     {
       name: 'no-auth',
       testIgnore: /.*\.setup\.ts/,
@@ -41,7 +49,7 @@ export default defineConfig({
       name: user,
       testIgnore: /.*\.setup\.ts/,
       grep: new RegExp(`@all-users|@${user}`),
-      dependencies: ['setup'],
+      dependencies: [`setup-${user}`],
       use: {
         ...devices['Desktop Chrome'],
         storageState: `auth/${user}.json`,
