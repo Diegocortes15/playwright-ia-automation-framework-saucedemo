@@ -6,10 +6,6 @@
   "scripts": {
     "test": "playwright test",
     "test:standard": "playwright test --project=standard",
-    "test:no-auth": "playwright test --project=no-auth",
-    "test:problem": "playwright test --project=problem",
-    "test:firefox": "playwright test --project=firefox-standard",
-    "test:webkit": "playwright test --project=webkit-standard",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --project=standard --debug",
     "test:headed": "playwright test --project=standard --headed",
@@ -22,7 +18,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "tcms:sync": "tsx src/tcms/suite-sync.ts"
+    "tcms:sync": "tsx src/tcms/suite-sync.ts",
+    "tcms:run": "tsx src/tcms/run-report.ts"
   },
   "devDependencies": {
     "@playwright/cli": "^0.1.13",

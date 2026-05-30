@@ -85,7 +85,7 @@ export class QaseClient implements TcmsSeam {
     return created.result.id;
   }
 
-  async recordResults(results: CaseResult[], meta: SyncMeta): Promise<void> {
+  async recordResults(results: CaseResult[], meta: SyncMeta): Promise<number> {
     const code = this.cfg.projectCode;
     const run = await this.rpc<IdResp>('POST', `/run/${code}`, {
       title: meta.runTitle,
@@ -99,6 +99,7 @@ export class QaseClient implements TcmsSeam {
         ...(r.comment === undefined ? {} : { comment: r.comment }),
       });
     }
+    return run.result.id;
   }
 
   async archiveCase(caseId: number): Promise<void> {

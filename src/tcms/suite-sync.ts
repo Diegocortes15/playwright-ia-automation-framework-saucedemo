@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { TcmsSeam, TestRecord, SyncMeta, CaseResult, QaseMap } from './types';
+import type { TcmsSeam, TestRecord, QaseMap } from './types';
 import { indexResults, normalizeTitle } from './results-reader';
 import { mapToCase } from './case-mapper';
 import { loadMap, saveMap, logicalKey, orphanedIds, mergeMap } from './map-store';
@@ -14,7 +14,6 @@ export interface SuiteSyncInput {
   records: EnrichedRecord[];
   report: unknown; // parsed test-results/results.json
   oldMap: QaseMap;
-  meta: SyncMeta;
 }
 export interface SuiteSyncOutcome {
   synced: string[]; // logical keys upserted
@@ -31,7 +30,6 @@ export async function runSuiteSync(
 ): Promise<SuiteSyncOutcome> {
   const index = indexResults(input.report);
   const outcome: SuiteSyncOutcome = { synced: [], unlinked: [], archived: [], newMap: {} };
-  const results: CaseResult[] = [];
 
   for (const record of input.records) {
     const hit = index.get(normalizeTitle(record.title));
@@ -48,13 +46,6 @@ export async function runSuiteSync(
     const caseId = await seam.upsertCase(suiteId, c);
     outcome.newMap[key] = caseId;
     outcome.synced.push(key);
-    results.push({
-      caseId,
-      status: hit.status,
-      comment: hit.failedProjects.length
-        ? `failed on: ${hit.failedProjects.join(', ')}`
-        : undefined,
-    });
   }
 
   // Assumes a full-suite report: a record whose test is absent from the report is
@@ -66,7 +57,6 @@ export async function runSuiteSync(
   }
   outcome.newMap = mergeMap(input.oldMap, outcome.newMap);
 
-  if (results.length > 0) await seam.recordResults(results, input.meta);
   return outcome;
 }
 
@@ -120,13 +110,8 @@ async function main(): Promise<void> {
     return;
   }
   const report = JSON.parse(readFileSync('test-results/results.json', 'utf-8'));
-  const meta: SyncMeta = {
-    jiraKey: 'suite',
-    sourceUrl: '',
-    runTitle: `Regression — ${new Date().toISOString().slice(0, 10)}`,
-  };
   const outcome = await runSuiteSync(
-    { records, report, oldMap: loadMap(mapPath), meta },
+    { records, report, oldMap: loadMap(mapPath) },
     new QaseClient(cfg),
   );
   saveMap(mapPath, outcome.newMap);

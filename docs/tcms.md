@@ -3,24 +3,52 @@
 An **opt-in, one-way** mirror of the automated suite into a TCMS so non-technical
 reviewers can browse and approve human-readable test cases. Off unless configured.
 Decision: [ADR-0016](adr/0016-tcms-mirror.md) (per-ticket model) →
-superseded by [ADR-0017](adr/0017-tcms-sync-at-merge.md) (at-merge, whole-suite).
+superseded by [ADR-0017](adr/0017-tcms-sync-at-merge.md) (at-merge, whole-suite, catalog-only) →
+scoped by [ADR-0018](adr/0018-qase-runs-opt-in.md) (runs are opt-in via `tcms:run`).
 
 ## How the sync works
 
-The mirror runs **at merge in CI**, not at PR-creation time:
+The mirror has two separate commands with distinct responsibilities:
+
+### `tcms:sync` — catalog-only, runs at merge
 
 1. `/from-issue` writes a committed `.tcms/records/<KEY>.json` artifact — no Qase
    calls happen during PR creation or review.
 2. When a PR merges to `main`, the CI `test` workflow runs `npm run tcms:sync`
    (gated on a `push` event + `QASE_*` GitHub Actions secrets). A rejected or
    unmerged PR never touches Qase.
-3. The sync mirrors the **whole suite** as `feature › context › bucket`, one case per
-   logical test, marked **automated** (which conveys regression status), deduped across
-   Playwright projects (passed iff every project passed), with AC text as the expected
-   result.
+3. The sync keeps the **catalog** current: creates new cases, updates changed cases,
+   archives orphaned cases, and writes `qase-map.json`. **It does not create a Qase run.**
+   Merges keep Qase accurate with zero run-history noise.
 4. `qase-map.json` (committed to the repo) is the authoritative link index mapping
-   each logical test to its Qase case id. Orphaned cases — whose `.tcms/records/`
-   entry has been removed — are deleted from Qase and dropped from the map.
+   each logical test to its Qase case id.
+
+### `tcms:run` — opt-in, record-only
+
+Runs are intentional — recorded when a human decides a regression pass, a smoke check,
+or a subset needs to be shared with a stakeholder.
+
+```bash
+# Full regression:
+npm test
+npm run tcms:run
+
+# A specific feature folder:
+npx playwright test tests/footer
+npm run tcms:run
+
+# Smoke suite:
+npm run test:smoke
+npm run tcms:run
+
+# Chain in one shot (PowerShell ; chains unconditionally):
+npx playwright test tests/checkout ; npm run tcms:run
+```
+
+`tcms:run` reads the **last** `test-results/results.json`, matches ran tests to existing
+cases via `qase-map.json`, records **one** Qase run titled `On-demand: <features> — <date>`,
+and prints the run URL. It is **record-only**: it never creates, updates, or archives cases.
+Tests not yet in `qase-map.json` are skipped with a note to run `npm run tcms:sync` first.
 
 ## Turn it on
 
@@ -32,9 +60,10 @@ The mirror runs **at merge in CI**, not at PR-creation time:
    - `QASE_API_TOKEN` — your token
    - `QASE_PROJECT_CODE` — e.g. `SAUCE`
 
-The next merged PR triggers the sync automatically.
+The next merged PR triggers the catalog sync automatically. No run is created unless
+you invoke `npm run tcms:run` locally.
 
-### Local refresh (optional)
+### Local catalog refresh (optional)
 
 To regenerate `qase-map.json` from your machine:
 
@@ -44,8 +73,7 @@ QASE_API_TOKEN=...
 QASE_PROJECT_CODE=SAUCE
 # QASE_API_HOST=https://api.qase.io/v1   # override only for self-hosted
 
-# 2. Run the full suite then sync:
-npm test
+# 2. Run the catalog sync:
 npm run tcms:sync
 ```
 
