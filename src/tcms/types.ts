@@ -52,7 +52,7 @@ export interface CaseResult {
 export interface TcmsSeam {
   ensureSuitePath(path: string[]): Promise<number>; // create-as-needed → leaf suite id
   upsertCase(suiteId: number, c: TcmsCase): Promise<number>; // find-or-create by (suite,title)
-  recordResults(results: CaseResult[], meta: SyncMeta): Promise<void>; // create run + results
+  recordResults(results: CaseResult[], meta: SyncMeta): Promise<number>; // create run + results → run id
   archiveCase(caseId: number): Promise<void>; // deprecate/archive a case whose test was removed
 }
 
