@@ -29,26 +29,26 @@ Runs are intentional — recorded when a human decides a regression pass, a smok
 or a subset needs to be shared with a stakeholder.
 
 ```bash
-# Full regression:
+# Smoke + Qase:
+npm run test:smoke ; npm run tcms:run -- SMOKE
+
+# Regression + Qase:
+npm run test:regression ; npm run tcms:run -- REGRESSION
+
+# A specific feature folder + Qase (→ title ON-DEMAND: FOOTER — <date time ET>):
+npx playwright test footer --project=standard ; npm run tcms:run
+
+# Full suite (on-demand, no label):
 npm test
 npm run tcms:run
-
-# A specific feature folder:
-npx playwright test tests/footer
-npm run tcms:run
-
-# Smoke suite:
-npm run test:smoke
-npm run tcms:run
-
-# Chain in one shot (PowerShell ; chains unconditionally):
-npx playwright test tests/checkout ; npm run tcms:run
 ```
 
 `tcms:run` reads the **last** `test-results/results.json`, matches ran tests to existing
-cases via `qase-map.json`, records **one** Qase run titled `On-demand: <features> — <date>`,
-and prints the run URL. It is **record-only**: it never creates, updates, or archives cases.
-Tests not yet in `qase-map.json` are skipped with a note to run `npm run tcms:sync` first.
+cases via `qase-map.json`, records **one** Qase run, and prints the run URL. It is
+**record-only**: it never creates, updates, or archives cases. Tests not yet in
+`qase-map.json` are skipped with a note to run `npm run tcms:sync` first.
+
+Run titles are upper-cased with the current date + time in ET (e.g. `ON-DEMAND: FOOTER, LOGIN — 2026-05-30 14:15 ET`). Pass an optional label (`-- SMOKE` or `-- REGRESSION`) for named runs. The printed run link is purple and any "skipped" warning is amber (TTY only).
 
 ## Turn it on
 
