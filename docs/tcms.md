@@ -20,7 +20,10 @@ The mirror has two separate commands with distinct responsibilities:
 3. The sync keeps the **catalog** current: creates new cases, updates changed cases,
    archives orphaned cases, and writes `qase-map.json`. **It does not create a Qase run.**
    Merges keep Qase accurate with zero run-history noise.
-4. `qase-map.json` (committed to the repo) is the authoritative link index mapping
+4. CI then **commits the refreshed `qase-map.json` back** to the branch (a
+   `[skip ci]` bot commit), so the committed map always reflects the live Qase case
+   ids — no manual refresh needed after a `/from-issue` PR merges.
+5. `qase-map.json` (committed to the repo) is the authoritative link index mapping
    each logical test to its Qase case id.
 
 ### `qase:smoke` / `qase:regression` — one-command run + auto-labeled Qase record
