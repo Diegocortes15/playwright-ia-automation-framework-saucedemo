@@ -19,6 +19,8 @@ jobs:
       contents: write # allow the merge-time job to commit the refreshed qase-map.json back
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so `--only-changed` can diff PRs against their base
 
       - uses: actions/setup-node@v4
         with:
@@ -35,7 +37,21 @@ jobs:
 
       - run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: Run tests
+      # On a PR: run ONLY the tests the PR added/changed (fast feedback, no full suite).
+      # --only-changed reliably runs changed spec files; it best-effort-tracks tests
+      # affected by changed shared files. The scheduled full regression is the backstop.
+      - name: Run affected tests (pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
+          CI: 'true'
+        run: npx playwright test --only-changed=${{ github.event.pull_request.base.sha }}
+
+      # On merge (push): run the full suite so the Qase catalog sync below has every
+      # test's steps/status. (A lighter merge + a separate scheduled full regression
+      # is a planned follow-up.)
+      - name: Run full suite (merge)
+        if: ${{ github.event_name == 'push' }}
         env:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           CI: 'true'
