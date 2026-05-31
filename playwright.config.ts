@@ -39,14 +39,17 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/,
       grep: new RegExp(`authenticate as ${user}$`),
     })),
+    // Projects are `chromium-<context>` so the project chip in the report is
+    // distinct from the `@<tag>` chip (both would otherwise read e.g. "standard").
+    // Matches the firefox-standard/webkit-standard cross-browser naming.
     {
-      name: 'no-auth',
+      name: 'chromium-no-auth',
       testIgnore: /.*\.setup\.ts/,
       grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
     },
     ...AUTH_USERS.map((user) => ({
-      name: user,
+      name: `chromium-${user}`,
       testIgnore: /.*\.setup\.ts/,
       grep: new RegExp(`@all-users|@${user}`),
       dependencies: [`setup-${user}`],

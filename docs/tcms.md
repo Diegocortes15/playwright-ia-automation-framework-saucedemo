@@ -47,7 +47,7 @@ where you want to control the Playwright invocation separately:
 
 ```bash
 # A specific feature folder + Qase (→ title ON-DEMAND: FOOTER — <date time ET>):
-npx playwright test footer --project=standard ; npm run tcms:run
+npx playwright test footer --project=chromium-standard ; npm run tcms:run
 
 # Full suite (on-demand, no label):
 npm test

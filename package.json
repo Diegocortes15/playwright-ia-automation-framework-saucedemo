@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "test": "playwright test",
-    "test:standard": "playwright test --project=standard",
+    "test:standard": "playwright test --project=chromium-standard",
     "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --project=standard --debug",
-    "test:headed": "playwright test --project=standard --headed",
+    "test:debug": "playwright test --project=chromium-standard --debug",
+    "test:headed": "playwright test --project=chromium-standard --headed",
     "test:smoke": "playwright test --grep \"@smoke\"",
     "test:regression": "playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
