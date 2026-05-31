@@ -15,6 +15,10 @@ export class InventoryPage {
   private readonly productDescriptions: Locator;
   private readonly productPrices: Locator;
   private readonly addToCartButtons: Locator;
+  // Sort control — saucedemo's ordering control is a native <select> (no separate
+  // filter widget); activeSortOption mirrors the currently-selected option's label.
+  private readonly sortDropdown: Locator;
+  private readonly activeSortOption: Locator;
 
   constructor(public readonly page: Page) {
     this.footer = new Footer(page);
@@ -23,6 +27,8 @@ export class InventoryPage {
     this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');
     this.productPrices = page.locator('[data-test="inventory-item-price"]');
     this.addToCartButtons = page.getByRole('button', { name: /^Add to cart$/i });
+    this.sortDropdown = page.locator('[data-test="product-sort-container"]');
+    this.activeSortOption = page.locator('[data-test="active-option"]');
   }
 
   // Composed / intent-level action — body wrapped in exactly one test.step.
@@ -78,5 +84,18 @@ export class InventoryPage {
     await test.step(`Hover the "${productName}" product title`, async () => {
       await this.productTitle(productName).hover();
     });
+  }
+
+  // Composed action — selects a sort option by its <option> value
+  // (az | za | lohi | hilo). Native <select>, so selectOption sets it directly.
+  async sortBy(optionValue: string): Promise<void> {
+    await test.step(`Sort products by "${optionValue}"`, async () => {
+      await this.sortDropdown.selectOption(optionValue);
+    });
+  }
+
+  // Query — the label of the currently-selected sort option (ADR-0001 rule #8).
+  async getActiveSortLabel(): Promise<string> {
+    return (await this.activeSortOption.textContent())?.trim() ?? '';
   }
 }

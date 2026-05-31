@@ -66,6 +66,51 @@
       "bucket": "Edge",
       "feature": "inventory",
       "contextLabel": "standard_user"
+    },
+    {
+      "title": "products default to Name (A to Z) order with the matching active sort label",
+      "acText": "On load, products are sorted by Name (A to Z) by default and the active sort option reads 'Name (A to Z)'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "selecting \"Name (A to Z)\" sorts products by name ascending",
+      "acText": "Selecting 'Name (A to Z)' orders the products alphabetically ascending by name.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "selecting \"Name (Z to A)\" sorts products by name descending",
+      "acText": "Selecting 'Name (Z to A)' orders the products alphabetically descending by name.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "selecting \"Price (low to high)\" sorts products by price ascending",
+      "acText": "Selecting 'Price (low to high)' orders the products by price ascending (lowest first).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
+    },
+    {
+      "title": "selecting \"Price (high to low)\" sorts products by price descending",
+      "acText": "Selecting 'Price (high to low)' orders the products by price descending (highest first).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user"
     }
   ]
 }
