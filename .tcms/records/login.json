@@ -1,8 +1,4 @@
 {
-  "meta": {
-    "jiraKey": "SW-1",
-    "sourceUrl": "https://diegocortes15.atlassian.net/browse/SW-1"
-  },
   "records": [
     {
       "title": "standard_user logs in successfully and lands on inventory",
@@ -11,7 +7,8 @@
       "tags": ["@no-auth", "@smoke"],
       "bucket": "Positive",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "problem_user logs in successfully and lands on inventory",
@@ -20,7 +17,8 @@
       "tags": ["@no-auth"],
       "bucket": "Positive",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "performance_glitch_user logs in successfully and lands on inventory",
@@ -29,7 +27,8 @@
       "tags": ["@no-auth"],
       "bucket": "Positive",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "error_user logs in successfully and lands on inventory",
@@ -38,7 +37,8 @@
       "tags": ["@no-auth"],
       "bucket": "Positive",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "visual_user logs in successfully and lands on inventory",
@@ -47,7 +47,8 @@
       "tags": ["@no-auth"],
       "bucket": "Positive",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "no credentials shows the required-field error",
@@ -56,7 +57,8 @@
       "tags": ["@no-auth"],
       "bucket": "Negative",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "missing password shows the required-field error",
@@ -65,7 +67,8 @@
       "tags": ["@no-auth"],
       "bucket": "Negative",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "missing username shows the required-field error",
@@ -74,7 +77,8 @@
       "tags": ["@no-auth"],
       "bucket": "Negative",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     },
     {
       "title": "invalid credentials are rejected",
@@ -83,7 +87,8 @@
       "tags": ["@no-auth", "@smoke"],
       "bucket": "Negative",
       "feature": "login",
-      "contextLabel": "no auth"
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
     }
   ]
 }

@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { runSuiteSync } from './suite-sync';
-import type { EnrichedRecord } from './suite-sync';
-import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta, QaseMap } from './types';
+import type { TcmsSeam, TcmsCase, CaseResult, SyncMeta, QaseMap, TestRecord } from './types';
 
 class FakeSeam implements TcmsSeam {
   public upserted: { suiteId: number; c: TcmsCase }[] = [];
@@ -22,7 +21,7 @@ class FakeSeam implements TcmsSeam {
   }
 }
 
-const records: EnrichedRecord[] = [
+const records: TestRecord[] = [
   {
     title: 'standard_user logs in',
     acText: 'Lands on inventory',
@@ -31,8 +30,7 @@ const records: EnrichedRecord[] = [
     bucket: 'Positive',
     feature: 'login',
     contextLabel: 'no auth',
-    jiraKey: 'SW-1',
-    sourceUrl: 'u',
+    jira: [{ key: 'SW-1', url: 'u' }],
   },
 ];
 const report = {
@@ -83,7 +81,7 @@ test('archives orphans: an old map entry with no current record', async () => {
 
 test('a record with no matching result is reported unlinked, not synced', async () => {
   const seam = new FakeSeam();
-  const orphanRecord: EnrichedRecord = { ...records[0], title: 'never ran' };
+  const orphanRecord: TestRecord = { ...records[0], title: 'never ran' };
   const out = await runSuiteSync({ records: [orphanRecord], report, oldMap: {} }, seam);
   expect(seam.upserted).toHaveLength(0);
   expect(out.unlinked).toEqual(['never ran']);
@@ -94,7 +92,7 @@ test('partial run carries forward non-ran records — archives nothing', async (
   // The login test exists (has a record + an existing case id 100) but does NOT run
   // in this invocation (empty report). It must be carried forward, never archived.
   const oldMap: QaseMap = { 'login › no auth › Positive › standard_user logs in': 100 };
-  const loginRecord: EnrichedRecord = {
+  const loginRecord: TestRecord = {
     title: 'standard_user logs in',
     acText: 'x',
     user: 'no-auth',
@@ -102,8 +100,7 @@ test('partial run carries forward non-ran records — archives nothing', async (
     bucket: 'Positive',
     feature: 'login',
     contextLabel: 'no auth',
-    jiraKey: 'SW-1',
-    sourceUrl: 'u',
+    jira: [{ key: 'SW-1', url: 'u' }],
   };
   const out = await runSuiteSync({ records: [loginRecord], report: { suites: [] }, oldMap }, seam);
   expect(seam.archived).toEqual([]); // nothing archived

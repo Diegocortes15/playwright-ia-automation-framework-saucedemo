@@ -12,8 +12,9 @@ The mirror has two separate commands with distinct responsibilities:
 
 ### `tcms:sync` — catalog-only, runs at merge
 
-1. `/from-issue` writes a committed `.tcms/records/<KEY>.json` artifact — no Qase
-   calls happen during PR creation or review.
+1. `/from-issue` writes a committed `.tcms/records/<feature>.json` artifact (per
+   feature, appended when a ticket augments an existing feature; each record carries
+   its own `jira` provenance) — no Qase calls happen during PR creation or review.
 2. When a PR merges to `main`, the CI `test` workflow runs `npm run tcms:sync`
    (gated on a `push` event + `QASE_*` GitHub Actions secrets). A rejected or
    unmerged PR never touches Qase.
@@ -103,7 +104,7 @@ Commit the updated `qase-map.json`.
 
 - A **suite tree** `feature › context › bucket`, one **case** per logical
   test (prose title), marked **automated** (conveying regression status).
-- **Expected result** = the AC text from `.tcms/records/<KEY>.json`.
+- **Expected result** = the AC text from the record (`.tcms/records/<feature>.json`).
 - Cases are **found-or-created by suite-path + title** — no Qase id is ever
   hand-pasted in code (avoids the drift the no-TCMS doc warns about).
 - Results are **deduped across Playwright projects**: a test passes only if every

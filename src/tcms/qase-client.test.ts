@@ -47,8 +47,7 @@ const baseCase: TcmsCase = {
   preconditions: 'No authentication',
   tags: [],
   bucket: 'Positive',
-  jiraKey: 'SW-1',
-  sourceUrl: 'u',
+  jira: [{ key: 'SW-1', url: 'u' }],
   status: 'passed',
 };
 

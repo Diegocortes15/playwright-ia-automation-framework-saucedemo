@@ -1,8 +1,4 @@
 {
-  "meta": {
-    "jiraKey": "SW-2",
-    "sourceUrl": "https://diegocortes15.atlassian.net/browse/SW-2"
-  },
   "records": [
     {
       "title": "footer Twitter link points to its Sauce Labs URL",
@@ -11,7 +7,8 @@
       "tags": ["@standard"],
       "bucket": "Positive",
       "feature": "footer",
-      "contextLabel": "standard_user"
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-2", "url": "https://diegocortes15.atlassian.net/browse/SW-2" }]
     },
     {
       "title": "footer Facebook link points to its Sauce Labs URL",
@@ -20,7 +17,8 @@
       "tags": ["@standard"],
       "bucket": "Positive",
       "feature": "footer",
-      "contextLabel": "standard_user"
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-2", "url": "https://diegocortes15.atlassian.net/browse/SW-2" }]
     },
     {
       "title": "footer LinkedIn link points to its Sauce Labs URL",
@@ -29,7 +27,8 @@
       "tags": ["@standard"],
       "bucket": "Positive",
       "feature": "footer",
-      "contextLabel": "standard_user"
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-2", "url": "https://diegocortes15.atlassian.net/browse/SW-2" }]
     },
     {
       "title": "footer shows the Sauce Labs copyright text",
@@ -38,7 +37,8 @@
       "tags": ["@standard"],
       "bucket": "Positive",
       "feature": "footer",
-      "contextLabel": "standard_user"
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-2", "url": "https://diegocortes15.atlassian.net/browse/SW-2" }]
     }
   ]
 }
