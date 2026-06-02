@@ -75,9 +75,14 @@ test.describe('checkout — standard_user', { tag: '@standard' }, () => {
     });
 
     // AC 3 + AC 4 (SW-8): both exit controls return the user to the Cart page.
-    const exitControls = ['Cancel button', 'cart icon'] as const;
-    for (const control of exitControls) {
-      test(`${control} returns to the Cart page from Checkout: Your Information`, async ({
+    // The differing step is the CheckoutInfoPage method named in the table, applied
+    // unconditionally — no branch in the test body (eslint no-conditional-in-test).
+    const exitControls = [
+      { name: 'Cancel button', via: 'cancel' },
+      { name: 'cart icon', via: 'openCart' },
+    ] as const;
+    for (const { name, via } of exitControls) {
+      test(`${name} returns to the Cart page from Checkout: Your Information`, async ({
         checkoutInfoPage,
         cartPage,
         page,
@@ -85,11 +90,7 @@ test.describe('checkout — standard_user', { tag: '@standard' }, () => {
         await checkoutInfoPage.goto();
         await expect(page).toHaveURL(/\/checkout-step-one\.html$/);
 
-        if (control === 'Cancel button') {
-          await checkoutInfoPage.cancel();
-        } else {
-          await checkoutInfoPage.openCart();
-        }
+        await checkoutInfoPage[via]();
 
         await expect(page).toHaveURL(/\/cart\.html$/);
         expect(await cartPage.getTitle()).toBe('Your Cart');
