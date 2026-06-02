@@ -10,8 +10,9 @@ import { CartBadge } from '@components/CartBadge';
 export class Header {
   // Composed child component first (ADR-0001 rule #6) — nesting depth 2 (rule #11).
   readonly cartBadge: CartBadge;
-  // Header-direct locators second.
-  private readonly cartLink: Locator;
+  // Header-direct locators second. cartLink is public so a composing page can
+  // assert the cart icon's visibility directly (e.g. CheckoutInfoPage, SW-8).
+  readonly cartLink: Locator;
 
   constructor(public readonly page: Page) {
     this.cartBadge = new CartBadge(page);

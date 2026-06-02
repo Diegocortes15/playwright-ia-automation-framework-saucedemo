@@ -1,0 +1,54 @@
+{
+  "records": [
+    {
+      "title": "the cancel button and header cart icon are visible",
+      "acText": "On /checkout-step-one.html (Checkout: Your Information), standard_user sees the Cancel button and the header shopping-cart icon.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "clicking the cancel button returns to the cart page",
+      "acText": "On the Checkout: Your Information page, clicking Cancel returns standard_user to the Cart page (/cart.html).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "clicking the header cart icon returns to the cart page",
+      "acText": "On the Checkout: Your Information page, clicking the header shopping-cart icon returns standard_user to the Cart page (/cart.html).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "the information form is reset after leaving and returning",
+      "acText": "After entering First 'Jane', Last 'Doe', Postal '12345', leaving to the cart, and returning to the Checkout: Your Information page, all three fields are empty (form state not persisted).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "cancelling with an empty form returns to the cart without a validation error",
+      "acText": "With the form empty, clicking Cancel on the Checkout: Your Information page returns standard_user to the Cart page (/cart.html) with no validation error — Cancel does not enforce the required-field validation Continue does.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    }
+  ]
+}
