@@ -1,4 +1,12 @@
 {
+  "cart › standard_user › Edge › adding a product toggles its inventory button to Remove": 59,
+  "cart › standard_user › Edge › cart contents persist after continue shopping": 60,
+  "cart › standard_user › Edge › removing the last item hides the cart badge": 58,
+  "cart › standard_user › Positive › a cart row shows the quantity, title, description, price, and a remove button": 55,
+  "cart › standard_user › Positive › adding a product shows a cart badge count of one": 53,
+  "cart › standard_user › Positive › adding three products shows a badge of three and lists them in add order": 54,
+  "cart › standard_user › Positive › continue shopping returns to the inventory page": 57,
+  "cart › standard_user › Positive › removing a product drops it from the cart and decrements the badge": 56,
   "footer › standard_user › Positive › footer Facebook link points to its Sauce Labs URL": 29,
   "footer › standard_user › Positive › footer LinkedIn link points to its Sauce Labs URL": 30,
   "footer › standard_user › Positive › footer Twitter link points to its Sauce Labs URL": 28,
