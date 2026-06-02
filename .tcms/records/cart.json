@@ -1,0 +1,84 @@
+{
+  "records": [
+    {
+      "title": "adding a product shows a cart badge count of one",
+      "acText": "On /inventory.html, standard_user clicks 'Add to cart' on 'Sauce Labs Backpack'; the header cart badge shows '1'.",
+      "user": "standard_user",
+      "tags": ["@standard", "@smoke"],
+      "bucket": "Positive",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "adding three products shows a badge of three and lists them in add order",
+      "acText": "standard_user adds Backpack, Bike Light, and Bolt T-Shirt; the cart badge shows '3' and the cart lists the three products top-to-bottom in the order added.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "a cart row shows the quantity, title, description, price, and a remove button",
+      "acText": "On /cart.html, the 'Sauce Labs Backpack' row displays quantity '1', its title, its catalog description, price '$29.99', and a 'Remove' button.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "removing a product drops it from the cart and decrements the badge",
+      "acText": "With Backpack + Bike Light in the cart (badge '2'), clicking 'Remove' on the Backpack row removes that row; only Bike Light remains and the badge shows '1'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "continue shopping returns to the inventory page",
+      "acText": "On /cart.html, clicking 'Continue Shopping' returns standard_user to /inventory.html.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "removing the last item hides the cart badge",
+      "acText": "With exactly one item in the cart, clicking 'Remove' drops the count to 0 and the cart badge disappears entirely (no badge element rendered).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "adding a product toggles its inventory button to Remove",
+      "acText": "On /inventory.html, clicking 'Add to cart' on 'Sauce Labs Backpack' changes that product's button label to 'Remove' (saucedemo caps quantity at 1 per product).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    },
+    {
+      "title": "cart contents persist after continue shopping",
+      "acText": "standard_user adds Backpack, clicks Continue Shopping, then re-opens the cart; Backpack is still listed and the badge still shows '1'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "cart",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-6", "url": "https://diegocortes15.atlassian.net/browse/SW-6" }]
+    }
+  ]
+}

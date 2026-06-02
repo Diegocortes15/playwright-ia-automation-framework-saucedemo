@@ -5,10 +5,12 @@
 
 import { test, type Locator, type Page } from '@playwright/test';
 import { Footer } from '@components/Footer';
+import { Header } from '@components/Header';
 
 export class InventoryPage {
   // Composed components first (ADR-0001 rule #6).
   readonly footer: Footer;
+  readonly header: Header;
   // Page-direct locators second.
   private readonly productImages: Locator;
   private readonly productNames: Locator;
@@ -22,6 +24,7 @@ export class InventoryPage {
 
   constructor(public readonly page: Page) {
     this.footer = new Footer(page);
+    this.header = new Header(page);
     this.productImages = page.locator('img.inventory_item_img');
     this.productNames = page.locator('[data-test="inventory-item-name"]');
     this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');
@@ -97,5 +100,39 @@ export class InventoryPage {
   // Query — the label of the currently-selected sort option (ADR-0001 rule #8).
   async getActiveSortLabel(): Promise<string> {
     return (await this.activeSortOption.textContent())?.trim() ?? '';
+  }
+
+  // --- Cart (SW-6) ---
+
+  // A single product card, scoped by its title. Exact match so a short name
+  // can't also match a longer one that contains it (playwright-conventions
+  // "Exact-match for named-element filters").
+  private productCard(productName: string): Locator {
+    return this.page.locator('[data-test="inventory-item"]').filter({
+      has: this.page.getByText(productName, { exact: true }),
+    });
+  }
+
+  // Composed action — add one product to the cart from its card.
+  async addToCart(productName: string): Promise<void> {
+    await test.step(`Add "${productName}" to the cart`, async () => {
+      await this.productCard(productName).getByRole('button', { name: /^Add to cart$/i }).click();
+    });
+  }
+
+  // Composed action — open the cart from the header.
+  async openCart(): Promise<void> {
+    await this.header.openCart();
+  }
+
+  // Query — the label of a product card's cart button ("Add to cart" → "Remove"
+  // after it's added; saucedemo caps quantity at 1 per product).
+  async getProductButtonLabel(productName: string): Promise<string> {
+    return (await this.productCard(productName).getByRole('button').textContent())?.trim() ?? '';
+  }
+
+  // Query — cart count from the header badge; 0 when the badge is absent.
+  async getCartBadgeCount(): Promise<number> {
+    return this.header.getCartItemCount();
   }
 }
