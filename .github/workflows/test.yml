@@ -37,15 +37,27 @@ jobs:
 
       - run: npx playwright install --with-deps chromium firefox webkit
 
-      # On a PR: run ONLY the tests the PR added/changed (fast feedback, no full suite).
-      # --only-changed reliably runs changed spec files; it best-effort-tracks tests
-      # affected by changed shared files. The scheduled full regression is the backstop.
-      - name: Run affected tests (pull request)
+      # On a PR: run ONLY the spec files this PR added/modified — "the PR's tests, no
+      # more". We deliberately do NOT use `--only-changed`: it follows the import graph,
+      # so touching a shared file (e.g. src/fixtures/test.ts, which every spec imports)
+      # drags in the whole suite — which is exactly the scaling pain we're avoiding.
+      # Changing a shared Page Object therefore won't re-run its OTHER dependents here;
+      # the full suite on merge (below) is the integration gate that catches that.
+      - name: Run changed spec files (pull request)
         if: ${{ github.event_name == 'pull_request' }}
         env:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           CI: 'true'
-        run: npx playwright test --only-changed=${{ github.event.pull_request.base.sha }}
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          changed=$(git diff --name-only --diff-filter=AM "$base"...HEAD -- 'tests/' | grep '\.spec\.ts$' || true)
+          if [ -z "$changed" ]; then
+            echo "No spec files added/modified in this PR — nothing to run."
+            exit 0
+          fi
+          echo "Changed spec files:"
+          echo "$changed"
+          npx playwright test $changed
 
       # On merge (push): run the full suite so the Qase catalog sync below has every
       # test's steps/status. (A lighter merge + a separate scheduled full regression
