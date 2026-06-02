@@ -79,6 +79,56 @@
       "feature": "checkout",
       "contextLabel": "standard_user",
       "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "Cancel button and cart icon are visible on the Checkout: Your Information page",
+      "acText": "On /checkout-step-one.html, standard_user sees the Cancel button and the header shopping-cart icon both displayed.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "Cancel button returns to the Cart page from Checkout: Your Information",
+      "acText": "On /checkout-step-one.html, clicking Cancel returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "cart icon returns to the Cart page from Checkout: Your Information",
+      "acText": "On /checkout-step-one.html, clicking the header shopping-cart icon returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "entered information does not persist after leaving via Cancel and returning",
+      "acText": "After entering First name 'Jane', Last name 'Doe', Postal code '12345' on /checkout-step-one.html, leaving to the cart via Cancel, and returning to the page, all three fields are empty (form state is not persisted).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "cancelling an empty form returns to the Cart page without a validation error",
+      "acText": "With the form empty on /checkout-step-one.html, clicking Cancel returns standard_user to the Cart page (/cart.html, title 'Your Cart') with no validation error shown.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
     }
   ]
 }
