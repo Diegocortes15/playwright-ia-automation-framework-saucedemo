@@ -86,36 +86,51 @@ test.describe('inventory — standard_user', { tag: '@standard' }, () => {
     });
 
     // AC1's four sort modes — one flow (select option → read order), four inputs.
+    // The differing read (`getProductNames`/`getProductPrices`) and the expected
+    // ordering both live in the table, applied on a single straight-line path, so
+    // the body never branches (eslint no-conditional-in-test / no-conditional-expect).
+    const toPrice = (p: string): number => parseFloat(p.replace('$', ''));
     const sortScenarios = [
-      { value: 'az', label: 'Name (A to Z)', key: 'name', direction: 'asc' },
-      { value: 'za', label: 'Name (Z to A)', key: 'name', direction: 'desc' },
-      { value: 'lohi', label: 'Price (low to high)', key: 'price', direction: 'asc' },
-      { value: 'hilo', label: 'Price (high to low)', key: 'price', direction: 'desc' },
+      {
+        value: 'az',
+        label: 'Name (A to Z)',
+        by: 'name ascending',
+        read: 'getProductNames',
+        sort: (xs: string[]) => [...xs].sort((a, b) => a.localeCompare(b)),
+      },
+      {
+        value: 'za',
+        label: 'Name (Z to A)',
+        by: 'name descending',
+        read: 'getProductNames',
+        sort: (xs: string[]) => [...xs].sort((a, b) => b.localeCompare(a)),
+      },
+      {
+        value: 'lohi',
+        label: 'Price (low to high)',
+        by: 'price ascending',
+        read: 'getProductPrices',
+        sort: (xs: string[]) => [...xs].sort((a, b) => toPrice(a) - toPrice(b)),
+      },
+      {
+        value: 'hilo',
+        label: 'Price (high to low)',
+        by: 'price descending',
+        read: 'getProductPrices',
+        sort: (xs: string[]) => [...xs].sort((a, b) => toPrice(b) - toPrice(a)),
+      },
     ] as const;
 
-    for (const scenario of sortScenarios) {
-      test(`selecting "${scenario.label}" sorts products by ${scenario.key} ${scenario.direction}ending`, async ({
-        inventoryPage,
-      }) => {
+    for (const { value, label, by, read, sort } of sortScenarios) {
+      test(`selecting "${label}" sorts products by ${by}`, async ({ inventoryPage }) => {
         await inventoryPage.goto();
-        await inventoryPage.sortBy(scenario.value);
-        expect(await inventoryPage.getActiveSortLabel()).toBe(scenario.label);
+        await inventoryPage.sortBy(value);
+        expect(await inventoryPage.getActiveSortLabel()).toBe(label);
 
-        if (scenario.key === 'name') {
-          const names = await inventoryPage.getProductNames();
-          const expected = [...names].sort((a, b) => a.localeCompare(b));
-          if (scenario.direction === 'desc') expected.reverse();
-          // Displayed order equals the names sorted in the expected direction.
-          expect(names).toEqual(expected);
-        } else {
-          const prices = (await inventoryPage.getProductPrices()).map((price) =>
-            parseFloat(price.replace('$', '')),
-          );
-          const expected = [...prices].sort((a, b) => a - b);
-          if (scenario.direction === 'desc') expected.reverse();
-          // Monotonic ordering (ties, e.g. two $15.99 items, stay adjacent either way).
-          expect(prices).toEqual(expected);
-        }
+        // Displayed order equals those same values sorted in the expected direction
+        // (ties, e.g. two $15.99 items, compare equal either way — stable sort).
+        const displayed = await inventoryPage[read]();
+        expect(displayed).toEqual(sort(displayed));
       });
     }
   });
