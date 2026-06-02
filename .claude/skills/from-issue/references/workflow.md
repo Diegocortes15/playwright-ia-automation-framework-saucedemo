@@ -18,6 +18,21 @@ Confirm the **Atlassian MCP** is connected (the skill reads tickets through it).
 
 Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
 
+### 1.5. Sync the base branch
+
+`/from-issue` branches off whatever branch you're on (captured in Step 11), and the Step 5/8 "does this feature already exist?" checks read **that branch's tree**. Branch from a **stale** base and you silently miss already-merged work — e.g. a sibling feature ticket that merged since this session last pulled — so the existence checks wrongly conclude the feature is new, and you produce a parallel branch that collides on merge (the SW-7/SW-8 checkout collision). Bring the base current with its remote **before** any inspection:
+
+```bash
+base=$(git branch --show-current)
+git fetch origin "$base"
+```
+
+- **Working tree must be clean.** If `git status --porcelain` is non-empty, abort: _"working tree is dirty — commit/stash before running /from-issue."_
+- If `origin/$base` exists, **fast-forward only**: `git merge --ff-only "origin/$base"`. If that fails (local diverged from the remote), abort: _"`<base>` isn't a clean fast-forward of `origin/<base>` — reconcile them, then re-run."_ Never force or auto-merge.
+- If `origin/$base` has no remote-tracking counterpart (purely local base), skip the sync.
+
+This makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: once the prior PR is merged, the fast-forward pulls it in, so this run **augments** the existing feature instead of forking a conflicting copy.
+
 ### 2. Fetch the Jira ticket
 
 Read the ticket via the **Atlassian MCP's get-issue tool** for the key (e.g. `SW-123`), requesting the rendered/text form of the description.
@@ -325,7 +340,7 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 
 ### 11.5. Write the TCMS records artifact (Qase, at-merge model)
 
-**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to `.tcms/records/<KEY>.json` (a committed file — one object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`; plus a `meta` block with `jiraKey`/`sourceUrl`), and `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
+**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
 
 ### 12. Open PR
 

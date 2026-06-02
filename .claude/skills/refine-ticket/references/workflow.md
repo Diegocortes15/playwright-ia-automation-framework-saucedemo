@@ -17,7 +17,17 @@ Call `getAccessibleAtlassianResources` (cloudId), then `getJiraIssue` for `<KEY>
 
 ## 3. Discover sources
 
-Per [`sources.md`](sources.md), consult sources in cheap→expensive order (repo reads → app docs → conventions). Do not yet ask the user — gather what ground truth exists first.
+**First, sync the working branch with its remote** so the repo reads below (and the rubric's item-9 coverage-overlap check) see the latest merged work — a stale local branch is why an overlap can be missed (it makes item-9 wrongly report "no existing specs"). Require a clean tree; fast-forward only:
+
+```bash
+base=$(git branch --show-current)
+git fetch origin "$base"
+# clean tree required; if origin/$base exists: git merge --ff-only "origin/$base"
+```
+
+If the tree is dirty or the fast-forward fails (local diverged), don't force it — note it and proceed with the local state (refine-ticket only reads the repo; it never branches), but flag in the assumptions that coverage checks ran against a possibly-stale tree. If `origin/$base` has no counterpart, skip.
+
+Then, per [`sources.md`](sources.md), consult sources in cheap→expensive order (repo reads → app docs → conventions). Do not yet ask the user — gather what ground truth exists first.
 
 ## 4. Score against the rubric
 
