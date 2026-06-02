@@ -1,0 +1,84 @@
+{
+  "records": [
+    {
+      "title": "checkout button on the cart page navigates to Checkout: Your Information",
+      "acText": "On /cart.html with at least one item, the Checkout button is displayed; clicking it routes standard_user to /checkout-step-one.html (page title 'Checkout: Your Information').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "mandatory fields show their placeholder text",
+      "acText": "On /checkout-step-one.html, the three mandatory inputs display placeholder text 'First Name', 'Last Name', and 'Zip/Postal Code' respectively.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "valid information routes to Checkout: Overview",
+      "acText": "On /checkout-step-one.html, filling First Name 'John', Last Name 'Doe', Zip/Postal Code '12345' and clicking Continue routes standard_user to /checkout-step-two.html (page title 'Checkout: Overview').",
+      "user": "standard_user",
+      "tags": ["@standard", "@smoke"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with all fields empty shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, clicking Continue with all three fields empty shows the error banner 'Error: First Name is required' and flags all three inputs with the error state (error class + error icon).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only first name shows \"Error: Last Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only First Name ('John') populated, clicking Continue shows 'Error: Last Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only last name shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only Last Name ('Doe') populated, clicking Continue shows 'Error: First Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only postal code shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only Zip/Postal Code ('12345') populated, clicking Continue shows 'Error: First Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "dismissing the error clears the banner and field styling but keeps entered values",
+      "acText": "On /checkout-step-one.html with an error shown, clicking the error container's X removes the error banner and clears the per-field error styling on all three inputs, while preserving any text already entered (First Name 'John' is retained).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    }
+  ]
+}
