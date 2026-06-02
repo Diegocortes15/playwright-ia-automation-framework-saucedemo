@@ -13,12 +13,16 @@ export class CartPage {
   private readonly cartList: Locator;
   private readonly itemNames: Locator;
   private readonly continueShoppingButton: Locator;
+  // Public so a test can assert it's displayed (AC 1, SW-7) — mirrors the
+  // LoginPage.errorBanner pattern for visibility assertions.
+  readonly checkoutButton: Locator;
 
   constructor(public readonly page: Page) {
     this.header = new Header(page);
     this.cartList = page.locator('[data-test="cart-list"]');
     this.itemNames = this.cartList.locator('[data-test="inventory-item-name"]');
     this.continueShoppingButton = page.locator('[data-test="continue-shopping"]');
+    this.checkoutButton = page.locator('[data-test="checkout"]');
   }
 
   // Composed / intent-level action — body wrapped in exactly one test.step.
@@ -48,6 +52,13 @@ export class CartPage {
   async continueShopping(): Promise<void> {
     await test.step('Continue shopping', async () => {
       await this.continueShoppingButton.click();
+    });
+  }
+
+  // Composed action — proceed to Checkout: Your Information (SW-7).
+  async checkout(): Promise<void> {
+    await test.step('Proceed to checkout', async () => {
+      await this.checkoutButton.click();
     });
   }
 
