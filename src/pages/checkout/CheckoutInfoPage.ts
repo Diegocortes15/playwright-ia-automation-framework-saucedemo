@@ -4,17 +4,26 @@
 // not regenerated automatically.
 
 import { test, type Locator, type Page } from '@playwright/test';
+import { Header } from '@components/Header';
 
 // Checkout: Your Information (/checkout-step-one.html) — the first of saucedemo's
 // three checkout steps. Mandatory first name / last name / postal code, with a
-// shared error banner and per-field error styling (SW-7).
+// shared error banner and per-field error styling (SW-7). Cancel button + header
+// cart icon both exit back to the Cart page (SW-8).
 export class CheckoutInfoPage {
+  // Composed components first (ADR-0001 rule #6).
+  readonly header: Header;
+  // The header's cart icon, re-exposed for a visibility assertion (AC 2, SW-8).
+  readonly cartIcon: Locator;
   // Page-direct locators.
   readonly title: Locator;
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
   readonly postalCodeInput: Locator;
   readonly continueButton: Locator;
+  // Public so a test can assert it's displayed (AC 1, SW-8) — mirrors the
+  // CartPage.checkoutButton pattern for visibility assertions.
+  readonly cancelButton: Locator;
   // Public so a test can assert visibility / text / hidden state (mirrors
   // LoginPage.errorBanner).
   readonly errorBanner: Locator;
@@ -27,11 +36,14 @@ export class CheckoutInfoPage {
   private readonly errorIcons: Locator;
 
   constructor(public readonly page: Page) {
+    this.header = new Header(page);
+    this.cartIcon = this.header.cartLink;
     this.title = page.locator('[data-test="title"]');
     this.firstNameInput = page.locator('[data-test="firstName"]');
     this.lastNameInput = page.locator('[data-test="lastName"]');
     this.postalCodeInput = page.locator('[data-test="postalCode"]');
     this.continueButton = page.locator('[data-test="continue"]');
+    this.cancelButton = page.locator('[data-test="cancel"]');
     this.errorBanner = page.locator('[data-test="error"]');
     this.errorDismissButton = page.locator('[data-test="error"] button.error-button');
     this.erroredInputs = page.locator('input.error');
@@ -65,6 +77,19 @@ export class CheckoutInfoPage {
     await test.step('Dismiss the error banner', async () => {
       await this.errorDismissButton.click();
     });
+  }
+
+  // Composed action — Cancel exits back to the Cart page (SW-8).
+  async cancel(): Promise<void> {
+    await test.step('Cancel the checkout information form', async () => {
+      await this.cancelButton.click();
+    });
+  }
+
+  // Composed action — open the cart from the header (SW-8). Delegates to the
+  // Header component (composition rule #10), like InventoryPage.openCart().
+  async openCart(): Promise<void> {
+    await this.header.openCart();
   }
 
   // Queries — return data, never a Locator (ADR-0001 rule #8).

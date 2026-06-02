@@ -10,6 +10,7 @@ export class CartPage {
   // Composed components first (ADR-0001 rule #6).
   readonly header: Header;
   // Page-direct locators second.
+  private readonly title: Locator;
   private readonly cartList: Locator;
   private readonly itemNames: Locator;
   private readonly continueShoppingButton: Locator;
@@ -19,6 +20,7 @@ export class CartPage {
 
   constructor(public readonly page: Page) {
     this.header = new Header(page);
+    this.title = page.locator('[data-test="title"]');
     this.cartList = page.locator('[data-test="cart-list"]');
     this.itemNames = this.cartList.locator('[data-test="inventory-item-name"]');
     this.continueShoppingButton = page.locator('[data-test="continue-shopping"]');
@@ -63,6 +65,11 @@ export class CartPage {
   }
 
   // Queries — return data, never a Locator (ADR-0001 rule #8).
+
+  /** Page title — "Your Cart" on the cart page (used by SW-8 exit-control tests). */
+  async getTitle(): Promise<string> {
+    return (await this.title.textContent())?.trim() ?? '';
+  }
 
   /** Product titles in cart-list DOM order (saucedemo preserves insertion order). */
   async getItemNames(): Promise<string[]> {
