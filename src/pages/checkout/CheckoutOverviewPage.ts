@@ -4,16 +4,50 @@
 // not regenerated automatically.
 
 import { test, type Locator, type Page } from '@playwright/test';
+import { Header } from '@components/Header';
 
-// Checkout: Overview (/checkout-step-two.html) — the second checkout step.
-// SW-7 only needs to confirm the user lands here after a valid information
-// submission, so this is intentionally minimal; later tickets grow it.
+// Checkout: Overview (/checkout-step-two.html) — the second checkout step. Lists
+// the ordered products (name, qty, description, price), the payment + shipping
+// info, and the price summary (item total, tax, total). Cancel returns to the
+// inventory page (cart preserved); Finish advances to Checkout: Complete! (SW-9).
 export class CheckoutOverviewPage {
+  // Composed components first (ADR-0001 rule #6).
+  readonly header: Header;
+  // The header's cart icon, re-exposed for a visibility assertion (AC 8, SW-9) —
+  // mirrors CheckoutInfoPage.cartIcon.
+  readonly cartIcon: Locator;
   // Page-direct locators.
   readonly title: Locator;
+  private readonly cartList: Locator;
+  private readonly itemNames: Locator;
+  private readonly itemQuantities: Locator;
+  private readonly itemDescriptions: Locator;
+  private readonly itemPrices: Locator;
+  private readonly paymentInfoValue: Locator;
+  private readonly shippingInfoValue: Locator;
+  private readonly subtotalLabel: Locator;
+  private readonly taxLabel: Locator;
+  private readonly totalLabel: Locator;
+  // Public so a test can assert it's displayed (AC 10, SW-9).
+  readonly finishButton: Locator;
+  readonly cancelButton: Locator;
 
   constructor(public readonly page: Page) {
+    this.header = new Header(page);
+    this.cartIcon = this.header.cartLink;
     this.title = page.locator('[data-test="title"]');
+    this.cartList = page.locator('[data-test="cart-list"]');
+    this.itemNames = this.cartList.locator('[data-test="inventory-item-name"]');
+    this.itemQuantities = this.cartList.locator('[data-test="item-quantity"]');
+    this.itemDescriptions = this.cartList.locator('[data-test="inventory-item-desc"]');
+    this.itemPrices = this.cartList.locator('[data-test="inventory-item-price"]');
+    this.paymentInfoValue = page.locator('[data-test="payment-info-value"]');
+    this.shippingInfoValue = page.locator('[data-test="shipping-info-value"]');
+    this.subtotalLabel = page.locator('[data-test="subtotal-label"]');
+    this.taxLabel = page.locator('[data-test="tax-label"]');
+    this.totalLabel = page.locator('[data-test="total-label"]');
+    this.finishButton = page.locator('[data-test="finish"]');
+    this.cancelButton = page.locator('[data-test="cancel"]');
   }
 
   // Composed / intent-level action — body wrapped in exactly one test.step.
@@ -23,8 +57,80 @@ export class CheckoutOverviewPage {
     });
   }
 
-  // Query — returns data, never a Locator (ADR-0001 rule #8).
+  // Composed action — Finish advances to Checkout: Complete! (SW-9).
+  async finish(): Promise<void> {
+    await test.step('Finish the order', async () => {
+      await this.finishButton.click();
+    });
+  }
+
+  // Composed action — Cancel returns to the inventory page (cart preserved, SW-9).
+  async cancel(): Promise<void> {
+    await test.step('Cancel the checkout overview', async () => {
+      await this.cancelButton.click();
+    });
+  }
+
+  // Composed action — open the cart from the header (AC 8, SW-9). Delegates to the
+  // Header component (composition rule #10), like CheckoutInfoPage.openCart().
+  async openCart(): Promise<void> {
+    await this.header.openCart();
+  }
+
+  // Queries — return data, never a Locator (ADR-0001 rule #8).
+
+  /** Page title — "Checkout: Overview" on this page. */
   async getTitle(): Promise<string> {
     return (await this.title.textContent())?.trim() ?? '';
+  }
+
+  /** Product titles in overview DOM order (saucedemo preserves insertion order). */
+  async getProductNames(): Promise<string[]> {
+    return (await this.itemNames.allTextContents()).map((name) => name.trim());
+  }
+
+  /** Per-product quantities, in overview DOM order. */
+  async getProductQuantities(): Promise<string[]> {
+    return (await this.itemQuantities.allTextContents()).map((qty) => qty.trim());
+  }
+
+  /** Per-product descriptions, in overview DOM order. */
+  async getProductDescriptions(): Promise<string[]> {
+    return (await this.itemDescriptions.allTextContents()).map((desc) => desc.trim());
+  }
+
+  /** Per-product prices, in overview DOM order. */
+  async getProductPrices(): Promise<string[]> {
+    return (await this.itemPrices.allTextContents()).map((price) => price.trim());
+  }
+
+  /** Payment information value (e.g. "SauceCard #31337"). */
+  async getPaymentInfo(): Promise<string> {
+    return (await this.paymentInfoValue.textContent())?.trim() ?? '';
+  }
+
+  /** Shipping information value (e.g. "Free Pony Express Delivery!"). */
+  async getShippingInfo(): Promise<string> {
+    return (await this.shippingInfoValue.textContent())?.trim() ?? '';
+  }
+
+  /** Item-total label text (e.g. "Item total: $55.97"). */
+  async getItemTotalText(): Promise<string> {
+    return (await this.subtotalLabel.textContent())?.trim() ?? '';
+  }
+
+  /** Tax label text (e.g. "Tax: $4.48"). */
+  async getTaxText(): Promise<string> {
+    return (await this.taxLabel.textContent())?.trim() ?? '';
+  }
+
+  /** Order-total label text (e.g. "Total: $60.45"). */
+  async getTotalText(): Promise<string> {
+    return (await this.totalLabel.textContent())?.trim() ?? '';
+  }
+
+  /** Cart count from the header badge; 0 when the badge is absent (empty cart). */
+  async getCartBadgeCount(): Promise<number> {
+    return this.header.getCartItemCount();
   }
 }
