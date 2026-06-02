@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # full history so `--only-changed` can diff PRs against their base
+          fetch-depth: 0 # full history so the PR step can diff changed spec files against the base
 
       - uses: actions/setup-node@v4
         with:
@@ -28,6 +28,16 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
+
+      # Static gates — run on the WHOLE codebase before the (narrow) test run, so a
+      # type error or lint violation in a non-spec file (Page Object, fixture,
+      # component) is caught even when a PR only runs a few changed spec files.
+      # Fail fast, before the expensive browser install.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
