@@ -129,6 +129,76 @@
       "feature": "checkout",
       "contextLabel": "standard_user",
       "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "overview lists the three products in cart order with name, quantity, description, and price",
+      "acText": "On /checkout-step-two.html, the three added products (Sauce Labs Backpack, Sauce Labs Bike Light, Sauce Labs Bolt T-Shirt) are listed in the order they were added, each with its name, a quantity of 1, its description, and its price ($29.99, $9.99, $15.99).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "overview shows the payment and shipping information",
+      "acText": "On /checkout-step-two.html, the Payment Information section shows 'SauceCard #31337' and the Shipping Information section shows 'Free Pony Express Delivery!'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "overview shows the item total, tax, and order total",
+      "acText": "On /checkout-step-two.html with the three-item cart, the price summary reads 'Item total: $55.97', 'Tax: $4.48' (8% of the item total, 2 decimals), and 'Total: $60.45' (item total + tax).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "cart icon on the overview navigates to the Cart page",
+      "acText": "On /checkout-step-two.html, the header shopping-cart icon is displayed; clicking it returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "finishing the order shows the confirmation page with a Back Home button",
+      "acText": "On /checkout-step-two.html, the Finish button is visible; clicking it routes standard_user to /checkout-complete.html (title 'Checkout: Complete!') showing the header 'Thank you for your order!', the dispatch confirmation body, and a Back Home button.",
+      "user": "standard_user",
+      "tags": ["@standard", "@smoke"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "cancel on the overview returns to the inventory page and keeps the cart",
+      "acText": "On /checkout-step-two.html, clicking Cancel returns standard_user to the inventory page (/inventory.html) and the three products remain in the cart (cart badge shows 3).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "back home after finishing clears the cart and returns to the inventory page",
+      "acText": "After finishing the order on /checkout-complete.html, clicking Back Home returns standard_user to the inventory page (/inventory.html) and the cart is reset — the cart badge count is no longer shown (0).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
     }
   ]
 }
