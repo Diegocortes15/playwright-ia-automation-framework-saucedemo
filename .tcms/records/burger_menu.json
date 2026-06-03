@@ -1,0 +1,64 @@
+{
+  "records": [
+    {
+      "title": "burger menu lists the All Items, About, and Reset App State options",
+      "acText": "As standard_user on the inventory page, clicking the burger menu button opens the side panel, which displays the options All Items, About, and Reset App State (Logout is also present but is covered by SW-10).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    },
+    {
+      "title": "All Items returns to the inventory page",
+      "acText": "As standard_user with the side panel open, clicking \"All Items\" navigates to the Inventory page (URL ends with /inventory.html, page title \"Products\").",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    },
+    {
+      "title": "About navigates the same tab to saucelabs.com",
+      "acText": "As standard_user with the side panel open, clicking \"About\" navigates the same browser tab to https://saucelabs.com/ (the page URL becomes https://saucelabs.com/). Real third-party navigation, deviating from the footer href-only convention.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    },
+    {
+      "title": "Reset App State clears the cart badge, reverts buttons, and empties the cart",
+      "acText": "As standard_user on the inventory page, after adding \"Sauce Labs Backpack\" and \"Sauce Labs Bike Light\" (cart badge 2), clicking \"Reset App State\" and refreshing resets state: the cart badge is absent (count 0), both products show \"Add to cart\" again, and the cart page (/cart.html) is empty.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    },
+    {
+      "title": "the close button hides the burger menu options",
+      "acText": "As standard_user with the side panel open, clicking the panel's close (X) button closes the side panel (the menu options are no longer visible).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    },
+    {
+      "title": "All Items from the cart page returns to the inventory page",
+      "acText": "As standard_user on the cart page (/cart.html), opening the burger menu and clicking \"All Items\" returns to the Inventory page (URL ends with /inventory.html).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "burger_menu",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-11", "url": "https://diegocortes15.atlassian.net/browse/SW-11" }]
+    }
+  ]
+}
