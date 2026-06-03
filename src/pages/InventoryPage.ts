@@ -12,6 +12,7 @@ export class InventoryPage {
   readonly footer: Footer;
   readonly header: Header;
   // Page-direct locators second.
+  private readonly title: Locator;
   private readonly productImages: Locator;
   private readonly productNames: Locator;
   private readonly productDescriptions: Locator;
@@ -25,6 +26,7 @@ export class InventoryPage {
   constructor(public readonly page: Page) {
     this.footer = new Footer(page);
     this.header = new Header(page);
+    this.title = page.locator('[data-test="title"]');
     this.productImages = page.locator('img.inventory_item_img');
     this.productNames = page.locator('[data-test="inventory-item-name"]');
     this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');
@@ -39,6 +41,12 @@ export class InventoryPage {
     await test.step('Navigate to the inventory page', async () => {
       await this.page.goto('/inventory.html');
     });
+  }
+
+  // Query — page title ("Products" on the inventory page). Mirrors
+  // CartPage.getTitle(); used by SW-11 to confirm "All Items" lands here.
+  async getTitle(): Promise<string> {
+    return (await this.title.textContent())?.trim() ?? '';
   }
 
   // Query — returns data, never a Locator (ADR-0001 rule #8).
@@ -126,9 +134,9 @@ export class InventoryPage {
   }
 
   // Composed action — log out from the header burger menu (SW-10). Delegates to
-  // the Header component (composition rule #10), like openCart().
+  // the Header's BurgerMenu component (composition rule #10), like openCart().
   async logout(): Promise<void> {
-    await this.header.logout();
+    await this.header.burgerMenu.logout();
   }
 
   // Query — the label of a product card's cart button ("Add to cart" → "Remove"
