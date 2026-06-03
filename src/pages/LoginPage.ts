@@ -39,6 +39,15 @@ export class LoginPage {
     });
   }
 
+  // Attempt direct navigation to a protected path with no active session (SW-10).
+  // Saucedemo's route guard redirects back to the login screen and renders the
+  // path-specific error here, so this access attempt lives on the LoginPage.
+  async gotoProtected(path: string): Promise<void> {
+    await test.step(`Attempt direct access to ${path} while logged out`, async () => {
+      await this.page.goto(path);
+    });
+  }
+
   async loginAs(username: string, password: string): Promise<void> {
     await test.step('Submit credentials', async () => {
       await this.usernameInput.fill(username);
