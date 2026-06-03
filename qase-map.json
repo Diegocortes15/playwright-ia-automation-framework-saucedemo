@@ -51,5 +51,16 @@
   "login › no auth › Positive › performance_glitch_user logs in successfully and lands on inventory": 41,
   "login › no auth › Positive › problem_user logs in successfully and lands on inventory": 40,
   "login › no auth › Positive › standard_user logs in successfully and lands on inventory": 39,
-  "login › no auth › Positive › visual_user logs in successfully and lands on inventory": 43
+  "login › no auth › Positive › visual_user logs in successfully and lands on inventory": 43,
+  "logout › no auth › Edge › back button after logout does not restore the session": 91,
+  "logout › no auth › Negative › direct access to /cart.html while logged out is blocked with an error": 87,
+  "logout › no auth › Negative › direct access to /checkout-complete.html while logged out is blocked with an error": 90,
+  "logout › no auth › Negative › direct access to /checkout-step-one.html while logged out is blocked with an error": 88,
+  "logout › no auth › Negative › direct access to /checkout-step-two.html while logged out is blocked with an error": 89,
+  "logout › no auth › Negative › direct access to /inventory.html while logged out is blocked with an error": 86,
+  "logout › no auth › Positive › error_user logs out from the menu and returns to the login page": 84,
+  "logout › no auth › Positive › performance_glitch_user logs out from the menu and returns to the login page": 83,
+  "logout › no auth › Positive › problem_user logs out from the menu and returns to the login page": 82,
+  "logout › no auth › Positive › standard_user logs out from the menu and returns to the login page": 81,
+  "logout › no auth › Positive › visual_user logs out from the menu and returns to the login page": 85
 }
