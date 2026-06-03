@@ -18,12 +18,23 @@ Confirm the **Atlassian MCP** is connected (the skill reads tickets through it).
 
 Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
 
-### 1.5. Sync the base branch
+### 1.5. Resolve and sync the base branch
 
-`/from-issue` branches off whatever branch you're on (captured in Step 11), and the Step 5/8 "does this feature already exist?" checks read **that branch's tree**. Branch from a **stale** base and you silently miss already-merged work — e.g. a sibling feature ticket that merged since this session last pulled — so the existence checks wrongly conclude the feature is new, and you produce a parallel branch that collides on merge (the SW-7/SW-8 checkout collision). Bring the base current with its remote **before** any inspection:
+`/from-issue` branches off the base captured in Step 11, and the Step 5/8 "does this feature already exist?" checks read **that branch's tree**. Two failure modes are prevented here, **before any inspection** — first pick the *right* base, then make it current.
+
+**(a) Never branch from a leftover ticket branch.** A previous `/from-issue` run leaves the working tree on **its** `<KEY>-<feature>` branch, so the next run starts there by default. Branching the new ticket off that one stacks it on unmerged work and targets the wrong base — this is what forced SW-11 to stop and ask.
 
 ```bash
-base=$(git branch --show-current)
+current=$(git branch --show-current)
+```
+
+- If `current` matches `^[A-Z][A-Z0-9]*-[0-9]+-` (a ticket branch from a prior run), it is **not** a valid base. Resolve the **integration base** — the branch this project's ticket PRs target (commonly `main`, or a long-lived integration branch during a build-up). Prefer the branch `current` was cut from; if you cannot determine it unambiguously, **ask the user**: _"You're on `<current>` (a prior ticket's branch). Which branch should `<KEY>` branch from?"_ Then `git checkout <integration-base>`.
+- Otherwise `current` already is the base.
+
+**(b) Sync the chosen base with its remote** — catches a stale local base (work merged on the remote but not pulled), so the existence checks don't wrongly conclude a feature is new and fork a colliding copy (the SW-7/SW-8 collision).
+
+```bash
+base=$(git branch --show-current)   # the resolved integration base from (a)
 git fetch origin "$base"
 ```
 
@@ -31,7 +42,7 @@ git fetch origin "$base"
 - If `origin/$base` exists, **fast-forward only**: `git merge --ff-only "origin/$base"`. If that fails (local diverged from the remote), abort: _"`<base>` isn't a clean fast-forward of `origin/<base>` — reconcile them, then re-run."_ Never force or auto-merge.
 - If `origin/$base` has no remote-tracking counterpart (purely local base), skip the sync.
 
-This makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: once the prior PR is merged, the fast-forward pulls it in, so this run **augments** the existing feature instead of forking a conflicting copy.
+Together this makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: the new ticket branches from a current integration base that includes prior merged work, so this run **augments** the existing feature instead of forking a conflicting copy.
 
 ### 2. Fetch the Jira ticket
 
