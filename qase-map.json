@@ -1,4 +1,10 @@
 {
+  "burger_menu › standard_user › Edge › All Items from the cart page returns to the inventory page": 97,
+  "burger_menu › standard_user › Edge › the close button hides the burger menu options": 96,
+  "burger_menu › standard_user › Positive › About navigates the same tab to saucelabs.com": 94,
+  "burger_menu › standard_user › Positive › All Items returns to the inventory page": 93,
+  "burger_menu › standard_user › Positive › Reset App State clears the cart badge, reverts buttons, and empties the cart": 95,
+  "burger_menu › standard_user › Positive › burger menu lists the All Items, About, and Reset App State options": 92,
   "cart › standard_user › Edge › adding a product toggles its inventory button to Remove": 59,
   "cart › standard_user › Edge › cart contents persist after continue shopping": 60,
   "cart › standard_user › Edge › removing the last item hides the cart badge": 58,
