@@ -134,9 +134,9 @@ export class InventoryPage {
   }
 
   // Composed action — log out from the header burger menu (SW-10). Delegates to
-  // the Header component (composition rule #10), like openCart().
+  // the Header's BurgerMenu component (composition rule #10), like openCart().
   async logout(): Promise<void> {
-    await this.header.logout();
+    await this.header.burgerMenu.logout();
   }
 
   // Query — the label of a product card's cart button ("Add to cart" → "Remove"

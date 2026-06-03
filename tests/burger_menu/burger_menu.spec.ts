@@ -17,17 +17,17 @@ test.describe('burger_menu — standard_user', { tag: '@standard' }, () => {
       inventoryPage,
     }) => {
       await inventoryPage.goto();
-      await inventoryPage.header.openMenu();
-      await expect(inventoryPage.header.allItemsOption).toBeVisible();
-      await expect(inventoryPage.header.aboutOption).toBeVisible();
-      await expect(inventoryPage.header.resetAppStateOption).toBeVisible();
+      await inventoryPage.header.burgerMenu.open();
+      await expect(inventoryPage.header.burgerMenu.allItemsOption).toBeVisible();
+      await expect(inventoryPage.header.burgerMenu.aboutOption).toBeVisible();
+      await expect(inventoryPage.header.burgerMenu.resetAppStateOption).toBeVisible();
     });
 
     // AC 2 — "All Items" lands on the inventory page (URL + "Products" title).
     test('All Items returns to the inventory page', async ({ inventoryPage, page }) => {
       await inventoryPage.goto();
-      await inventoryPage.header.openMenu();
-      await inventoryPage.header.selectAllItems();
+      await inventoryPage.header.burgerMenu.open();
+      await inventoryPage.header.burgerMenu.selectAllItems();
       await expect(page).toHaveURL(/\/inventory\.html$/);
       expect(await inventoryPage.getTitle()).toBe('Products');
     });
@@ -37,8 +37,8 @@ test.describe('burger_menu — standard_user', { tag: '@standard' }, () => {
     // href-only convention), so it depends on the external site being reachable.
     test('About navigates the same tab to saucelabs.com', async ({ inventoryPage, page }) => {
       await inventoryPage.goto();
-      await inventoryPage.header.openMenu();
-      await inventoryPage.header.selectAbout();
+      await inventoryPage.header.burgerMenu.open();
+      await inventoryPage.header.burgerMenu.selectAbout();
       await expect(page).toHaveURL(/saucelabs\.com/, { timeout: 15_000 });
     });
 
@@ -56,8 +56,8 @@ test.describe('burger_menu — standard_user', { tag: '@standard' }, () => {
       await inventoryPage.addToCart(bikeLight);
       expect(await inventoryPage.getCartBadgeCount()).toBe(2);
 
-      await inventoryPage.header.openMenu();
-      await inventoryPage.header.resetAppState();
+      await inventoryPage.header.burgerMenu.open();
+      await inventoryPage.header.burgerMenu.resetAppState();
       // saucedemo only reverts the product buttons after a reload (the ticket
       // calls this out explicitly), so refresh before re-checking state.
       await inventoryPage.goto();
@@ -75,10 +75,10 @@ test.describe('burger_menu — standard_user', { tag: '@standard' }, () => {
     // AC 5 — the close (X) button hides the panel options again.
     test('the close button hides the burger menu options', async ({ inventoryPage }) => {
       await inventoryPage.goto();
-      await inventoryPage.header.openMenu();
-      await expect(inventoryPage.header.allItemsOption).toBeVisible();
-      await inventoryPage.header.closeMenu();
-      await expect(inventoryPage.header.allItemsOption).toBeHidden();
+      await inventoryPage.header.burgerMenu.open();
+      await expect(inventoryPage.header.burgerMenu.allItemsOption).toBeVisible();
+      await inventoryPage.header.burgerMenu.close();
+      await expect(inventoryPage.header.burgerMenu.allItemsOption).toBeHidden();
     });
 
     // AC 6 — "All Items" from the cart page also returns to the inventory page.
@@ -87,8 +87,8 @@ test.describe('burger_menu — standard_user', { tag: '@standard' }, () => {
       page,
     }) => {
       await cartPage.goto();
-      await cartPage.header.openMenu();
-      await cartPage.header.selectAllItems();
+      await cartPage.header.burgerMenu.open();
+      await cartPage.header.burgerMenu.selectAllItems();
       await expect(page).toHaveURL(/\/inventory\.html$/);
     });
   });
