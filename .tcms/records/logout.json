@@ -1,0 +1,114 @@
+{
+  "records": [
+    {
+      "title": "standard_user logs out from the menu and returns to the login page",
+      "acText": "An authenticated user opens the header burger menu, clicks Logout, and is returned to the login screen (URL /).",
+      "user": "no-auth",
+      "tags": ["@no-auth", "@smoke"],
+      "bucket": "Positive",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "problem_user logs out from the menu and returns to the login page",
+      "acText": "An authenticated user opens the header burger menu, clicks Logout, and is returned to the login screen (URL /).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "performance_glitch_user logs out from the menu and returns to the login page",
+      "acText": "An authenticated user opens the header burger menu, clicks Logout, and is returned to the login screen (URL /), despite the slow load.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "error_user logs out from the menu and returns to the login page",
+      "acText": "An authenticated user opens the header burger menu, clicks Logout, and is returned to the login screen (URL /).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "visual_user logs out from the menu and returns to the login page",
+      "acText": "An authenticated user opens the header burger menu, clicks Logout, and is returned to the login screen (URL /).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "direct access to /inventory.html while logged out is blocked with an error",
+      "acText": "With no active session, opening /inventory.html redirects to the login screen (URL /), shows 'Epic sadface: You can only access '/inventory.html' when you are logged in.', and flags both credential fields with error styling.",
+      "user": "no-auth",
+      "tags": ["@no-auth", "@smoke"],
+      "bucket": "Negative",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "direct access to /cart.html while logged out is blocked with an error",
+      "acText": "With no active session, opening /cart.html redirects to the login screen (URL /), shows 'Epic sadface: You can only access '/cart.html' when you are logged in.', and flags both credential fields with error styling.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "direct access to /checkout-step-one.html while logged out is blocked with an error",
+      "acText": "With no active session, opening /checkout-step-one.html redirects to the login screen (URL /), shows 'Epic sadface: You can only access '/checkout-step-one.html' when you are logged in.', and flags both credential fields with error styling.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "direct access to /checkout-step-two.html while logged out is blocked with an error",
+      "acText": "With no active session, opening /checkout-step-two.html redirects to the login screen (URL /), shows 'Epic sadface: You can only access '/checkout-step-two.html' when you are logged in.', and flags both credential fields with error styling.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "direct access to /checkout-complete.html while logged out is blocked with an error",
+      "acText": "With no active session, opening /checkout-complete.html redirects to the login screen (URL /), shows 'Epic sadface: You can only access '/checkout-complete.html' when you are logged in.', and flags both credential fields with error styling.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    },
+    {
+      "title": "back button after logout does not restore the session",
+      "acText": "After logging out, pressing the browser Back button does not restore the session — the route guard redirects to the login screen (URL /) with its error instead of the previously authenticated page.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Edge",
+      "feature": "logout",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-10", "url": "https://diegocortes15.atlassian.net/browse/SW-10" }]
+    }
+  ]
+}
