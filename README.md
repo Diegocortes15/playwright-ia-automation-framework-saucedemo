@@ -77,7 +77,9 @@ The authoring layer is four composable [Claude Code skills](.claude/skills/). Th
 
 `/from-issue` is the conductor: it calls `/scaffold-page-object` when a Page Object doesn't exist yet, uses `playwright-cli` to confirm selectors, grows the auth harness when a ticket needs an unwired user, and surfaces every assumption it made in the PR body for the reviewer.
 
-<!-- 📷 IMAGE SLOT — Screenshot of a real /from-issue PR body (the "What I understood" + AC-coverage table + Assumptions block) — it shows the skills' reasoning nicely. Replace with: ![generated-pr](docs/images/from-issue-pr.png) -->
+> **📋 See a real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request from this repo. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, the **⚠️ Assumptions** the agent flagged for review, and the verification results — exactly what a reviewer reads before merging.
+
+<!-- 📷 IMAGE SLOT — Screenshot of a real /from-issue PR body (the "What I understood" + AC-coverage table + Assumptions block) — it shows the skills' reasoning nicely. A live example is linked just above (PR #25). Replace with: ![generated-pr](docs/images/from-issue-pr.png) -->
 
 ---
 
@@ -127,7 +129,7 @@ An **opt-in, one-way** mirror so non-technical reviewers can browse human-readab
 - **Runs are explicit** — `npm run qase:smoke` / `qase:regression` execute a scope _and_ record a labeled Qase run; `tcms:run` records an ad-hoc run from the last results.
 - **Swappable** — `src/tcms/qase-client.ts` is the only Qase-aware file; it implements a tool-agnostic seam, so Xray/Zephyr/etc. is a sibling client. Full design in [`docs/tcms.md`](docs/tcms.md).
 
-<!-- 📷 IMAGE SLOT — Screenshot of the Qase suite tree + one case with its steps + "Covers Jira SW-x" link. Replace with: ![qase](docs/images/qase-suite.png) -->
+<!-- 📷 IMAGE SLOT (Qase board) — Paste a screenshot of the Qase board/dashboard here: the suite tree, a case with its steps + "Covers Jira SW-x" link, or the runs view — whichever reads best. Replace with: ![qase board](docs/images/qase-board.png) -->
 
 ---
 
