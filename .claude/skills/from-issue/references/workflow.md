@@ -18,6 +18,32 @@ Confirm the **Atlassian MCP** is connected (the skill reads tickets through it).
 
 Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
 
+### 1.5. Resolve and sync the base branch
+
+`/from-issue` branches off the base captured in Step 11, and the Step 5/8 "does this feature already exist?" checks read **that branch's tree**. Two failure modes are prevented here, **before any inspection** — first pick the *right* base, then make it current.
+
+**(a) Never branch from a leftover ticket branch.** A previous `/from-issue` run leaves the working tree on **its** `<KEY>-<feature>` branch, so the next run starts there by default. Branching the new ticket off that one stacks it on unmerged work and targets the wrong base — this is what forced SW-11 to stop and ask.
+
+```bash
+current=$(git branch --show-current)
+```
+
+- If `current` matches `^[A-Z][A-Z0-9]*-[0-9]+-` (a ticket branch from a prior run), it is **not** a valid base. Resolve the **integration base** — the branch this project's ticket PRs target (commonly `main`, or a long-lived integration branch during a build-up). Prefer the branch `current` was cut from; if you cannot determine it unambiguously, **ask the user**: _"You're on `<current>` (a prior ticket's branch). Which branch should `<KEY>` branch from?"_ Then `git checkout <integration-base>`.
+- Otherwise `current` already is the base.
+
+**(b) Sync the chosen base with its remote** — catches a stale local base (work merged on the remote but not pulled), so the existence checks don't wrongly conclude a feature is new and fork a colliding copy (the SW-7/SW-8 collision).
+
+```bash
+base=$(git branch --show-current)   # the resolved integration base from (a)
+git fetch origin "$base"
+```
+
+- **Working tree must be clean.** If `git status --porcelain` is non-empty, abort: _"working tree is dirty — commit/stash before running /from-issue."_
+- If `origin/$base` exists, **fast-forward only**: `git merge --ff-only "origin/$base"`. If that fails (local diverged from the remote), abort: _"`<base>` isn't a clean fast-forward of `origin/<base>` — reconcile them, then re-run."_ Never force or auto-merge.
+- If `origin/$base` has no remote-tracking counterpart (purely local base), skip the sync.
+
+Together this makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: the new ticket branches from a current integration base that includes prior merged work, so this run **augments** the existing feature instead of forking a conflicting copy.
+
 ### 2. Fetch the Jira ticket
 
 Read the ticket via the **Atlassian MCP's get-issue tool** for the key (e.g. `SW-123`), requesting the rendered/text form of the description.
@@ -109,7 +135,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 ```
 
 - **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
-  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched. When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per [`component-detection.md`](../../scaffold-page-object/references/component-detection.md) ("Parallel-array queries vs a discriminator component").
+  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched. When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per [`component-detection.md`](../../scaffold-page-object/references/component-detection.md) ("Parallel-array queries vs a discriminator component"). **Component-extraction judgment applies on augment, not just at page-scaffold:** if the new members form a **distinct sub-widget** — its own panel/menu/region with several locators + actions (e.g. a header burger menu) — prefer extracting a **nested component** (composed by the target, depth ≤ 2 per rule #11, like `CartBadge` under `Header`) over fattening the target into a multi-widget grab-bag. Apply `component-detection.md`'s "is this a component?" test to the new cluster. (SW-10/SW-11's burger menu accreted onto `Header` member-by-member before it was extracted into `BurgerMenu` — the per-ticket append never stepped back to see the emerging widget; this note is that step-back.)
   - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
   - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting <KEY> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
@@ -325,7 +351,7 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 
 ### 11.5. Write the TCMS records artifact (Qase, at-merge model)
 
-**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to `.tcms/records/<KEY>.json` (a committed file — one object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`; plus a `meta` block with `jiraKey`/`sourceUrl`), and `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
+**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
 
 ### 12. Open PR
 

@@ -1,16 +1,19 @@
-import productsJson from './shared/products.json' with { type: 'json' };
-import validCheckoutJson from './scenarios/checkout/valid-checkout.json' with { type: 'json' };
-import invalidPostalJson from './scenarios/checkout/invalid-postalcode.json' with { type: 'json' };
-import sortOrdersJson from './scenarios/sort/sort-orders.json' with { type: 'json' };
-import type { Product, CheckoutScenario, SortOption } from './types';
+// Typed loaders for externalized test data (per data-placement.md / CLAUDE.md).
+// Specs import named datasets from '@data/fixtures' — never read JSON directly.
+// JSON is read via fs (not an `import ... json` — the project runs as native ESM,
+// which would require an import attribute and is brittle through Playwright's loader).
+// First externalized dataset: the saucedemo product catalog (shared reference
+// data reused by inventory and, in future, cart/checkout specs).
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import type { Product } from './types';
 
-export const loadProducts = (): Product[] => productsJson as Product[];
-export const loadValidCheckouts = (): CheckoutScenario[] => validCheckoutJson as CheckoutScenario[];
-export const loadInvalidPostal = (): CheckoutScenario[] => invalidPostalJson as CheckoutScenario[];
-export const loadSortOrders = (): SortOption[] => sortOrdersJson as SortOption[];
+const dataDir = dirname(fileURLToPath(import.meta.url));
 
-export const getProductById = (id: string): Product => {
-  const product = loadProducts().find((p) => p.id === id);
-  if (!product) throw new Error(`Product not found in shared/products.json: ${id}`);
-  return product;
-};
+function load<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(join(dataDir, relativePath), 'utf-8')) as T;
+}
+
+/** The 6 saucedemo products in default inventory (Name A→Z) display order. */
+export const products: readonly Product[] = load<Product[]>('shared/products.json');

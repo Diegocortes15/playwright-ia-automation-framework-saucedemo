@@ -1,12 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
+import { AUTH_USERS } from './tests/users';
 
-const userProjects = ['standard', 'problem', 'performance_glitch', 'error', 'visual'] as const;
-
-// Saucedemo intentionally breaks the sort dropdown for problem_user and
-// error_user (selections are ignored, list stays in default A-Z order).
-// Only these 3 users opt into @sort-functional tests.
-const sortFunctionalUsers = new Set<string>(['standard', 'performance_glitch', 'visual']);
+// Clean-room config (e2e-jira-from-issues), data-driven from tests/users.ts
+// (Phase H / ADR-0014). Projects derive from AUTH_USERS, which /from-issue grows
+// one user at a time as tickets require authenticated pages. Cross-browser
+// (firefox/webkit-standard) + @sort-functional remain a separate ADR-0004 decision.
 
 export default defineConfig({
   testDir: './tests',
@@ -31,47 +30,33 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    // One setup project per user (filtered by the auth.setup test title), so a
+    // user project authenticates ONLY its own user — not every AUTH_USER. A
+    // project dependency runs the whole dependency project, so per-user setup
+    // projects are how we scope auth to what each run actually needs.
+    ...AUTH_USERS.map((user) => ({
+      name: `setup-${user}`,
+      testMatch: /.*\.setup\.ts/,
+      grep: new RegExp(`authenticate as ${user}$`),
+    })),
+    // Projects are `chromium-<context>` so the project chip in the report is
+    // distinct from the `@<tag>` chip (both would otherwise read e.g. "standard").
+    // Matches the firefox-standard/webkit-standard cross-browser naming.
     {
-      name: 'no-auth',
+      name: 'chromium-no-auth',
       testIgnore: /.*\.setup\.ts/,
       grep: /@no-auth/,
       use: { ...devices['Desktop Chrome'] },
     },
-    ...userProjects.map((u) => {
-      const tagAlternates = ['@all-users', `@${u}`];
-      if (sortFunctionalUsers.has(u)) tagAlternates.push('@sort-functional');
-      return {
-        name: u,
-        testIgnore: /.*\.setup\.ts/,
-        grep: new RegExp(tagAlternates.join('|')),
-        dependencies: ['setup'],
-        use: {
-          ...devices['Desktop Chrome'],
-          storageState: `auth/${u}.json`,
-          ...(u === 'performance_glitch' ? { navigationTimeout: 30_000 } : {}),
-        },
-      };
-    }),
-    {
-      name: 'firefox-standard',
+    ...AUTH_USERS.map((user) => ({
+      name: `chromium-${user}`,
       testIgnore: /.*\.setup\.ts/,
-      grep: /@all-users|@standard|@sort-functional/,
-      dependencies: ['setup'],
+      grep: new RegExp(`@all-users|@${user}`),
+      dependencies: [`setup-${user}`],
       use: {
-        ...devices['Desktop Firefox'],
-        storageState: 'auth/standard.json',
+        ...devices['Desktop Chrome'],
+        storageState: `auth/${user}.json`,
       },
-    },
-    {
-      name: 'webkit-standard',
-      testIgnore: /.*\.setup\.ts/,
-      grep: /@all-users|@standard|@sort-functional/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Safari'],
-        storageState: 'auth/standard.json',
-      },
-    },
+    })),
   ],
 });

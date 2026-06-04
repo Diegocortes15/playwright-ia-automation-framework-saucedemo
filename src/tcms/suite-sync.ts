@@ -7,11 +7,8 @@ import { loadMap, saveMap, logicalKey, orphanedIds, mergeMap } from './map-store
 import { QaseClient } from './qase-client';
 import { qaseConfig } from '../utils/qase-env';
 
-// A record plus its file-level provenance (from the records file's meta block).
-export type EnrichedRecord = TestRecord & { jiraKey: string; sourceUrl: string };
-
 export interface SuiteSyncInput {
-  records: EnrichedRecord[];
+  records: TestRecord[];
   report: unknown; // parsed test-results/results.json
   oldMap: QaseMap;
 }
@@ -43,10 +40,7 @@ export async function runSuiteSync(
       outcome.unlinked.push(record.title);
       continue;
     }
-    const c = mapToCase(record, hit.steps, hit.status, {
-      jiraKey: record.jiraKey,
-      sourceUrl: record.sourceUrl,
-    });
+    const c = mapToCase(record, hit.steps, hit.status);
     const suiteId = await seam.ensureSuitePath(c.suitePath);
     const caseId = await seam.upsertCase(suiteId, c);
     outcome.newMap[key] = caseId;
@@ -67,19 +61,20 @@ export async function runSuiteSync(
 }
 
 // ---- records loader + CLI (run via tsx): src/tcms/suite-sync.ts ----
+// Records files are per-FEATURE (e.g. inventory.json) and a feature spans tickets,
+// so provenance is per-record (`jira`), not a file-level meta block.
 interface RecordsFile {
-  meta: { jiraKey: string; sourceUrl: string };
   records: TestRecord[];
 }
 
-export function loadRecords(dir: string): EnrichedRecord[] {
+export function loadRecords(dir: string): TestRecord[] {
   let files: string[] = [];
   try {
     files = readdirSync(dir).filter((f) => f.endsWith('.json'));
   } catch {
     return []; // no .tcms/records dir → nothing to sync
   }
-  const all: EnrichedRecord[] = [];
+  const all: TestRecord[] = [];
   for (const f of files) {
     let parsed: RecordsFile;
     try {
@@ -87,13 +82,12 @@ export function loadRecords(dir: string): EnrichedRecord[] {
     } catch (e) {
       throw new Error(`Failed to parse records file ${join(dir, f)}: ${e}`);
     }
-    all.push(
-      ...parsed.records.map((r) => ({
-        ...r,
-        jiraKey: parsed.meta.jiraKey,
-        sourceUrl: parsed.meta.sourceUrl,
-      })),
-    );
+    for (const r of parsed.records) {
+      if (!Array.isArray(r.jira) || r.jira.length === 0) {
+        throw new Error(`Record "${r.title}" in ${f} is missing a non-empty "jira" array`);
+      }
+    }
+    all.push(...parsed.records);
   }
   return all;
 }

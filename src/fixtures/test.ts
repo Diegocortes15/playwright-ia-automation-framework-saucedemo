@@ -35,5 +35,4 @@ export const test = base.extend<Pages>({
     await use(new CheckoutCompletePage(page));
   },
 });
-
 export { expect };

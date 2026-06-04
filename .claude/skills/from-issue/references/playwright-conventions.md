@@ -162,6 +162,36 @@ if (await loginPage.errorBanner.isVisible()) {
 
 Use auto-waiting assertions and let them fail loudly.
 
+### No conditionals in a test body (parameterized variants)
+
+eslint `playwright/no-conditional-in-test` flags any `if`/`else` inside a `test(...)`, and CI runs `npm run lint`. When you parameterize a test over variants that differ by which **action** or **expected value** applies, put that difference **in the data table** and apply it on a single straight-line path — never branch in the body.
+
+```ts
+// BAD — branches on the variant inside the test
+for (const control of ['Cancel button', 'cart icon'] as const) {
+  test(`${control} returns to the cart`, async ({ checkoutInfoPage, page }) => {
+    if (control === 'Cancel button') await checkoutInfoPage.cancel();
+    else await checkoutInfoPage.openCart();
+    await expect(page).toHaveURL(/\/cart\.html$/);
+  });
+}
+
+// GOOD — the differing step is data (a Page Object method name), applied unconditionally
+const controls = [
+  { name: 'Cancel button', via: 'cancel' },
+  { name: 'cart icon', via: 'openCart' },
+] as const;
+for (const { name, via } of controls) {
+  test(`${name} returns to the cart`, async ({ checkoutInfoPage, page }) => {
+    await checkoutInfoPage.goto();
+    await checkoutInfoPage[via](); // type-safe: via is 'cancel' | 'openCart'
+    await expect(page).toHaveURL(/\/cart\.html$/);
+  });
+}
+```
+
+Whatever varies — a value, an expected result, or a method name (above) — goes in the table, so the body stays branch-free. Each row is still a real, independent test, and the lint gate stays green.
+
 ## Computed-style / pseudo-state assertions (hover / focus / active)
 
 Some ACs assert a style that only appears in a pseudo-state — e.g. "the title turns green on hover." Read the **computed** style and let the state settle:

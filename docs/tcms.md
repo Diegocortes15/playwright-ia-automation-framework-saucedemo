@@ -12,15 +12,19 @@ The mirror has two separate commands with distinct responsibilities:
 
 ### `tcms:sync` — catalog-only, runs at merge
 
-1. `/from-issue` writes a committed `.tcms/records/<KEY>.json` artifact — no Qase
-   calls happen during PR creation or review.
+1. `/from-issue` writes a committed `.tcms/records/<feature>.json` artifact (per
+   feature, appended when a ticket augments an existing feature; each record carries
+   its own `jira` provenance) — no Qase calls happen during PR creation or review.
 2. When a PR merges to `main`, the CI `test` workflow runs `npm run tcms:sync`
    (gated on a `push` event + `QASE_*` GitHub Actions secrets). A rejected or
    unmerged PR never touches Qase.
 3. The sync keeps the **catalog** current: creates new cases, updates changed cases,
    archives orphaned cases, and writes `qase-map.json`. **It does not create a Qase run.**
    Merges keep Qase accurate with zero run-history noise.
-4. `qase-map.json` (committed to the repo) is the authoritative link index mapping
+4. CI then **commits the refreshed `qase-map.json` back** to the branch (a
+   `[skip ci]` bot commit), so the committed map always reflects the live Qase case
+   ids — no manual refresh needed after a `/from-issue` PR merges.
+5. `qase-map.json` (committed to the repo) is the authoritative link index mapping
    each logical test to its Qase case id.
 
 ### `qase:smoke` / `qase:regression` — one-command run + auto-labeled Qase record
@@ -47,7 +51,7 @@ where you want to control the Playwright invocation separately:
 
 ```bash
 # A specific feature folder + Qase (→ title ON-DEMAND: FOOTER — <date time ET>):
-npx playwright test footer --project=standard ; npm run tcms:run
+npx playwright test footer --project=chromium-standard ; npm run tcms:run
 
 # Full suite (on-demand, no label):
 npm test
@@ -100,7 +104,7 @@ Commit the updated `qase-map.json`.
 
 - A **suite tree** `feature › context › bucket`, one **case** per logical
   test (prose title), marked **automated** (conveying regression status).
-- **Expected result** = the AC text from `.tcms/records/<KEY>.json`.
+- **Expected result** = the AC text from the record (`.tcms/records/<feature>.json`).
 - Cases are **found-or-created by suite-path + title** — no Qase id is ever
   hand-pasted in code (avoids the drift the no-TCMS doc warns about).
 - Results are **deduped across Playwright projects**: a test passes only if every

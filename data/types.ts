@@ -1,22 +1,11 @@
+// Shared domain types for externalized test data (data/).
+// Loaders in fixtures.ts return these; specs import via the @data/* alias.
+
 export interface Product {
-  id: string;
+  /** Exact product title as displayed on the inventory card. */
   name: string;
-  price: number;
+  /** Exact product description text. */
   description: string;
-  imageAlt: string;
-}
-
-export interface CheckoutScenario {
-  description: string;
-  firstName: string;
-  lastName: string;
-  postalCode: string;
-  expectError?: string;
-}
-
-export interface SortOption {
-  label: 'Name (A to Z)' | 'Name (Z to A)' | 'Price (low to high)' | 'Price (high to low)';
-  value: 'az' | 'za' | 'lohi' | 'hilo';
-  expectedFirst: string;
-  expectedLast: string;
+  /** Displayed price including the leading "$", e.g. "$29.99". */
+  price: string;
 }

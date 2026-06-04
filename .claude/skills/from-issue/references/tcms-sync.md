@@ -2,13 +2,20 @@
 
 The framework mirrors tests into Qase **one-way, at merge** (see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), behind the `src/tcms/` seam. `/from-issue` does **not** push to Qase; it writes a committed **records artifact**, and a merge-time CI step (`npm run tcms:sync`) does the authoritative create/update/archive. A rejected PR therefore never mutates Qase.
 
-## Step 11.5 — write `.tcms/records/<KEY>.json`
+## Step 11.5 — write/append `.tcms/records/<feature>.json`
+
+Records files are keyed by **feature** (e.g. `inventory.json`), mirroring the spec
+files — **not** by ticket. When the ticket augments an existing feature, **append**
+the new records to that feature's file (create it only if absent); never start a
+per-ticket file. There is **no file-level `meta`** — each record carries its own
+`jira` array, because one feature file legitimately holds tests from several tickets
+(SW-3 + SW-4 + SW-5 all live in `inventory.json`), and a single test may even trace
+to more than one ticket over time.
 
 One object per generated test, from the Step 6 model:
 
 ```json
 {
-  "meta": { "jiraKey": "SW-1", "sourceUrl": "https://…/browse/SW-1" },
   "records": [
     {
       "title": "<prose test title, with any embedded @tag tokens stripped>",
@@ -17,13 +24,16 @@ One object per generated test, from the Step 6 model:
       "tags": ["@no-auth", "@smoke"],
       "bucket": "Positive | Negative | Edge",
       "feature": "<feature slug, e.g. login>",
-      "contextLabel": "<context label, e.g. 'no auth' / 'problem_user'>"
+      "contextLabel": "<context label, e.g. 'no auth' / 'problem_user'>",
+      "jira": [{ "key": "<THIS ticket, e.g. SW-1>", "url": "https://…/browse/SW-1" }]
     }
   ]
 }
 ```
 
-Write it with the Write tool and `git add` it alongside the spec. Skip under `dry-run`.
+Set `jira` to the ticket(s) **this** test traces to (usually just the one you're
+working). Write/append with the Write tool and `git add` it alongside the spec.
+Skip under `dry-run`. The sync rejects any record missing a non-empty `jira` array.
 
 ## What the merge-time sync does (`src/tcms/suite-sync.ts`, run by CI)
 

@@ -1,0 +1,204 @@
+{
+  "records": [
+    {
+      "title": "checkout button on the cart page navigates to Checkout: Your Information",
+      "acText": "On /cart.html with at least one item, the Checkout button is displayed; clicking it routes standard_user to /checkout-step-one.html (page title 'Checkout: Your Information').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "mandatory fields show their placeholder text",
+      "acText": "On /checkout-step-one.html, the three mandatory inputs display placeholder text 'First Name', 'Last Name', and 'Zip/Postal Code' respectively.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "valid information routes to Checkout: Overview",
+      "acText": "On /checkout-step-one.html, filling First Name 'John', Last Name 'Doe', Zip/Postal Code '12345' and clicking Continue routes standard_user to /checkout-step-two.html (page title 'Checkout: Overview').",
+      "user": "standard_user",
+      "tags": ["@standard", "@smoke"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with all fields empty shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, clicking Continue with all three fields empty shows the error banner 'Error: First Name is required' and flags all three inputs with the error state (error class + error icon).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only first name shows \"Error: Last Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only First Name ('John') populated, clicking Continue shows 'Error: Last Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only last name shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only Last Name ('Doe') populated, clicking Continue shows 'Error: First Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "continue with only postal code shows \"Error: First Name is required\" and flags all fields",
+      "acText": "On /checkout-step-one.html, with only Zip/Postal Code ('12345') populated, clicking Continue shows 'Error: First Name is required' and flags all three inputs with the error state.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Negative",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "dismissing the error clears the banner and field styling but keeps entered values",
+      "acText": "On /checkout-step-one.html with an error shown, clicking the error container's X removes the error banner and clears the per-field error styling on all three inputs, while preserving any text already entered (First Name 'John' is retained).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-7", "url": "https://diegocortes15.atlassian.net/browse/SW-7" }]
+    },
+    {
+      "title": "Cancel button and cart icon are visible on the Checkout: Your Information page",
+      "acText": "On /checkout-step-one.html, standard_user sees the Cancel button and the header shopping-cart icon both displayed.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "Cancel button returns to the Cart page from Checkout: Your Information",
+      "acText": "On /checkout-step-one.html, clicking Cancel returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "cart icon returns to the Cart page from Checkout: Your Information",
+      "acText": "On /checkout-step-one.html, clicking the header shopping-cart icon returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "entered information does not persist after leaving via Cancel and returning",
+      "acText": "After entering First name 'Jane', Last name 'Doe', Postal code '12345' on /checkout-step-one.html, leaving to the cart via Cancel, and returning to the page, all three fields are empty (form state is not persisted).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "cancelling an empty form returns to the Cart page without a validation error",
+      "acText": "With the form empty on /checkout-step-one.html, clicking Cancel returns standard_user to the Cart page (/cart.html, title 'Your Cart') with no validation error shown.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-8", "url": "https://diegocortes15.atlassian.net/browse/SW-8" }]
+    },
+    {
+      "title": "overview lists the three products in cart order with name, quantity, description, and price",
+      "acText": "On /checkout-step-two.html, the three added products (Sauce Labs Backpack, Sauce Labs Bike Light, Sauce Labs Bolt T-Shirt) are listed in the order they were added, each with its name, a quantity of 1, its description, and its price ($29.99, $9.99, $15.99).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "overview shows the payment and shipping information",
+      "acText": "On /checkout-step-two.html, the Payment Information section shows 'SauceCard #31337' and the Shipping Information section shows 'Free Pony Express Delivery!'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "overview shows the item total, tax, and order total",
+      "acText": "On /checkout-step-two.html with the three-item cart, the price summary reads 'Item total: $55.97', 'Tax: $4.48' (8% of the item total, 2 decimals), and 'Total: $60.45' (item total + tax).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "cart icon on the overview navigates to the Cart page",
+      "acText": "On /checkout-step-two.html, the header shopping-cart icon is displayed; clicking it returns standard_user to the Cart page (/cart.html, title 'Your Cart').",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "finishing the order shows the confirmation page with a Back Home button",
+      "acText": "On /checkout-step-two.html, the Finish button is visible; clicking it routes standard_user to /checkout-complete.html (title 'Checkout: Complete!') showing the header 'Thank you for your order!', the dispatch confirmation body, and a Back Home button.",
+      "user": "standard_user",
+      "tags": ["@standard", "@smoke"],
+      "bucket": "Positive",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "cancel on the overview returns to the inventory page and keeps the cart",
+      "acText": "On /checkout-step-two.html, clicking Cancel returns standard_user to the inventory page (/inventory.html) and the three products remain in the cart (cart badge shows 3).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    },
+    {
+      "title": "back home after finishing clears the cart and returns to the inventory page",
+      "acText": "After finishing the order on /checkout-complete.html, clicking Back Home returns standard_user to the inventory page (/inventory.html) and the cart is reset — the cart badge count is no longer shown (0).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "checkout",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-9", "url": "https://diegocortes15.atlassian.net/browse/SW-9" }]
+    }
+  ]
+}

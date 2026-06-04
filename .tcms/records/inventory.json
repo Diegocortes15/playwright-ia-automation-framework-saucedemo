@@ -1,0 +1,124 @@
+{
+  "records": [
+    {
+      "title": "problem_user sees one identical broken image for every product",
+      "acText": "For problem_user, every product image collapses to the same broken placeholder (sl-404) instead of a distinct image per product.",
+      "user": "problem_user",
+      "tags": ["@problem"],
+      "bucket": "Edge",
+      "feature": "inventory",
+      "contextLabel": "problem_user",
+      "jira": [{ "key": "SW-3", "url": "https://diegocortes15.atlassian.net/browse/SW-3" }]
+    },
+    {
+      "title": "all six product images render with distinct, non-empty sources",
+      "acText": "All six products show distinct, non-empty image sources (one image per product).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "all six product titles render exactly and in catalog order",
+      "acText": "The six product titles match the catalog exactly, in Name A→Z display order.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "every product shows its exact description",
+      "acText": "Each product's description matches the catalog reference data exactly.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "every product price is formatted with a leading dollar sign",
+      "acText": "Each product price matches the catalog and is formatted as $NN.NN.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "every product offers an enabled Add to cart button",
+      "acText": "All six products show an enabled 'Add to cart' button.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "hovering a product title turns its text the brand green (#3ddc91)",
+      "acText": "Hovering a product title changes its computed text color to the brand green rgb(61, 220, 145).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Edge",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+    },
+    {
+      "title": "products default to Name (A to Z) order with the matching active sort label",
+      "acText": "On load, products are sorted by Name (A to Z) by default and the active sort option reads 'Name (A to Z)'.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+    },
+    {
+      "title": "selecting \"Name (A to Z)\" sorts products by name ascending",
+      "acText": "Selecting 'Name (A to Z)' orders the products alphabetically ascending by name.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+    },
+    {
+      "title": "selecting \"Name (Z to A)\" sorts products by name descending",
+      "acText": "Selecting 'Name (Z to A)' orders the products alphabetically descending by name.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+    },
+    {
+      "title": "selecting \"Price (low to high)\" sorts products by price ascending",
+      "acText": "Selecting 'Price (low to high)' orders the products by price ascending (lowest first).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+    },
+    {
+      "title": "selecting \"Price (high to low)\" sorts products by price descending",
+      "acText": "Selecting 'Price (high to low)' orders the products by price descending (highest first).",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "records": [
+    {
+      "title": "standard_user logs in successfully and lands on inventory",
+      "acText": "standard_user is authenticated and the browser lands on the Products / Inventory page (/inventory.html).",
+      "user": "no-auth",
+      "tags": ["@no-auth", "@smoke"],
+      "bucket": "Positive",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "problem_user logs in successfully and lands on inventory",
+      "acText": "problem_user is authenticated and the browser lands on the Products / Inventory page (/inventory.html).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "performance_glitch_user logs in successfully and lands on inventory",
+      "acText": "performance_glitch_user is authenticated and the browser lands on the Products / Inventory page (/inventory.html), despite the slow load.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "error_user logs in successfully and lands on inventory",
+      "acText": "error_user is authenticated and the browser lands on the Products / Inventory page (/inventory.html).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "visual_user logs in successfully and lands on inventory",
+      "acText": "visual_user is authenticated and the browser lands on the Products / Inventory page (/inventory.html).",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Positive",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "no credentials shows the required-field error",
+      "acText": "With both fields empty, an error banner reads 'Epic sadface: Username is required'.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "missing password shows the required-field error",
+      "acText": "With a username but no password, an error banner reads 'Epic sadface: Password is required'.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "missing username shows the required-field error",
+      "acText": "With a password but no username, an error banner reads 'Epic sadface: Username is required'.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Negative",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    },
+    {
+      "title": "invalid credentials are rejected",
+      "acText": "Invalid credentials are rejected with 'Epic sadface: Username and password do not match any user in this service'.",
+      "user": "no-auth",
+      "tags": ["@no-auth", "@smoke"],
+      "bucket": "Negative",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+    }
+  ]
+}

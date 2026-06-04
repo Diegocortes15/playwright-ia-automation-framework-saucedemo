@@ -5,6 +5,15 @@
 export type TcmsStatus = 'passed' | 'failed' | 'skipped';
 export type TcmsBucket = 'Positive' | 'Negative' | 'Edge';
 
+// A Jira ticket a case traces back to. A case can cover MORE THAN ONE ticket over
+// its lifetime (born in one ticket, amended by a later edit/update ticket), so
+// provenance is an array — and it lives per-RECORD, not per records-file, so one
+// feature file (e.g. inventory.json) can hold tests from several tickets.
+export interface JiraRef {
+  key: string; // e.g. 'SW-4'
+  url: string; // e.g. 'https://…/browse/SW-4'
+}
+
 export interface TcmsStep {
   action: string;
   expected: string; // '' when the step has no specific expected result
@@ -19,8 +28,7 @@ export interface TcmsCase {
   tags: string[];
   bucket: TcmsBucket;
   // Structured provenance — some seams (Xray/Zephyr) link test↔requirement by Jira key.
-  jiraKey: string;
-  sourceUrl: string;
+  jira: JiraRef[];
   status: TcmsStatus; // run outcome; carried for seams that can set case status (e.g. Xray). sync.ts records run status via CaseResult.
 }
 
@@ -34,6 +42,7 @@ export interface TestRecord {
   bucket: TcmsBucket;
   feature: string; // suite root, e.g. 'login'
   contextLabel: string; // e.g. 'no auth', 'problem_user'
+  jira: JiraRef[]; // ticket(s) this test traces to — per-record so a feature file spans tickets
 }
 
 export interface SyncMeta {

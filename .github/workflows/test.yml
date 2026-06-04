@@ -15,8 +15,12 @@ jobs:
     name: Playwright matrix
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write # allow the merge-time job to commit the refreshed qase-map.json back
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so the PR step can diff changed spec files against the base
 
       - uses: actions/setup-node@v4
         with:
@@ -24,6 +28,16 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
+
+      # Static gates — run on the WHOLE codebase before the (narrow) test run, so a
+      # type error or lint violation in a non-spec file (Page Object, fixture,
+      # component) is caught even when a PR only runs a few changed spec files.
+      # Fail fast, before the expensive browser install.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -33,20 +47,61 @@ jobs:
 
       - run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: Run tests
+      # On a PR: run ONLY the spec files this PR added/modified — "the PR's tests, no
+      # more". We deliberately do NOT use `--only-changed`: it follows the import graph,
+      # so touching a shared file (e.g. src/fixtures/test.ts, which every spec imports)
+      # drags in the whole suite — which is exactly the scaling pain we're avoiding.
+      # Changing a shared Page Object therefore won't re-run its OTHER dependents here;
+      # the full suite on merge (below) is the integration gate that catches that.
+      - name: Run changed spec files (pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
+          CI: 'true'
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          changed=$(git diff --name-only --diff-filter=AM "$base"...HEAD -- 'tests/' | grep '\.spec\.ts$' || true)
+          if [ -z "$changed" ]; then
+            echo "No spec files added/modified in this PR — nothing to run."
+            exit 0
+          fi
+          echo "Changed spec files:"
+          echo "$changed"
+          npx playwright test $changed
+
+      # On merge (push): run the full suite so the Qase catalog sync below has every
+      # test's steps/status. (A lighter merge + a separate scheduled full regression
+      # is a planned follow-up.)
+      - name: Run full suite (merge)
+        if: ${{ github.event_name == 'push' }}
         env:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           CI: 'true'
         run: npm test
 
-      # Note: qase-map.json updates here are ephemeral on CI. The committed map is
-      # refreshed when a developer runs `npm run tcms:sync` locally (see docs/tcms.md).
+      # Catalog sync at merge (push only): create/update/archive Qase cases. No run.
       - name: Sync test cases to Qase (merge only)
         if: ${{ always() && github.event_name == 'push' }}
         env:
           QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
           QASE_PROJECT_CODE: ${{ secrets.QASE_PROJECT_CODE }}
         run: npm run tcms:sync
+
+      # Commit the refreshed qase-map.json back so the committed map always reflects
+      # the live Qase case ids (e.g. after a /from-issue PR adds new cases). The
+      # `[skip ci]` tag stops this bot commit from re-triggering the workflow.
+      - name: Commit refreshed qase-map.json (merge only)
+        if: ${{ always() && github.event_name == 'push' }}
+        run: |
+          if [ -n "$(git status --porcelain qase-map.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add qase-map.json
+            git commit -m "chore(tcms): refresh qase-map.json [skip ci]"
+            git push origin "HEAD:${{ github.ref_name }}"
+          else
+            echo "qase-map.json unchanged — nothing to commit."
+          fi
 
       - name: Upload HTML report on failure
         if: failure()
