@@ -15,7 +15,7 @@ Playwright + TypeScript test framework for [saucedemo](https://www.saucedemo.com
 ## Quick run
 
 ```bash
-npm test                 # full matrix (9 projects, 62 instances, ~1 min)
+npm test                 # full matrix (all data-driven projects, per tests/users.ts)
 npm run test:standard    # standard chromium only (fast local iteration)
 npm run test:debug       # Playwright Inspector
 npm run test:ui          # Playwright UI mode
@@ -80,31 +80,30 @@ Never use XPath.
 
 > Tags are applied via Playwright's **`{ tag }` option** — routing tags on `test.describe`, `@smoke` on the `test` — NOT in the title string (per [ADR-0015](docs/adr/0015-spec-tags-via-tag-option.md)). Project `grep` matches option-tags, so routing is unchanged. One feature file holds one tagged describe per user-context.
 
-| Tag                   | Runs on project(s)                                                                | Purpose                                                                                                       |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                                   |
-| `@all-users`          | All 5 chromium user projects + firefox/webkit                                     | User-agnostic flows                                                                                           |
-| `@standard`           | `standard`, `firefox-standard`, `webkit-standard`                                 | Tests where only standard user is meaningful                                                                  |
-| `@problem`            | `problem`                                                                         | Tests that _expect_ the problem user's broken UI                                                              |
-| `@performance_glitch` | `performance_glitch`                                                              | Tests that handle slow loads                                                                                  |
-| `@error`              | `error`                                                                           | Tests for the error user's random failures                                                                    |
-| `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                                         |
-| `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users)             |
-| `@smoke`              | Cross-cutting (filtered via `--grep "@smoke"`)                                    | Build-verification candidates from /from-issue. Selected per `smoke-policy.md`. Run via `npm run test:smoke`. |
+Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['standard', 'problem']`); `/from-issue` grows that array one user at a time as tickets need authenticated pages (ADR-0014). Each user yields a `setup-<user>` + a `chromium-<user>` project; plus a `chromium-no-auth` project. Cross-browser (firefox/webkit) stays out (ADR-0004).
+
+| Tag          | Runs on project(s)                                                                  | Purpose                                                                                                                                                                                                |
+| ------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@no-auth`   | `chromium-no-auth`                                                                  | Login / logout / route-guard tests — no pre-existing session                                                                                                                                           |
+| `@all-users` | every `chromium-<user>` project (currently `chromium-standard`, `chromium-problem`) | User-agnostic flows                                                                                                                                                                                    |
+| `@standard`  | `chromium-standard`                                                                 | Tests where only standard_user is meaningful                                                                                                                                                           |
+| `@problem`   | `chromium-problem`                                                                  | Tests that _expect_ problem_user's broken UI                                                                                                                                                           |
+| `@<user>`    | `chromium-<user>` — **only once that user is wired** into `AUTH_USERS`              | On-demand per ADR-0014: e.g. `@performance_glitch` / `@error` / `@visual` route nowhere until a ticket needs that user (then `/from-issue` adds it + its project). Cross-browser stays out (ADR-0004). |
+| `@smoke`     | Cross-cutting (filtered via `--grep "@smoke"`)                                      | Build-verification candidates from /from-issue. Selected per `smoke-policy.md`. Run via `npm run test:smoke`.                                                                                          |
 
 ## Where things live
 
-| What                                         | Where                                                                                               |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Page objects                                 | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                      |
-| Components                                   | `src/components/` (`Header.ts`, `CartBadge.ts`, `ProductCard.ts`, `SortDropdown.ts`)                |
-| Fixture (auto-injects pages)                 | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test` |
-| Test data + types + loaders                  | `data/` (use `@data/*` alias)                                                                       |
-| env config                                   | `src/utils/env.ts` (single read point for `process.env`)                                            |
-| Specs                                        | `tests/<feature>/*.spec.ts`                                                                         |
-| Auth setup (generates storageState per user) | `tests/auth.setup.ts`                                                                               |
-| Playwright config (9 projects)               | `playwright.config.ts`                                                                              |
-| TCMS mirror (optional Qase seam)             | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `sync.ts`)        |
+| What                                            | Where                                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Page objects                                    | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                                     |
+| Components                                      | `src/components/` (`Header.ts`, `Footer.ts`, `CartBadge.ts`, `BurgerMenu.ts`)                                      |
+| Fixture (auto-injects pages)                    | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test`                |
+| Test data + types + loaders                     | `data/` (use `@data/*` alias)                                                                                      |
+| env config                                      | `src/utils/env.ts` (single read point for `process.env`)                                                           |
+| Specs                                           | `tests/<feature>/*.spec.ts`                                                                                        |
+| Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                              |
+| Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                             |
+| TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`) |
 
 ## Path aliases
 
