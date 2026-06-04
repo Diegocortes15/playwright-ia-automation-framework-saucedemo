@@ -73,6 +73,8 @@ The authoring layer is four composable [Claude Code skills](.claude/skills/). Th
 | **`/scaffold-page-object`** | Generates a draft Page Object from a live page snapshot, composing detected components. ([guide](docs/scaffold-page-object.md))  | Repo             |
 | **`playwright-cli`**        | Drives a real browser to discover/verify selectors and read the rendered DOM before authoring. ([guide](docs/playwright-cli.md)) | — (read-only)    |
 
+![refined Jira ticket](docs/images/jira-ticket.png)
+
 `/from-issue` is the conductor: it calls `/scaffold-page-object` when a Page Object doesn't exist yet, uses `playwright-cli` to confirm selectors, grows the auth harness when a ticket needs an unwired user, and surfaces every assumption it made in the PR body for the reviewer.
 
 > **📋 See a real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request from this repo. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, the **⚠️ Assumptions** the agent flagged for review, and the verification results — exactly what a reviewer reads before merging.
