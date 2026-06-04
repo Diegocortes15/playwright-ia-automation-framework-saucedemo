@@ -8,7 +8,7 @@
 
 > An end-to-end test framework where **a Jira ticket becomes a reviewed, TCMS-mirrored Playwright pull request** — authored by AI agents, gated by deterministic CI. Built on [saucedemo](https://www.saucedemo.com) as both a **reusable template** and a **portfolio piece**.
 
-<!-- 📷 IMAGE SLOT — Hero banner or a side-by-side screenshot collage (a generated PR on the left, the Qase suite tree on the right). Replace this comment with: ![overview](docs/images/hero.png) -->
+![overview](docs/images/hero.png)
 
 The framework is **code-first and AI-extended**. Tests are plain, fast, deterministic Playwright + TypeScript — nothing exotic at runtime. The "AI" part is the _authoring_ layer: a set of custom [Claude Code](https://claude.ai/code) skills read a Jira ticket, generate Page-Object-backed tests, run them, and open a GitHub PR — optionally mirroring each test into a [Qase](https://qase.io) TCMS so non-technical reviewers can browse human-readable cases. A human reviews and merges; CI keeps everything honest.
 
@@ -27,8 +27,6 @@ flowchart LR
     Rev -->|merge| M["main"]
     M -->|"CI: full suite<br/>+ catalog sync"| Q["Qase TCMS<br/>(human-readable cases)"]
 ```
-
-<!-- 📷 IMAGE SLOT — A polished version of the pipeline above (or a screenshot of a real run: the Jira ticket → the PR → the Qase case). Replace with: ![pipeline](docs/images/pipeline.png) -->
 
 1. **`/refine-ticket`** hardens a Jira ticket's acceptance criteria against a "bulletproof" rubric (grounded in the existing automation + app docs) and writes the refined ACs back to Jira — so the next step has nothing to guess.
 2. **`/from-issue`** reads the refined ticket through the **Atlassian MCP**, generates tests + Page Objects (scaffolding new ones via `/scaffold-page-object`, verifying selectors live via `playwright-cli`), runs them, writes a committed TCMS record, and opens a **GitHub PR**.
@@ -79,7 +77,7 @@ The authoring layer is four composable [Claude Code skills](.claude/skills/). Th
 
 > **📋 See a real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request from this repo. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, the **⚠️ Assumptions** the agent flagged for review, and the verification results — exactly what a reviewer reads before merging.
 
-<!-- 📷 IMAGE SLOT — Screenshot of a real /from-issue PR body (the "What I understood" + AC-coverage table + Assumptions block) — it shows the skills' reasoning nicely. A live example is linked just above (PR #25). Replace with: ![generated-pr](docs/images/from-issue-pr.png) -->
+![generated-pr](docs/images/from-issue-pr.png)
 
 ---
 
@@ -108,8 +106,6 @@ flowchart TD
     Pages -.->|"page-direct locators"| Loc
 ```
 
-<!-- 📷 IMAGE SLOT — A cleaner architecture/composition diagram (or a layered "onion" view). Replace with: ![architecture](docs/images/architecture.png) -->
-
 **Key ideas:**
 
 - **Composition rules are enforced** — e.g. Pages never return other Pages, queries return data (never `Locator`), component nesting depth ≤ 2. The full list is in [`CLAUDE.md`](CLAUDE.md) and [`docs/architecture.md`](docs/architecture.md).
@@ -129,7 +125,7 @@ An **opt-in, one-way** mirror so non-technical reviewers can browse human-readab
 - **Runs are explicit** — `npm run qase:smoke` / `qase:regression` execute a scope _and_ record a labeled Qase run; `tcms:run` records an ad-hoc run from the last results.
 - **Swappable** — `src/tcms/qase-client.ts` is the only Qase-aware file; it implements a tool-agnostic seam, so Xray/Zephyr/etc. is a sibling client. Full design in [`docs/tcms.md`](docs/tcms.md).
 
-<!-- 📷 IMAGE SLOT (Qase board) — Paste a screenshot of the Qase board/dashboard here: the suite tree, a case with its steps + "Covers Jira SW-x" link, or the runs view — whichever reads best. Replace with: ![qase board](docs/images/qase-board.png) -->
+![qase board](docs/images/qase-board.png)
 
 ---
 
