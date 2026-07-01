@@ -103,10 +103,13 @@ jobs:
             echo "qase-map.json unchanged — nothing to commit."
           fi
 
-      - name: Upload HTML report on failure
-        if: failure()
+      - name: Upload HTML report (always)
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          # A PR that changes no spec files runs no tests → no report to upload;
+          # skip quietly instead of warning.
+          if-no-files-found: ignore

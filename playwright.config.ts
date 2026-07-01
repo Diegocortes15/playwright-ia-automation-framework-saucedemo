@@ -24,7 +24,7 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.SAUCEDEMO_BASE_URL ?? 'https://www.saucedemo.com',
-    trace: 'on-first-retry',
+    trace: 'on', // always record a trace, so the trace viewer has data for every test (pass or fail)
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     actionTimeout: 10_000,
