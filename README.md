@@ -144,6 +144,49 @@ The "changed specs only" selection is a deliberate choice over Playwright's `--o
 
 ---
 
+## Reports & debugging
+
+Every run produces a self-contained **HTML report** (`playwright-report/`) and, because `trace: 'on'`, a **trace** for _every_ test — so the [Trace Viewer](https://playwright.dev/docs/trace-viewer) (a full timeline: actions, DOM snapshots, network, console) is available for any test, not just failures. Screenshots and video are additionally captured **on failure**.
+
+### Locally
+
+```bash
+npm test                 # runs + writes playwright-report/ and per-test traces
+npm run report           # open the HTML report in a browser
+```
+
+In the report, click a test → **Traces** to open the trace viewer inline. Or open a trace file directly:
+
+```bash
+npx playwright show-trace test-results/<test-dir>/trace.zip
+```
+
+### From CI (GitHub Actions)
+
+The report is uploaded as an artifact on **every** run (pass or fail), so you can inspect any run:
+
+1. Open the workflow run → **Summary** → **Artifacts** → download **`playwright-report`**.
+2. Unzip it, then serve it locally (the traces are bundled inside, so the viewer works too):
+
+```bash
+npx playwright show-report ./playwright-report
+```
+
+### What's captured when
+
+| Artifact    | When       | Config (`playwright.config.ts`) |
+| ----------- | ---------- | ------------------------------- |
+| Trace       | every test | `trace: 'on'`                   |
+| Screenshot  | on failure | `screenshot: 'only-on-failure'` |
+| Video       | on failure | `video: 'retain-on-failure'`    |
+| HTML report | every run  | `reporter: [['html', …]]`       |
+
+> `trace: 'on'` makes the trace viewer available everywhere at the cost of larger artifacts + slightly slower runs — a deliberate trade for always-on debuggability. Switch to `retain-on-failure` if that ever becomes heavy.
+>
+> _Optional next step:_ the CI report is a downloadable artifact, not a hosted link. To get a clickable per-run report URL, publish `playwright-report/` to GitHub Pages.
+
+---
+
 ## Getting started
 
 ### Prerequisites

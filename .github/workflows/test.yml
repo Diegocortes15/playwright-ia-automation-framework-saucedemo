@@ -103,8 +103,8 @@ jobs:
             echo "qase-map.json unchanged — nothing to commit."
           fi
 
-      - name: Upload HTML report on failure
-        if: failure()
+      - name: Upload HTML report (always)
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
