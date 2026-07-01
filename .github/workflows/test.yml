@@ -45,7 +45,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - run: npx playwright install --with-deps chromium firefox webkit
+      # Chromium only — the suite is chromium-only (projects use Desktop Chrome; no
+      # firefox/webkit). Installing all three pulled in huge OS deps that timed the
+      # job out; chromium's deps are largely pre-installed on the runner.
+      - run: npx playwright install --with-deps chromium
 
       # On a PR: run ONLY the spec files this PR added/modified — "the PR's tests, no
       # more". We deliberately do NOT use `--only-changed`: it follows the import graph,
