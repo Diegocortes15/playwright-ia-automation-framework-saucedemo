@@ -123,17 +123,19 @@ jobs:
           counts=""
           dur=""
           if [ -f test-results/results.json ]; then
-            counts=$(jq -r '.stats | "✅ \(.expected) passed · ❌ \(.unexpected) failed" + (if .flaky>0 then " · ⚠️ \(.flaky) flaky" else "" end) + (if .skipped>0 then " · ⏭️ \(.skipped) skipped" else "" end)' test-results/results.json 2>/dev/null || true)
+            counts=$(jq -r '.stats | ":check-mark-button: \(.expected) passed · :cross-mark: \(.unexpected) failed" + (if .flaky>0 then " · ⚠️ \(.flaky) flaky" else "" end) + (if .skipped>0 then " · ⏭️ \(.skipped) skipped" else "" end)' test-results/results.json 2>/dev/null || true)
             secs=$(jq -r '(.stats.duration // 0)/1000|floor' test-results/results.json 2>/dev/null || echo 0)
             if [ "$secs" -ge 60 ]; then dur="$((secs/60))m $((secs%60))s"; else dur="${secs}s"; fi
           fi
-          if [ "$RESULT" = "success" ]; then icon="✅"; verb="passed"; else icon="❌"; verb="FAILED"; fi
-          if [ "$EVENT_NAME" = "schedule" ]; then who="🤖 Automated (scheduled)"; else who="👤 Manual by @$ACTOR"; fi
+          # icon → unicode for the notification/fallback text; mark → custom emoji for the in-channel body.
+          if [ "$RESULT" = "success" ]; then icon="✅"; mark=":check-mark-button:"; verb="passed"; else icon="❌"; mark=":cross-mark:"; verb="FAILED"; fi
+          if [ "$EVENT_NAME" = "schedule" ]; then who=":robot: Automated (scheduled)"; else who=":scientist-2: Manual by @$ACTOR"; fi
           suite_uc=$(printf '%s' "$SUITE" | tr '[:lower:]' '[:upper:]')
-          body="*$icon $suite_uc $verb*"$'\n'"$who"
+          body="*$mark $suite_uc $verb*"$'\n'"$who"
           [ -n "$counts" ] && body="$body"$'\n'"$counts"
-          [ -n "$dur" ] && body="$body"$'\n'"⏱️ Ran in $dur"
-          [ -n "$ENV_LINE" ] && body="$body"$'\n'"🖥️ $ENV_LINE"
-          [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'"<$QASE_RUN_URL|📋 Qase run>"
-          body="$body"$'\n'"<$RUN_URL|🔎 GitHub run & report artifact>"
+          [ -n "$dur" ] && body="$body"$'\n'":stopwatch-2: Ran in $dur"
+          [ -n "$ENV_LINE" ] && body="$body"$'\n'":performing-arts: $ENV_LINE"
+          # Custom emoji outside the <url|label> so Slack renders them (emoji inside link text don't render).
+          [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'":qase: <$QASE_RUN_URL|Qase run>"
+          body="$body"$'\n'":github: <$RUN_URL|GitHub run & report artifact>"
           jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"
