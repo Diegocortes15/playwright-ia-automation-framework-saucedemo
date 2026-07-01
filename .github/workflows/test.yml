@@ -110,3 +110,6 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          # A PR that changes no spec files runs no tests → no report to upload;
+          # skip quietly instead of warning.
+          if-no-files-found: ignore
