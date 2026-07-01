@@ -1,5 +1,8 @@
 name: Regression & Smoke (scheduled + manual)
 
+# Names the run in the Actions UI: automated (scheduled) vs manual + who triggered it.
+run-name: ${{ github.event_name == 'schedule' && 'Automated · regression' || format('Manual · {0} — @{1}', inputs.suite, github.triggering_actor) }}
+
 on:
   # Every Monday 06:00 UTC (01:00 Bogota). The gate below limits SCHEDULED runs to
   # every OTHER Monday, anchored on 2026-07-13 → biweekly (Jul 13, 27, Aug 10, …).
@@ -77,6 +80,7 @@ jobs:
       # Runs the chosen suite AND records a labeled Qase run ("REGRESSION …" / "SMOKE …");
       # the Qase run URL is printed in this step's log.
       - name: Run ${{ needs.gate.outputs.suite }} + record a Qase run
+        id: run
         env:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
@@ -92,3 +96,30 @@ jobs:
           path: playwright-report/
           retention-days: 14
           if-no-files-found: ignore
+
+      # Post the outcome to Slack: pass/fail + counts, the Qase run link, the GitHub
+      # run link (→ report artifact), and the automated/manual + who identifier.
+      - name: Notify Slack
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RESULT: ${{ steps.run.outcome }}
+          SUITE: ${{ needs.gate.outputs.suite }}
+          QASE_RUN_URL: ${{ steps.run.outputs.qase_run_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.triggering_actor }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "No SLACK_WEBHOOK_URL secret — skipping Slack."; exit 0; fi
+          counts=""
+          if [ -f test-results/results.json ]; then
+            counts=$(jq -r '.stats | "✅ \(.expected) passed · ❌ \(.unexpected) failed" + (if .flaky>0 then " · ⚠️ \(.flaky) flaky" else "" end) + (if .skipped>0 then " · ⏭️ \(.skipped) skipped" else "" end)' test-results/results.json 2>/dev/null || true)
+          fi
+          if [ "$RESULT" = "success" ]; then icon="✅"; verb="passed"; else icon="❌"; verb="FAILED"; fi
+          if [ "$EVENT_NAME" = "schedule" ]; then who="🤖 Automated (scheduled)"; else who="👤 Manual by @$ACTOR"; fi
+          suite_uc=$(printf '%s' "$SUITE" | tr '[:lower:]' '[:upper:]')
+          body="*$icon $suite_uc $verb*"$'\n'"$who"
+          [ -n "$counts" ] && body="$body"$'\n'"$counts"
+          [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'"<$QASE_RUN_URL|📋 Qase run>"
+          body="$body"$'\n'"<$RUN_URL|🔎 GitHub run & report artifact>"
+          jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"

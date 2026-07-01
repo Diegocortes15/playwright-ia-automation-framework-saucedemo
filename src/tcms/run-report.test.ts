@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectResults, runTitle, nowET } from './run-report';
+import { selectResults, runTitle, nowET, triggerTag } from './run-report';
 import type { QaseMap } from './types';
 
 const map: QaseMap = {
@@ -88,4 +88,26 @@ test('runTitle falls back to a generic scope when no features resolve', () => {
 
 test('nowET returns a YYYY-MM-DD HH:MM ET string', () => {
   expect(nowET(new Date('2026-05-30T18:15:00Z'))).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2} ET$/);
+});
+
+test('triggerTag: empty locally, Automated for schedule, Manual (actor) for dispatch', () => {
+  const { GITHUB_EVENT_NAME, GITHUB_TRIGGERING_ACTOR, GITHUB_ACTOR } = process.env;
+  try {
+    delete process.env.GITHUB_EVENT_NAME;
+    expect(triggerTag()).toBe('');
+    process.env.GITHUB_EVENT_NAME = 'schedule';
+    expect(triggerTag()).toBe(' · Automated');
+    process.env.GITHUB_EVENT_NAME = 'workflow_dispatch';
+    process.env.GITHUB_TRIGGERING_ACTOR = 'diego';
+    expect(triggerTag()).toBe(' · Manual (diego)');
+  } finally {
+    const saved = { GITHUB_EVENT_NAME, GITHUB_TRIGGERING_ACTOR, GITHUB_ACTOR };
+    delete process.env.GITHUB_EVENT_NAME;
+    delete process.env.GITHUB_TRIGGERING_ACTOR;
+    delete process.env.GITHUB_ACTOR;
+    Object.assign(
+      process.env,
+      Object.fromEntries(Object.entries(saved).filter(([, v]) => v !== undefined)),
+    );
+  }
 });
