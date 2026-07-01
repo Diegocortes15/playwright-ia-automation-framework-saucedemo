@@ -4,6 +4,7 @@ import { indexResults, normalizeTitle } from './results-reader';
 import { loadMap } from './map-store';
 import { QaseClient } from './qase-client';
 import { qaseConfig } from '../utils/qase-env';
+import { runEnvironment, formatEnvironmentLine } from '../utils/run-environment';
 
 const SEP = ' › '; // matches map-store's logical-key separator
 const QASE_WEB_BASE = 'https://app.qase.io'; // cloud web app (run links); self-hosted differs
@@ -83,6 +84,14 @@ export function triggerTag(): string {
   return ` · ${event}`;
 }
 
+// Human-readable run duration, e.g. 4200 → '4s', 95000 → '1m 35s'.
+export function formatDuration(ms: number): string {
+  const totalSec = Math.round(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+}
+
 // Current date + time in US Eastern Time, e.g. "2026-05-30 14:15 ET".
 export function nowET(d: Date = new Date()): string {
   const date = new Intl.DateTimeFormat('en-CA', {
@@ -125,10 +134,15 @@ export async function recordRun(label?: string): Promise<void> {
     return;
   }
   const title = runTitle(map, results, nowET(), label ? `${label}${triggerTag()}` : label);
+  // Stamp the run with what it executed on + how long it took, so the Qase record
+  // stands alone (matches the report metadata + the Slack notification).
+  const durationMs = typeof report?.stats?.duration === 'number' ? report.stats.duration : 0;
+  const description = `Environment: ${formatEnvironmentLine(runEnvironment())}\nDuration: ${formatDuration(durationMs)}`;
   const runId = await new QaseClient(cfg).recordResults(results, {
     jiraKey: '',
     sourceUrl: '',
     runTitle: title,
+    description,
   });
   const runUrl = `${QASE_WEB_BASE}/run/${cfg.projectCode}/dashboard/${runId}`;
   console.log(color(`Qase run created — ${results.length} result(s) recorded.`, PURPLE));

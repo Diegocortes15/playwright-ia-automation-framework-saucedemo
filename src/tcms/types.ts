@@ -49,6 +49,7 @@ export interface SyncMeta {
   jiraKey: string;
   sourceUrl: string;
   runTitle: string; // e.g. 'from-issue SW-1 — 2026-05-28'
+  description?: string; // optional run description, e.g. environment + duration
 }
 
 export interface CaseResult {

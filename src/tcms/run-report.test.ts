@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectResults, runTitle, nowET, triggerTag } from './run-report';
+import { selectResults, runTitle, nowET, triggerTag, formatDuration } from './run-report';
 import type { QaseMap } from './types';
 
 const map: QaseMap = {
@@ -84,6 +84,13 @@ test('runTitle uses an explicit label (e.g. SMOKE/REGRESSION) when given', () =>
 
 test('runTitle falls back to a generic scope when no features resolve', () => {
   expect(runTitle(map, [], '2026-05-30 14:00 ET')).toBe('ON-DEMAND: TESTS — 2026-05-30 14:00 ET');
+});
+
+test('formatDuration renders seconds under a minute and m/s above it', () => {
+  expect(formatDuration(4200)).toBe('4s');
+  expect(formatDuration(48900)).toBe('49s');
+  expect(formatDuration(95000)).toBe('1m 35s');
+  expect(formatDuration(0)).toBe('0s');
 });
 
 test('nowET returns a YYYY-MM-DD HH:MM ET string', () => {
