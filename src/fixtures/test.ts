@@ -6,7 +6,7 @@ import { CartPage } from '@pages/CartPage';
 import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
 import { CheckoutCompletePage } from '@pages/checkout/CheckoutCompletePage';
-import { jiraAnnotations } from '@utils/jira-annotations';
+import { reportAnnotations } from '@utils/report-annotations';
 
 type Pages = {
   loginPage: LoginPage;
@@ -17,14 +17,15 @@ type Pages = {
   checkoutCompletePage: CheckoutCompletePage;
 };
 
-export const test = base.extend<Pages & { _jiraAnnotation: void }>({
-  // Auto fixture — link each test to its Jira ticket(s) in the Playwright report,
-  // derived from `.tcms/records/<feature>.json` (feature = the spec's parent dir).
-  // No per-test boilerplate; correct for augmented multi-ticket feature files.
-  _jiraAnnotation: [
+export const test = base.extend<Pages & { _reportAnnotation: void }>({
+  // Auto fixture — annotate each test in the Playwright report with its Jira
+  // ticket link(s) and the acceptance criterion it covers, derived from
+  // `.tcms/records/<feature>.json` (feature = the spec's parent dir). No per-test
+  // boilerplate; correct for augmented multi-ticket feature files.
+  _reportAnnotation: [
     async ({}, use, testInfo) => {
       const feature = basename(dirname(testInfo.file));
-      testInfo.annotations.push(...jiraAnnotations(feature, testInfo.title));
+      testInfo.annotations.push(...reportAnnotations(feature, testInfo.title));
       await use();
     },
     { auto: true },
