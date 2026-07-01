@@ -15,6 +15,8 @@ export default defineConfig({
   workers: process.env.CI ? 4 : undefined,
 
   reporter: [
+    // On CI, surface failures as inline GitHub annotations on the PR / run summary.
+    ...(process.env.CI ? [['github'] as const] : []),
     ['html', { open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
     ['list'],
