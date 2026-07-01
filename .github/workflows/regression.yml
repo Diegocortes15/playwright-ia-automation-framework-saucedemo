@@ -1,13 +1,20 @@
 name: Regression & Smoke (scheduled + manual)
 
-# Names the run in the Actions UI: automated (scheduled) vs manual + who triggered it.
-run-name: ${{ github.event_name == 'schedule' && 'Automated · regression' || format('Manual · {0} — @{1}', inputs.suite, github.triggering_actor) }}
+# Names the run in the Actions UI: automated (scheduled, smoke vs regression) vs
+# manual + who triggered it. The smoke cron is '0 5 * * *'; anything else scheduled
+# is the regression cron.
+run-name: ${{ github.event_name == 'schedule' && (github.event.schedule == '0 5 * * *' && 'Automated · smoke' || 'Automated · regression') || format('Manual · {0} — @{1}', inputs.suite, github.triggering_actor) }}
 
 on:
-  # Every Monday 06:00 UTC (01:00 Bogota). The gate below limits SCHEDULED runs to
-  # every OTHER Monday, anchored on 2026-07-13 → biweekly (Jul 13, 27, Aug 10, …).
+  # Two scheduled cadences, both gated below (crons are UTC; Bogota = UTC−5):
+  #  • Smoke      — 05:00 UTC = 00:00 Bogota (midnight). Daily cron, gated to EVERY
+  #                 OTHER DAY, anchored on 2026-07-02 → Jul 2, 4, 6, 8, …
+  #  • Regression — Mon 04:00 UTC = Sun 23:00 Bogota (the night before, so it's ready
+  #                 Monday morning). Gated to every OTHER Monday, anchored on
+  #                 2026-07-13 → Jul 13, 27, Aug 10, …
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: '0 5 * * *' # smoke — every other day (see gate)
+    - cron: '0 4 * * 1' # regression — biweekly, Sun 23:00 Bogota (see gate)
   # Run on demand: Actions tab → this workflow → "Run workflow" → pick the suite.
   workflow_dispatch:
     inputs:
@@ -31,16 +38,34 @@ jobs:
       suite: ${{ steps.check.outputs.suite }}
     steps:
       - id: check
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_SUITE: ${{ inputs.suite }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Manual run — suite=${{ inputs.suite }}."
+          today=$(date -u -d "$(date -u +%F)" +%s)
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Manual run — suite=$INPUT_SUITE."
             echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "suite=${{ inputs.suite }}" >> "$GITHUB_OUTPUT"
+            echo "suite=$INPUT_SUITE" >> "$GITHUB_OUTPUT"
+          elif [ "$SCHEDULE" = "0 5 * * *" ]; then
+            # Smoke: every other day. Anchored on 2026-07-02, so an even number of whole
+            # days since the anchor = an "on" day. (05:00 UTC = 00:00 Bogota / midnight.)
+            anchor=$(date -u -d '2026-07-02' +%s)
+            days=$(( (today - anchor) / 86400 ))
+            echo "suite=smoke" >> "$GITHUB_OUTPUT"
+            if [ $((days % 2)) -eq 0 ]; then
+              echo "On-cadence (day $days from 2026-07-02) — running smoke."
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Off-cadence (day $days from 2026-07-02) — skipping tonight."
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi
           else
-            # Biweekly: only every other Monday. Anchored on 2026-07-13 (a Monday), so
-            # an even number of whole weeks since the anchor = an "on" week.
+            # Regression: every other Monday. Anchored on 2026-07-13 (a Monday), so an
+            # even number of whole weeks since the anchor = an "on" week. The cron fires
+            # Mon 04:00 UTC = Sun 23:00 Bogota, but the UTC date is still that Monday.
             anchor=$(date -u -d '2026-07-13' +%s)
-            today=$(date -u -d "$(date -u +%F)" +%s)
             weeks=$(( (today - anchor) / 604800 ))
             echo "suite=regression" >> "$GITHUB_OUTPUT"
             if [ $((weeks % 2)) -eq 0 ]; then
