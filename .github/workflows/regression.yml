@@ -1,0 +1,125 @@
+name: Regression & Smoke (scheduled + manual)
+
+# Names the run in the Actions UI: automated (scheduled) vs manual + who triggered it.
+run-name: ${{ github.event_name == 'schedule' && 'Automated · regression' || format('Manual · {0} — @{1}', inputs.suite, github.triggering_actor) }}
+
+on:
+  # Every Monday 06:00 UTC (01:00 Bogota). The gate below limits SCHEDULED runs to
+  # every OTHER Monday, anchored on 2026-07-13 → biweekly (Jul 13, 27, Aug 10, …).
+  schedule:
+    - cron: '0 6 * * 1'
+  # Run on demand: Actions tab → this workflow → "Run workflow" → pick the suite.
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Suite to run'
+        type: choice
+        options:
+          - regression
+          - smoke
+        default: regression
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Decide whether to run
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+      suite: ${{ steps.check.outputs.suite }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual run — suite=${{ inputs.suite }}."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "suite=${{ inputs.suite }}" >> "$GITHUB_OUTPUT"
+          else
+            # Biweekly: only every other Monday. Anchored on 2026-07-13 (a Monday), so
+            # an even number of whole weeks since the anchor = an "on" week.
+            anchor=$(date -u -d '2026-07-13' +%s)
+            today=$(date -u -d "$(date -u +%F)" +%s)
+            weeks=$(( (today - anchor) / 604800 ))
+            echo "suite=regression" >> "$GITHUB_OUTPUT"
+            if [ $((weeks % 2)) -eq 0 ]; then
+              echo "On-cadence (week $weeks from 2026-07-13) — running regression."
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Off-cadence (week $weeks from 2026-07-13) — skipping this Monday."
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  run-suite:
+    name: Run suite
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      # Chromium only — the suite never uses firefox/webkit (see the main CI workflow).
+      - run: npx playwright install --with-deps chromium
+
+      # Runs the chosen suite AND records a labeled Qase run ("REGRESSION …" / "SMOKE …");
+      # the Qase run URL is printed in this step's log.
+      - name: Run ${{ needs.gate.outputs.suite }} + record a Qase run
+        id: run
+        env:
+          SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
+          QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+          QASE_PROJECT_CODE: ${{ secrets.QASE_PROJECT_CODE }}
+          CI: 'true'
+        run: npm run qase:${{ needs.gate.outputs.suite }}
+
+      - name: Upload HTML report (always)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ needs.gate.outputs.suite }}
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # Post the outcome to Slack: pass/fail + counts, the Qase run link, the GitHub
+      # run link (→ report artifact), and the automated/manual + who identifier.
+      - name: Notify Slack
+        if: ${{ !cancelled() }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RESULT: ${{ steps.run.outcome }}
+          SUITE: ${{ needs.gate.outputs.suite }}
+          QASE_RUN_URL: ${{ steps.run.outputs.qase_run_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.triggering_actor }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "No SLACK_WEBHOOK_URL secret — skipping Slack."; exit 0; fi
+          counts=""
+          if [ -f test-results/results.json ]; then
+            counts=$(jq -r '.stats | "✅ \(.expected) passed · ❌ \(.unexpected) failed" + (if .flaky>0 then " · ⚠️ \(.flaky) flaky" else "" end) + (if .skipped>0 then " · ⏭️ \(.skipped) skipped" else "" end)' test-results/results.json 2>/dev/null || true)
+          fi
+          if [ "$RESULT" = "success" ]; then icon="✅"; verb="passed"; else icon="❌"; verb="FAILED"; fi
+          if [ "$EVENT_NAME" = "schedule" ]; then who="🤖 Automated (scheduled)"; else who="👤 Manual by @$ACTOR"; fi
+          suite_uc=$(printf '%s' "$SUITE" | tr '[:lower:]' '[:upper:]')
+          body="*$icon $suite_uc $verb*"$'\n'"$who"
+          [ -n "$counts" ] && body="$body"$'\n'"$counts"
+          [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'"<$QASE_RUN_URL|📋 Qase run>"
+          body="$body"$'\n'"<$RUN_URL|🔎 GitHub run & report artifact>"
+          jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"

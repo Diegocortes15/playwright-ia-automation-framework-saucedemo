@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import type { CaseResult, QaseMap } from './types';
 import { indexResults, normalizeTitle } from './results-reader';
 import { loadMap } from './map-store';
@@ -69,6 +69,20 @@ export function runTitle(
   return `${scope} — ${when}`.toUpperCase();
 }
 
+// CI trigger identifier appended to the run label, from GitHub-provided env vars
+// (empty outside Actions). Distinguishes a scheduled (automated) run from a manual
+// (workflow_dispatch) one, and names who triggered a manual run.
+export function triggerTag(): string {
+  const event = process.env.GITHUB_EVENT_NAME;
+  if (!event) return '';
+  if (event === 'schedule') return ' · Automated';
+  if (event === 'workflow_dispatch') {
+    const actor = process.env.GITHUB_TRIGGERING_ACTOR || process.env.GITHUB_ACTOR;
+    return actor ? ` · Manual (${actor})` : ' · Manual';
+  }
+  return ` · ${event}`;
+}
+
 // Current date + time in US Eastern Time, e.g. "2026-05-30 14:15 ET".
 export function nowET(d: Date = new Date()): string {
   const date = new Intl.DateTimeFormat('en-CA', {
@@ -110,14 +124,18 @@ export async function recordRun(label?: string): Promise<void> {
     if (skipped.length) console.log(color(`Not in Qase: ${skipped.join('; ')}`, AMBER));
     return;
   }
-  const title = runTitle(map, results, nowET(), label);
+  const title = runTitle(map, results, nowET(), label ? `${label}${triggerTag()}` : label);
   const runId = await new QaseClient(cfg).recordResults(results, {
     jiraKey: '',
     sourceUrl: '',
     runTitle: title,
   });
+  const runUrl = `${QASE_WEB_BASE}/run/${cfg.projectCode}/dashboard/${runId}`;
   console.log(color(`Qase run created — ${results.length} result(s) recorded.`, PURPLE));
-  console.log(color(`  ${QASE_WEB_BASE}/run/${cfg.projectCode}/dashboard/${runId}`, PURPLE));
+  console.log(color(`  ${runUrl}`, PURPLE));
+  // Surface the run URL to GitHub Actions so the workflow's Slack step can link it.
+  if (process.env.GITHUB_OUTPUT)
+    appendFileSync(process.env.GITHUB_OUTPUT, `qase_run_url=${runUrl}\n`);
   if (skipped.length) {
     console.log(
       color(`Skipped (not in Qase yet — run \`npm run tcms:sync\`): ${skipped.join('; ')}`, AMBER),
