@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 import { AUTH_USERS } from './tests/users';
+import { runEnvironment } from './src/utils/run-environment';
+
+// Captured once at config eval (no browser launch) — surfaces in the HTML report
+// header so every downloaded report records the OS/Chromium/Node/Playwright it ran on.
+const env = runEnvironment();
 
 // Clean-room config (e2e-jira-from-issues), data-driven from tests/users.ts
 // (Phase H / ADR-0014). Projects derive from AUTH_USERS, which /from-issue grows
@@ -13,6 +18,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
+
+  // Shown as key/value chips in the HTML report header.
+  metadata: {
+    OS: env.os,
+    Chromium: env.chromium,
+    Node: env.node,
+    Playwright: env.playwright,
+  },
 
   reporter: [
     // On CI, surface failures as inline GitHub annotations on the PR / run summary.

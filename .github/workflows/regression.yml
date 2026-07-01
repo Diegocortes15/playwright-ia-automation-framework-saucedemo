@@ -97,8 +97,16 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-      # Post the outcome to Slack: pass/fail + counts, the Qase run link, the GitHub
-      # run link (→ report artifact), and the automated/manual + who identifier.
+      # The environment this run executed on (OS · Chromium · Node · Playwright),
+      # captured with no browser launch — same source as the report metadata + Qase.
+      - name: Capture environment
+        id: env
+        if: ${{ !cancelled() }}
+        run: echo "line=$(npx tsx src/utils/run-environment.ts)" >> "$GITHUB_OUTPUT"
+
+      # Post the outcome to Slack: pass/fail + counts, run duration, the environment,
+      # the Qase run link, the GitHub run link (→ report artifact), and the
+      # automated/manual + who identifier.
       - name: Notify Slack
         if: ${{ !cancelled() }}
         env:
@@ -109,17 +117,23 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
           ACTOR: ${{ github.triggering_actor }}
+          ENV_LINE: ${{ steps.env.outputs.line }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "No SLACK_WEBHOOK_URL secret — skipping Slack."; exit 0; fi
           counts=""
+          dur=""
           if [ -f test-results/results.json ]; then
             counts=$(jq -r '.stats | "✅ \(.expected) passed · ❌ \(.unexpected) failed" + (if .flaky>0 then " · ⚠️ \(.flaky) flaky" else "" end) + (if .skipped>0 then " · ⏭️ \(.skipped) skipped" else "" end)' test-results/results.json 2>/dev/null || true)
+            secs=$(jq -r '(.stats.duration // 0)/1000|floor' test-results/results.json 2>/dev/null || echo 0)
+            if [ "$secs" -ge 60 ]; then dur="$((secs/60))m $((secs%60))s"; else dur="${secs}s"; fi
           fi
           if [ "$RESULT" = "success" ]; then icon="✅"; verb="passed"; else icon="❌"; verb="FAILED"; fi
           if [ "$EVENT_NAME" = "schedule" ]; then who="🤖 Automated (scheduled)"; else who="👤 Manual by @$ACTOR"; fi
           suite_uc=$(printf '%s' "$SUITE" | tr '[:lower:]' '[:upper:]')
           body="*$icon $suite_uc $verb*"$'\n'"$who"
           [ -n "$counts" ] && body="$body"$'\n'"$counts"
+          [ -n "$dur" ] && body="$body"$'\n'"⏱️ Ran in $dur"
+          [ -n "$ENV_LINE" ] && body="$body"$'\n'"🖥️ $ENV_LINE"
           [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'"<$QASE_RUN_URL|📋 Qase run>"
           body="$body"$'\n'"<$RUN_URL|🔎 GitHub run & report artifact>"
           jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"

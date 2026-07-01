@@ -91,6 +91,7 @@ export class QaseClient implements TcmsSeam {
       title: meta.runTitle,
       cases: results.map((r) => r.caseId),
       is_autotest: true,
+      ...(meta.description ? { description: meta.description } : {}),
     });
     for (const r of results) {
       await this.rpc('POST', `/result/${code}/${run.result.id}`, {
