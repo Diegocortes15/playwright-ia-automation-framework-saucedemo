@@ -10,19 +10,32 @@ For the deep reference on any step, see [`from-issue.md`](from-issue.md); this p
 
 A ticket flows through a chain of Claude Code skills. Nothing is magic at runtime — the tests are plain Playwright. The "AI" is the **authoring** layer that turns a ticket into those tests, one hand-off at a time.
 
+The arrows are labelled with the **tool/integration** doing the work — see the legend box.
+
 ```mermaid
 flowchart TD
-    T["🎫 Jira SW-42<br/>(read via Atlassian MCP)"] --> RT["✏️ /refine-ticket<br/>sharpened ACs → back to Jira"]
-    RT --> FI["🧠 /from-issue<br/>reads ticket → test plan (JSON)"]
-    FI --> SPO["🔍 /scaffold-page-object + playwright-cli<br/>→ src/pages/CartPage.ts"]
+    T["🎫 Jira ticket SW-42<br/>project SW"]
+    T -->|"Atlassian MCP · read"| RT["✏️ /refine-ticket<br/>hardens ACs, writes them back to Jira"]
+    RT -->|"Atlassian MCP · read"| FI["🧠 /from-issue<br/>reads ticket → test plan (JSON)"]
+    FI -->|"playwright-cli · live DOM"| SPO["🔍 /scaffold-page-object<br/>→ src/pages/CartPage.ts"]
     SPO --> R["📝 render spec<br/>→ tests/cart/cart.spec.ts"]
     R --> REC["🗂️ TCMS record<br/>→ .tcms/records/cart.json"]
-    REC --> PR["🔀 gh CLI → GitHub PR<br/>(self-describing)"]
+    REC -->|"gh CLI · open PR"| PR["🔀 GitHub PR<br/>(self-describing)"]
     PR --> CI1["🤖 CI: changed spec only ✅"]
     CI1 --> H["👤 human review + merge"]
-    H --> CI2["🤖 CI: full suite + Qase sync"]
-    CI2 --> Q["✅ Qase case + qase-map.json"]
+    H --> CI2["🤖 CI: full suite"]
+    CI2 -->|"Qase REST · sync"| Q["✅ Qase cases + qase-map.json"]
+
+    subgraph TOOLS["🧰 Integrations &amp; tools the agent uses"]
+        direction LR
+        TA["Atlassian MCP<br/>↔ Jira — read + write"]
+        TG["gh CLI<br/>→ GitHub — PRs, CI, API"]
+        TP["playwright-cli<br/>→ live browser DOM"]
+        TQ["Qase REST<br/>→ TCMS mirror (swappable seam)"]
+    end
 ```
+
+> **Why these tools:** tickets come from **Jira via the Atlassian MCP** (never `gh issue`), all **GitHub** actions run through the **`gh` CLI** (we run _no_ GitHub MCP — [ADR-0007](adr/)), selectors are verified against the live DOM with **`playwright-cli`**, and the **Qase** mirror sits behind a swappable seam. Each choice is a documented ADR.
 
 ---
 
