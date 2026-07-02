@@ -43,6 +43,7 @@ flowchart LR
 - 🔐 **Data-driven auth matrix** — Playwright projects derive from a single `AUTH_USERS` array; the toolchain grows the matrix one user at a time, only as tickets need it.
 - 🗂️ **Opt-in TCMS mirror** — one-way code→[Qase](https://qase.io) sync at merge: human-readable cases with steps, per-case Jira provenance, and an auto-maintained id map.
 - ⚡ **Smart CI** — PRs run only their changed specs; merges run the full suite; a typecheck + `--max-warnings 0` lint gate blocks regressions before they land.
+- 📣 **Scheduled & notified** — an every-other-day smoke and a biweekly regression run themselves, each recording a Qase run and posting the result (with duration + environment) to Slack.
 - 🌐 **Config-driven** — base URL, credentials, and TCMS settings come from env; point it at a different app without touching code.
 - 📚 **Documented decisions** — every architectural choice is an ADR; the AI rules live in [`CLAUDE.md`](CLAUDE.md).
 
@@ -55,7 +56,7 @@ flowchart LR
 | Runtime / lang | Node 22 · TypeScript 5.9 (strict)                               |
 | Test runner    | Playwright 1.59 (`@playwright/test`)                            |
 | Quality gates  | ESLint v9 flat config + `eslint-plugin-playwright` · Prettier 3 |
-| CI/CD          | GitHub Actions                                                  |
+| CI/CD          | GitHub Actions (change gate + scheduled runs) · Slack alerts    |
 | TCMS           | Qase (REST, behind a swappable seam)                            |
 | Ticket source  | Jira (via the Atlassian MCP)                                    |
 | AI authoring   | Claude Code custom skills + `@playwright/cli`                   |
@@ -80,6 +81,21 @@ The authoring layer is four composable [Claude Code skills](.claude/skills/). Th
 > **📋 See a real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request from this repo. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, the **⚠️ Assumptions** the agent flagged for review, and the verification results — exactly what a reviewer reads before merging.
 
 ![generated-pr](docs/images/from-issue-pr.png)
+
+---
+
+## Integrations — how the agent reaches the outside world
+
+The AI-authoring layer talks to four external systems. Each connection choice is a documented ADR — notably, tickets come from **Jira via the Atlassian MCP** (not `gh issue`), while all **GitHub** actions run through the **`gh` CLI** (not a GitHub MCP server).
+
+| System                    | Connected via                  | Direction       | Notes                                                                                                                                                 |
+| ------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Jira** — tickets        | **Atlassian MCP**              | read + write¹   | The single source of tickets: `/from-issue SW-123` reads the ticket (project `SW`) through the MCP, never `gh issue`. ([ADR-0011](docs/adr/))         |
+| **GitHub** — PRs/runs/API | **`gh` CLI** (authenticated)   | read + write    | Every GitHub op — open the PR, read workflow runs, arbitrary REST — runs through `gh`. We deliberately run **no** GitHub MCP. ([ADR-0007](docs/adr/)) |
+| **Qase** — TCMS           | REST (behind a swappable seam) | write (one-way) | Code→Qase mirror at merge + labeled `qase:*` runs. ([docs/tcms.md](docs/tcms.md))                                                                     |
+| **Slack** — notifications | Incoming webhook               | write           | Scheduled/on-demand run outcomes (see [Continuous integration](#continuous-integration)).                                                             |
+
+¹ Only **`/refine-ticket`** writes back to Jira (the hardened acceptance criteria — [ADR-0013](docs/adr/)); every other skill reads Jira only. The `@playwright/cli` skill also drives a real browser locally to discover/verify selectors, but that's a dev tool, not an external service.
 
 ---
 
@@ -133,7 +149,9 @@ An **opt-in, one-way** mirror so non-technical reviewers can browse human-readab
 
 ## Continuous integration
 
-One workflow ([`.github/workflows/test.yml`](.github/workflows/test.yml)), two behaviors:
+Two workflows: **[`test.yml`](.github/workflows/test.yml)** gates every change; **[`regression.yml`](.github/workflows/regression.yml)** runs scheduled and on-demand suites.
+
+### `test.yml` — the change gate
 
 | Event              | What runs                                                                                     | Why                                              |
 | ------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -141,6 +159,18 @@ One workflow ([`.github/workflows/test.yml`](.github/workflows/test.yml)), two b
 | **Push to `main`** | typecheck + lint → **full suite** → Qase catalog sync → auto-commit refreshed `qase-map.json` | A complete gate + an always-accurate TCMS mirror |
 
 The "changed specs only" selection is a deliberate choice over Playwright's `--only-changed` (which follows the import graph and re-runs the world when a shared fixture changes) — the full suite on merge is the real integration gate.
+
+### `regression.yml` — scheduled + on-demand
+
+Runs the full suite or a `@smoke` scope, records a **labeled Qase run**, uploads the HTML report, and **posts the result to Slack**.
+
+| Trigger                    | Cadence                                               | Suite           |
+| -------------------------- | ----------------------------------------------------- | --------------- |
+| **Scheduled — smoke**      | every other day · 00:00 Bogotá (midnight)             | `@smoke`        |
+| **Scheduled — regression** | biweekly · Sun 23:00 Bogotá (the night before Monday) | full suite      |
+| **On demand**              | Actions → **Run workflow** → pick the suite           | smoke _or_ full |
+
+Each run posts a **Slack** message carrying the outcome (**pass/fail + counts**), the **run duration**, the **environment** it executed on, a **Qase run** link, the **GitHub run** link (→ report artifact), and an **automated-vs-manual + who-triggered** identifier. One workflow serves both cadences plus manual runs, distinguished by `github.event.schedule`; scheduling times are Bogotá (UTC−5) and the biweekly regression runs the night before so it's ready to read Monday morning.
 
 ---
 
@@ -180,6 +210,8 @@ npx playwright show-report ./playwright-report
 | Screenshot  | on failure | `screenshot: 'only-on-failure'` |
 | Video       | on failure | `video: 'retain-on-failure'`    |
 | HTML report | every run  | `reporter: [['html', …]]`       |
+
+Each report's header also records **how long the run took** and the **environment it executed on** — OS · Chromium · Node · Playwright — via `metadata` in `playwright.config.ts`. It's the same environment line the Slack notification and the Qase run description carry, sourced once (no browser launch) from [`src/utils/run-environment.ts`](src/utils/run-environment.ts).
 
 > `trace: 'on'` makes the trace viewer available everywhere at the cost of larger artifacts + slightly slower runs — a deliberate trade for always-on debuggability. Switch to `retain-on-failure` if that ever becomes heavy.
 >
