@@ -29,7 +29,7 @@ flowchart TD
     subgraph TOOLS["🧰 Integrations &amp; tools the agent uses"]
         direction LR
         TA["Atlassian MCP<br/>↔ Jira — read + write"]
-        TG["gh CLI<br/>→ GitHub — PRs, CI, API"]
+        TG["gh CLI<br/>→ GitHub — opens the PR"]
         TP["playwright-cli<br/>→ live browser DOM"]
         TQ["Qase REST<br/>→ TCMS mirror (swappable seam)"]
     end
