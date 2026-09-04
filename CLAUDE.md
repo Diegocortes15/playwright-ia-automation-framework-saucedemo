@@ -105,6 +105,7 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 | Specs                                           | `tests/<feature>/*.spec.ts`                                                                                        |
 | Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                              |
 | Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                             |
+| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); output in `.observations/<feature>.json`          |
 | TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`) |
 
 ## Path aliases
@@ -127,6 +128,7 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 
 ## What to NEVER do
 
+- Make an observation fail a test — the `_observations` fixture records, never judges ([ADR-0021](docs/adr/0021-runtime-observations.md)). Triage is human, via the `status` field
 - `await page.waitForTimeout()` — lint blocks; use auto-waiting assertions
 - Make a Page method return another Page (we explicitly rejected fluent navigation — see ADR-0001)
 - Import a Page from another Page (no cross-page imports in `src/pages/`)

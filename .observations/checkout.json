@@ -1,0 +1,39 @@
+{
+  "feature": "checkout",
+  "observations": [
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-one.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 9,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-04",
+      "status": "new",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/checkout-step-one.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "mandatory fields show their placeholder text",
+        "project": "chromium-standard"
+      }
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 11,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-04",
+      "status": "new",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "checkout button on the cart page navigates to Checkout: Your Information",
+        "project": "chromium-standard"
+      }
+    }
+  ]
+}

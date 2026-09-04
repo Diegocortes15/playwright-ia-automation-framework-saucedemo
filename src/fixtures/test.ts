@@ -7,6 +7,7 @@ import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
 import { CheckoutCompletePage } from '@pages/checkout/CheckoutCompletePage';
 import { reportAnnotations } from '@utils/report-annotations';
+import { ATTACHMENT_NAME, MAX_EVENTS_PER_TEST, type ObservationEvent } from '../observations/types';
 
 type Pages = {
   loginPage: LoginPage;
@@ -17,7 +18,7 @@ type Pages = {
   checkoutCompletePage: CheckoutCompletePage;
 };
 
-export const test = base.extend<Pages & { _reportAnnotation: void }>({
+export const test = base.extend<Pages & { _reportAnnotation: void; _observations: void }>({
   // Auto fixture — annotate each test in the Playwright report with its Jira
   // ticket link(s) and the acceptance criterion it covers, derived from
   // `.tcms/records/<feature>.json` (feature = the spec's parent dir). No per-test
@@ -27,6 +28,84 @@ export const test = base.extend<Pages & { _reportAnnotation: void }>({
       const feature = basename(dirname(testInfo.file));
       testInfo.annotations.push(...reportAnnotations(feature, testInfo.title));
       await use();
+    },
+    { auto: true },
+  ],
+
+  // Auto fixture — record what the app did that nobody asserted on: console errors,
+  // uncaught page errors, 4xx/5xx responses, and dialogs (ADR-0021). Detection is
+  // deterministic and never judges; the ObservationsReporter deduplicates and writes.
+  // Every handler swallows its own errors: observations must never fail a test.
+  _observations: [
+    async ({ page }, use, testInfo) => {
+      const events: ObservationEvent[] = [];
+      const record = (event: ObservationEvent): void => {
+        if (events.length < MAX_EVENTS_PER_TEST) events.push(event);
+      };
+
+      page.on('console', (message) => {
+        try {
+          if (message.type() !== 'error') return;
+          // The browser echoes every failed resource load to the console. The
+          // `response` handler already records those with method, status and URL,
+          // so keeping both would double-report one event.
+          if (message.text().startsWith('Failed to load resource')) return;
+          record({ kind: 'console-error', message: message.text(), url: message.location().url });
+        } catch {
+          /* observations never break a test */
+        }
+      });
+
+      page.on('pageerror', (error) => {
+        try {
+          record({ kind: 'page-error', message: error.message, url: page.url() });
+        } catch {
+          /* observations never break a test */
+        }
+      });
+
+      page.on('response', (response) => {
+        try {
+          const httpStatus = response.status();
+          if (httpStatus < 400) return;
+          record({
+            kind: 'failed-request',
+            // HTTP/2 responses carry no status text, so fall back to the code alone.
+            message: [httpStatus, response.statusText()].filter(Boolean).join(' ').trim(),
+            url: response.url(),
+            method: response.request().method(),
+            httpStatus,
+          });
+        } catch {
+          /* observations never break a test */
+        }
+      });
+
+      // Registering ANY dialog listener disables Playwright's automatic dismissal,
+      // so this handler must dismiss the dialog itself to preserve default behavior.
+      // The catch covers a test that registers its own handler and gets there first.
+      page.on('dialog', (dialog) => {
+        try {
+          record({
+            kind: 'dialog',
+            message: dialog.message(),
+            dialogType: dialog.type(),
+            url: page.url(),
+          });
+        } catch {
+          /* observations never break a test */
+        }
+        void dialog.dismiss().catch(() => {});
+      });
+
+      await use();
+
+      if (events.length > 0) {
+        await testInfo.attach(ATTACHMENT_NAME, {
+          body: JSON.stringify(events),
+          contentType: 'application/json',
+        });
+      }
     },
     { auto: true },
   ],

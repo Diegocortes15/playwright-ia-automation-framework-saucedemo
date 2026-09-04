@@ -121,7 +121,23 @@ original más abajo donde haya conflicto.
    esperado por el que emitió la app). Si no llega a verde: sin rama, sin
    commit, sin push, sin PR, sin artefacto TCMS. ADR-0020 scopea ADR-0012:
    el review gate sigue absorbiendo _juicio_, ya no _artefactos rotos_.
-7. **B12b arrancado**: primer script extraído,
+7. **Observaciones de runtime: HECHO** (ADR-0021, 2026-09-04). Ítem NUEVO,
+   fuera del plan original, pedido por el user. Fixture auto-use que graba
+   errores de consola, page errors, respuestas 4xx/5xx y diálogos; reporter
+   que deduplica por firma y escribe `.observations/<feature>.json`. Nada se
+   filtra — incluida la telemetría de terceros, que en una app real suele ser
+   justo lo que explica una falla; el volumen se controla deduplicando y
+   contando, no descartando. Triage humano vía `status` + `note`. Slack recibe
+   un **conteo**, nunca el contenido. CI sube el artifact y no commitea, para
+   que las corridas agendadas no ensucien `main`.
+
+   **La primera corrida encontró algo real**: cada navegación de la app
+   devuelve **HTTP 404** (saucedemo está en GitHub Pages con el shim
+   `spa-github-pages`) y la app renderiza igual por routing de cliente.
+   50 tests en verde y nadie se enteraba. Corrige lo que yo había afirmado:
+   que en saucedemo esto no iba a encontrar nada real.
+
+8. **B12b arrancado**: primer script extraído,
    `from-issue/scripts/typecheck-spec.sh` (Step 9). Al escribirlo apareció
    un bug latente que la prosa escondía: el workflow decía `npx tsc`, y sin
    `node_modules` npx baja **`tsc@2.0.4`** del registry — un paquete squatter
@@ -129,7 +145,7 @@ original más abajo donde haya conflicto.
    "Typecheck ✅ PASS" sin haber typechequeado nada. El script resuelve `tsc`
    solo desde `node_modules/.bin` y falla con exit 69 si no está.
    Es la mejor evidencia del principio #3 que apareció hasta ahora.
-8. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
+9. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
    pasan a ser artefactos portables — objetivo explícito, porque la idea
    del framework es que alguien se lleve los andamios para arrancar
    automation de otra app. Se convirtieron **56 links** que escapaban del

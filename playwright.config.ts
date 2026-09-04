@@ -32,6 +32,9 @@ export default defineConfig({
     ...(process.env.CI ? [['github'] as const] : []),
     ['html', { open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
+    // Deduplicates the per-test observation attachments into `.observations/<feature>.json`
+    // (ADR-0021). Single writer in the main process, so parallel workers can't corrupt it.
+    ['./src/observations/reporter.ts'],
     ['list'],
   ],
 

@@ -113,6 +113,15 @@ jobs:
           CI: 'true'
         run: npm run qase:${{ needs.gate.outputs.suite }}
 
+      # Runtime observations (ADR-0021) — things the app did that no test asserted on.
+      # Uploaded, never committed: a nightly commit-back would churn main every day.
+      - name: Upload observations (always)
+        if: ${{ !cancelled() && hashFiles('.observations/*.json') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: observations-${{ needs.gate.outputs.suite }}
+          path: .observations/
+
       - name: Upload HTML report (always)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -162,5 +171,14 @@ jobs:
           [ -n "$ENV_LINE" ] && body="$body"$'\n'":performing-arts: $ENV_LINE"
           # Custom emoji outside the <url|label> so Slack renders them (emoji inside link text don't render).
           [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'":qase: <$QASE_RUN_URL|Qase run>"
+          # Observations: a COUNT plus where to look. Dumping the contents here is how
+          # a channel gets muted — the detail lives in the uploaded artifact (ADR-0021).
+          if ls .observations/*.json >/dev/null 2>&1; then
+            total=$(jq -s '[.[].observations[]] | length' .observations/*.json 2>/dev/null || echo 0)
+            firstparty=$(jq -s '[.[].observations[] | select(.thirdParty == false)] | length' .observations/*.json 2>/dev/null || echo 0)
+            if [ "${total:-0}" -gt 0 ]; then
+              body="$body"$'\n'":magnifying-glass-tilted-left: $total observations · $firstparty first-party"
+            fi
+          fi
           body="$body"$'\n'":github: <$RUN_URL|GitHub run & report artifact>"
           jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"
