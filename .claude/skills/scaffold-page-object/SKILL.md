@@ -12,11 +12,11 @@ Given a URL + page name + optional storageState, this skill produces a draft Pag
 
 Tell Claude what you want:
 
-> Use the scaffold-page-object skill to create a `CheckoutCompletePage` from https://www.saucedemo.com/checkout-complete.html using `auth/standard.json`.
+> Use the scaffold-page-object skill to create a `CheckoutCompletePage` from `https://www.saucedemo.com/checkout-complete.html` using `auth/standard.json`.
 
 Or for experimentation, send the output to `scratch/`:
 
-> Use the scaffold-page-object skill to create a `LoginPage` from https://www.saucedemo.com — no auth needed. Write to `scratch/LoginPage.ts`.
+> Use the scaffold-page-object skill to create a `LoginPage` from `https://www.saucedemo.com` — no auth needed. Write to `scratch/LoginPage.ts`.
 
 ## Workflow
 
@@ -30,5 +30,6 @@ The full 12-step procedural workflow is in [`references/workflow.md`](references
 
 ## See also
 
-- [`docs/scaffold-page-object.md`](../../../docs/scaffold-page-object.md) — learning guide with worked examples
-- [`docs/adr/0008-custom-skills-pattern.md`](../../../docs/adr/0008-custom-skills-pattern.md) — why custom skills follow this layout
+- `docs/scaffold-page-object.md` — learning guide with worked examples
+- ADR-0008 — why custom skills follow this layout
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.

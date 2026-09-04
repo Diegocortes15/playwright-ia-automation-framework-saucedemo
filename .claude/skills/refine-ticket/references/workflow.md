@@ -56,7 +56,7 @@ Ask: **"Write this back to `<KEY>`? (yes / edit / no)"**
 
 ## 7. Write back (on approval)
 
-- **yes** → apply the idempotent description update via `editJiraIssue`, then the audit comment via `addCommentToJiraIssue` (per [`writeback-template.md`](writeback-template.md)). Per [ADR-0013](../../../../docs/adr/0013-refine-ticket-jira-writeback.md). If a write fails, report the MCP error verbatim and emit the block locally so nothing is lost.
+- **yes** → apply the idempotent description update via `editJiraIssue`, then the audit comment via `addCommentToJiraIssue` (per [`writeback-template.md`](writeback-template.md)). Per ADR-0013. If a write fails, report the MCP error verbatim and emit the block locally so nothing is lost.
 - **edit** → apply the user's tweaks, return to Step 6.
 - **no** → emit the block in-session for manual paste; make NO Jira calls.
 - **dry-run mode** → never write; print what would be written.

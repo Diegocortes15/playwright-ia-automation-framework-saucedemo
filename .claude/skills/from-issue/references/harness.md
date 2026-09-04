@@ -1,6 +1,6 @@
 # Harness resolution & growth
 
-How `/from-issue` resolves and **grows** the authenticated-test harness (the Playwright project matrix + auth setup) when a ticket needs a user whose project isn't wired yet. Per [ADR-0014](../../../../docs/adr/0014-from-issue-harness-growth.md). The harness is **data-driven and demand-driven**: autonomous, no mid-run questions, no recovering old config from git history.
+How `/from-issue` resolves and **grows** the authenticated-test harness (the Playwright project matrix + auth setup) when a ticket needs a user whose project isn't wired yet. Per ADR-0014. The harness is **data-driven and demand-driven**: autonomous, no mid-run questions, no recovering old config from git history.
 
 ## Single source of truth — `tests/users.ts`
 
@@ -49,7 +49,7 @@ Record a side-effect note for the PR (Step 12 / `pr-description-template.md`):
 ## Guardrail (ADR-0004)
 
 - **Never** pre-create users no test targets.
-- **Never** add `<browser>-<non-standard>` projects (`firefox-problem`, `webkit-error`, …). Cross-browser is standard-only smoke and stays **out** of `/from-issue`'s growth — it's a separate [ADR-0004](../../../../docs/adr/0004-cross-browser-smoke-pattern.md) decision. Same for the `@sort-functional` grep nuance.
+- **Never** add `<browser>-<non-standard>` projects (`firefox-problem`, `webkit-error`, …). Cross-browser is standard-only smoke and stays **out** of `/from-issue`'s growth — it's a separate ADR-0004 decision. Same for the `@sort-functional` grep nuance.
 
 ## Staging
 

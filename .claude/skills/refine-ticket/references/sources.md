@@ -5,14 +5,14 @@
 ## Discovery order (cheap → expensive)
 
 1. **The ticket** — already read in workflow Step 2 (Atlassian MCP `getJiraIssue`).
-2. **The authoring contract** — [`../../../../docs/jira-tickets.md`](../../../../docs/jira-tickets.md): what a good ticket looks like (mirrors the rubric).
+2. **The authoring contract** — `docs/jira-tickets.md`: what a good ticket looks like (mirrors the rubric).
 3. **Existing automation (ground truth)** — read the repo:
    - `src/pages/` — real Page Objects + their action methods (confirms locations + capabilities).
    - `tests/` — existing specs (feeds the rubric's coverage flag).
    - `data/` — real users + named scenarios (confirms roles + data).
    - `src/fixtures/`, `src/components/` — what's wired.
 4. **App domain knowledge** — `docs/app/` when present: `users.md` (the real users), `flows.md`, `overview.md`, `glossary.md`.
-5. **Framework judgment** — `CLAUDE.md`, [`../../from-issue/references/bucket-classification.md`](../../from-issue/references/bucket-classification.md), [`../../from-issue/references/smoke-policy.md`](../../from-issue/references/smoke-policy.md), [`../../from-issue/references/qa-analysis.md`](../../from-issue/references/qa-analysis.md).
+5. **Framework judgment** — `CLAUDE.md`, `from-issue/references/bucket-classification.md`, `from-issue/references/smoke-policy.md`, `from-issue/references/qa-analysis.md`.
 6. **User-supplied** — anything the user points at mid-loop (next section).
 
 > **Not a source: the live app.** `/refine-ticket` never drives a running app (no `playwright-cli`). Refinement is **shift-left** — it must work for a ticket whose feature isn't built yet. Exact selectors and live strings are confirmed by `/from-issue` at generation time, never baked into the ticket. Any fact the ticket / docs / existing automation don't carry is asked of the user.

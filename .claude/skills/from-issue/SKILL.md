@@ -6,7 +6,7 @@ allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(
 
 # from-issue
 
-Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, normalizes its requirement in whatever form it was written (narrative, Given/When/Then, bullet ACs, prose, or mixed), generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See [ADR-0011](../../../docs/adr/0011-jira-ticket-source.md).
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, normalizes its requirement in whatever form it was written (narrative, Given/When/Then, bullet ACs, prose, or mixed), generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See ADR-0011.
 
 ## How to use it
 
@@ -18,7 +18,7 @@ Or for experimentation (skip push/PR):
 
 > Use the from-issue skill on SW-123 with dry-run.
 
-If the ticket's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see [ADR-0010](../../../docs/adr/0010-from-issue-augment-mode.md). Re-running any ticket that already contributed to the file refuses. To force a separate file instead of augmenting:
+If the ticket's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see ADR-0010. Re-running any ticket that already contributed to the file refuses. To force a separate file instead of augmenting:
 
 > Use the from-issue skill on SW-123 with --new-file.
 
@@ -26,7 +26,7 @@ If the ticket's feature already has a generated spec, the skill **augments** tha
 
 The full procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
 
-> **Setup note:** the Atlassian MCP must be connected (OAuth) for the Step 2 ticket read — defined at project scope in [`.mcp.json`](../../../.mcp.json). Its read tools (`mcp__atlassian__getAccessibleAtlassianResources`, `mcp__atlassian__getJiraIssue`) are pre-authorized in `allowed-tools` above so reads don't prompt each run. If a future Atlassian MCP build renames those tools, update the `allowed-tools` line to match.
+> **Setup note:** the Atlassian MCP must be connected (OAuth) for the Step 2 ticket read — defined at project scope in `.mcp.json`. Its read tools (`mcp__atlassian__getAccessibleAtlassianResources`, `mcp__atlassian__getJiraIssue`) are pre-authorized in `allowed-tools` above so reads don't prompt each run. If a future Atlassian MCP build renames those tools, update the `allowed-tools` line to match.
 
 ## References
 
@@ -43,9 +43,10 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 
 ## Composition
 
-This skill invokes [`/scaffold-page-object`](../scaffold-page-object/SKILL.md) (C.1) when a Page Object inferred from the AC text has no matching file in `src/pages/`.
+This skill invokes `/scaffold-page-object` (C.1) when a Page Object inferred from the AC text has no matching file in `src/pages/`.
 
 ## See also
 
-- [`docs/from-issue.md`](../../../docs/from-issue.md) — learning guide with worked examples
-- [`docs/adr/0008-custom-skills-pattern.md`](../../../docs/adr/0008-custom-skills-pattern.md) — why custom skills follow this layout
+- `docs/from-issue.md` — learning guide with worked examples
+- ADR-0008 — why custom skills follow this layout
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.

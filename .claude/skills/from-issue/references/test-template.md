@@ -60,7 +60,7 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   // Re-running /from-issue against a contributing issue will refuse to overwrite.
   ```
 
-  When the file is **augmented** by a later ticket (per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md)), a `// Augmented by:` line is inserted directly below `// Title:`, listing each augmenting ticket as `<KEY> (YYYY-MM-DD)`, comma-separated:
+  When the file is **augmented** by a later ticket (per ADR-0010), a `// Augmented by:` line is inserted directly below `// Title:`, listing each augmenting ticket as `<KEY> (YYYY-MM-DD)`, comma-separated:
 
   ```ts
   // Title: <summary>
@@ -73,7 +73,7 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   - Always `import { test, expect } from '@fixtures/test'` — NEVER from `@playwright/test` (per CLAUDE.md "Where things live").
   - `import { env } from '@utils/env'` only when a test calls `loginAs(...)` and needs the password.
 
-- **Describe wrap — one tagged describe per user-context** (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)). Each context is a `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => { ... })`. The routing tag lives in the **`{ tag }` option, NOT the title** — Playwright's project `grep` matches option-tags (verified) and renders them as report chips. The title is human prose: `'<feature> — <context-label>'`.
+- **Describe wrap — one tagged describe per user-context** (per ADR-0015). Each context is a `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => { ... })`. The routing tag lives in the **`{ tag }` option, NOT the title** — Playwright's project `grep` matches option-tags (verified) and renders them as report chips. The title is human prose: `'<feature> — <context-label>'`.
 
 - **Context-label mapping** (routing tag → label in the describe title):
 
@@ -103,14 +103,14 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   - routing tag on the **describe**: `@no-auth` / `@all-users` / `@standard` / `@problem` / `@error` / `@performance_glitch` / `@visual` / `@sort-functional`
   - `@smoke` on the individual **test** (per [`smoke-policy.md`](smoke-policy.md))
 
-- **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from [`src/fixtures/test.ts`](../../../../src/fixtures/test.ts).
+- **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from `src/fixtures/test.ts`.
 - **No raw Locators in tests** — per ADR-0001 rule #4. Tests interact through Page methods, not `page.locator(...)`.
 - **No `await page.waitForTimeout(...)`** — per CLAUDE.md "What to NEVER do". Use Playwright auto-waiting assertions (`await expect(...).toBeVisible()`).
 - **Selector preference order** is the Page Object's concern, not the test's.
 
 ## Auth resolution and storageState
 
-Saucedemo's per-user storageState files live under `auth/<user>.json` (e.g., `auth/standard.json`). The orchestrator does NOT load storageState explicitly in the test code — the describe's routing tag routes the test to the matching Playwright project, whose `storageState` config (derived from `tests/users.ts` `AUTH_USERS`, per [ADR-0014](../../../../docs/adr/0014-from-issue-harness-growth.md)) wires the session.
+Saucedemo's per-user storageState files live under `auth/<user>.json` (e.g., `auth/standard.json`). The orchestrator does NOT load storageState explicitly in the test code — the describe's routing tag routes the test to the matching Playwright project, whose `storageState` config (derived from `tests/users.ts` `AUTH_USERS`, per ADR-0014) wires the session.
 
 If the AC text doesn't declare a user, default to `standard_user` (spec §2 Decision 13).
 

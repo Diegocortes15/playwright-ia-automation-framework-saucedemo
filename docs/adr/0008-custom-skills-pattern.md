@@ -1,7 +1,9 @@
 # 0008 — Custom Project-Specific Skills Pattern
 
 **Date:** 2026-05-15
-**Status:** Accepted
+**Status:** Accepted. Scoped by [ADR-0019](0019-skill-portability.md): the
+compact-`SKILL.md` + verbose-`references/` layout stands, but a skill directory
+is now the portability boundary — no markdown link may resolve outside it.
 
 ## Context
 
