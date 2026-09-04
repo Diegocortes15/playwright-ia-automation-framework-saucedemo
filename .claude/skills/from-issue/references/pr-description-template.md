@@ -95,6 +95,8 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
     Omit the whole item when the first run was green.
 
+- **Verification — observations**: if the run added or changed entries in `.observations/<feature>.json` (ADR-0021), add one bullet after the Test run list naming what appeared. These are things the app did that no test asserted on — never a blocker, and never a claim that something is broken. Example: `- :mag: **Observations:** 1 new — \`GET /checkout-step-one.html\` returns 404 (first-party, 9×). Reviewer: triage in \`.observations/checkout.json\`.` Omit when the run produced nothing new.
+
 - **Collision warnings section is omitted entirely when no collisions occur** — don't render an empty header.
 
 ## Example: 2-test PR with one collision

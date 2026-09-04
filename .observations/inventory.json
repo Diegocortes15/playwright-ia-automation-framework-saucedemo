@@ -1,0 +1,22 @@
+{
+  "feature": "inventory",
+  "observations": [
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 11,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-04",
+      "status": "new",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "all six product images render with distinct, non-empty sources",
+        "project": "chromium-standard"
+      }
+    }
+  ]
+}
