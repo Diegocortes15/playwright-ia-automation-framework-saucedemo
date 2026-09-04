@@ -1,12 +1,14 @@
 ---
 name: from-issue
 description: Generate Playwright tests from a Jira ticket (read via the Atlassian MCP), composing /scaffold-page-object when a target Page Object doesn't yet exist, and open a GitHub PR with the generated tests for review.
-allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Read Glob Grep Write mcp__atlassian__getAccessibleAtlassianResources mcp__atlassian__getJiraIssue
+allowed-tools: Bash(gh:*) Bash(git:*) Bash(npx:*) Bash(rm:*) Bash(mkdir:*) Bash(ls:*) Bash(.claude/skills/from-issue/scripts/typecheck-spec.sh:*) Read Glob Grep Write mcp__atlassian__getAccessibleAtlassianResources mcp__atlassian__getJiraIssue
 ---
 
 # from-issue
 
 Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, normalizes its requirement in whatever form it was written (narrative, Given/When/Then, bullet ACs, prose, or mixed), generates a set of Playwright tests, runs them locally, and opens a GitHub PR with a structured description. The PR is the review gate, and the GitHub-for-Jira app auto-links it onto the ticket. See ADR-0011.
+
+**A run never opens a red PR** (ADR-0020). If the typecheck or a test fails, the skill diagnoses and retries up to 3 times; if it still fails — or if the failure means the **app** contradicts an AC rather than the generated code being wrong — it reports what it found and opens nothing.
 
 ## How to use it
 
@@ -40,6 +42,10 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 - [`references/playwright-conventions.md`](references/playwright-conventions.md) — Playwright best practices the skill follows (D.1)
 - [`references/data-placement.md`](references/data-placement.md) — inline vs. externalized (`data/`) test data decision rule (D.1.4)
 - [`references/harness.md`](references/harness.md) — data-driven config + autonomous harness growth (Phase H / ADR-0014)
+
+## Scripts
+
+- [`scripts/typecheck-spec.sh`](scripts/typecheck-spec.sh) — typechecks the files a run generated against the project's own `tsconfig.json` (path aliases included), always cleaning up its throwaway config. Resolves `tsc` from `node_modules/.bin` only. Used by workflow Step 9.
 
 ## Composition
 

@@ -254,32 +254,32 @@ Record which records were `added` vs `skipped` for the PR body (Step 12).
 
 ### 9. Isolated typecheck
 
-Use the same `.tsconfig.scratch.json` pattern as C.1 step 11. A bare `npx tsc --noEmit <path>` doesn't pick up the project's `tsconfig.json` (it falls back to TS defaults without `paths` aliases, so `@fixtures/test` and `@pages/*` imports would fail with bogus "Cannot find module" errors).
+Run the typecheck script. Paths are **repo-relative**; pass every file this run created or
+modified — the spec, plus any Page Object from Step 5 and any data file from Step 7:
 
-1. **Write a throwaway tsconfig** via the `Write` tool at `.tsconfig.scratch.json` (substitute the `<testfile>` resolved in Step 8):
+```bash
+.claude/skills/from-issue/scripts/typecheck-spec.sh <testfile> [src/pages/<PageName>.ts ...]
+```
 
-   ```json
-   {
-     "extends": "./tsconfig.json",
-     "include": ["<testfile>"],
-     "exclude": []
-   }
-   ```
+The script writes a throwaway tsconfig that extends the project's own (so `@fixtures/test`
+and `@pages/*` resolve), typechecks through it, and always cleans up. It resolves `tsc` from
+`node_modules/.bin` and refuses to run otherwise — never `npx tsc`, which with `node_modules`
+absent silently fetches `tsc@2.0.4`, a deprecated squatter package that is not the TypeScript
+compiler and would hand back a PASS the run never earned.
 
-2. **Typecheck via the temp tsconfig**:
+| Exit | Meaning |
+| ---- | ------- |
+| 0 | Clean → record `Typecheck: ✅ PASS` |
+| 64 | Bad usage — you passed no files |
+| 66 | No `tsconfig.json` at the repo root |
+| 69 | TypeScript not installed → run `npm install`, then retry this step |
+| other | Type errors, printed verbatim |
 
-   ```bash
-   npx tsc --noEmit -p .tsconfig.scratch.json
-   ```
-
-3. **Always clean up** (whether typecheck passed or failed):
-
-   ```bash
-   rm .tsconfig.scratch.json
-   ```
-
-- If typecheck **passes**, record `Typecheck: ✅ PASS` for the PR body.
-- If typecheck **fails**, capture the errors verbatim for the PR body — but DO NOT abort. Continue to Step 10.
+- **Exit 0** → record `Typecheck: ✅ PASS` and continue to Step 10.
+- **Exit 64 / 66 / 69** → an environment problem, not a defect in the generated code, and
+  not something this skill fixes on its own. Report it and stop — for 69, tell the user to run
+  `npm install` and re-run the skill. These never consume a fix attempt.
+- **Type errors** → capture verbatim and go to **Step 10.5**. Do NOT continue to Step 11.
 
 ### 10. Run the generated tests
 
@@ -304,7 +304,76 @@ Capture per-test PASS/FAIL output. Record one line per test for the PR body's Ve
 - ✅ PASS → `` `<test title>` — ✅ PASS ``
 - ❌ FAIL → `` `<test title>` — ❌ FAIL: <one-line message> `` plus a `<details>` block with verbatim failure output
 
-DO NOT abort on test failures — continue to Step 11. The PR-as-review-gate model means reviewers see and fix failures in the PR.
+If every test passed **and** Step 9 was clean, continue to Step 11. If anything failed, go to **Step 10.5** — a run never opens a red PR (ADR-0020).
+
+### 10.5. Fix loop — the no-red-PR gate
+
+A `/from-issue` run **never opens a red PR** (ADR-0020, which supersedes the treatment of
+failures in Steps 9 and 10). Enter this step whenever the typecheck or any test failed.
+
+#### First: is the generated code wrong, or is the app wrong?
+
+Diagnose before editing anything. A failing test is not automatically a broken test — this is
+a QA framework, and a test that faithfully encodes its AC while the app misbehaves has found
+a bug. "Fixing" it would delete the finding.
+
+- **Generated code is wrong** — wrong selector, bad import, a Page Object method that doesn't
+  do what the test assumed, a tag routed to a project that isn't wired, a type error →
+  fixable. Continue the loop.
+- **The app is wrong** — the selector resolves, the flow runs, and the app's actual behavior
+  contradicts an AC the ticket asserts → **STOP.** Do not touch the test. Go to "Reporting a
+  blocked run" and say plainly that the ticket's AC and the app disagree.
+- **Cannot tell** → treat it as "the app is wrong" and stop. Guessing produces a test that
+  passes by meaning nothing.
+
+#### The loop
+
+Budget: **3 fix attempts.** For each attempt:
+
+1. State the diagnosis in one line before editing — what failed and why.
+2. Apply the **narrowest** fix, and only to artifacts THIS run produced: the spec, and the
+   Page Object if this run created it or appended to it. Verify a corrected selector against
+   the live page with `/playwright-cli` instead of guessing a second time.
+3. Re-run Step 9 (if the typecheck failed) and Step 10.
+4. Record the attempt: diagnosis, what changed, resulting status.
+
+**Stop early** when the same failure signature repeats on two consecutive attempts. The
+diagnosis isn't converging, and further attempts spend tokens without producing information.
+
+**Never, on any attempt:**
+
+- delete a failing test, or mark it `.skip()` / `.fixme()`
+- weaken an assertion, or change an expected value to whatever the app happened to emit
+- add `await page.waitForTimeout()` (lint blocks it — use auto-waiting assertions)
+- reinterpret an AC to match observed behavior
+- edit a spec or Page Object member this run did not generate — the one exception is the
+  deliberate `po_modified` modification already resolved in Step 5
+
+Each of these reaches green by making the run worthless. If green is only reachable that way,
+the run is blocked: report it.
+
+#### Outcome
+
+- **Green within budget** → continue to Step 11. Carry the attempt log into the PR body's
+  Verification section (per `pr-description-template.md`): the reviewer needs to see that the
+  first run was red and what changed to fix it.
+- **Budget exhausted, non-converging, or blocked** → "Reporting a blocked run", below.
+
+#### Reporting a blocked run
+
+**Skip Steps 11, 11.5 and 12 entirely.** No branch, no commit, no push, no PR, no TCMS
+artifact. The generated files stay on disk for you to inspect and finish by hand.
+
+Report to the user:
+
+- Why the run is blocked: budget exhausted, non-converging, or an app/AC contradiction.
+- Every file this run wrote or modified, by path.
+- The final failure output, verbatim — type errors and/or the failing tests.
+- The full attempt log: per attempt, the diagnosis, what changed, and the resulting failure.
+- The recommended next step. For an app/AC contradiction, say that the ticket may be
+  describing a real defect and should go back to the reporter rather than into a spec.
+
+Then stop. Do not ask whether to open the PR anyway — the gate is the point.
 
 ### 11. Branch + commit + push
 
@@ -395,5 +464,8 @@ Report to the user:
 - Collision warnings (if any)
 - Typecheck status
 - Test run result (PASS/FAIL counts)
+- Fix attempts, if Step 10.5 ran: how many, and what each one changed
 
 Done.
+
+_(A run that reached this step is green — a blocked run reported itself in Step 10.5 and never got here.)_
