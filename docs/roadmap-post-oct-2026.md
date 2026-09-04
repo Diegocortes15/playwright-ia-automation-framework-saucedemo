@@ -32,6 +32,7 @@ los viole debe justificarse explícitamente.
 No extraer abstracciones sin segundo consumidor real.
 
 Ejemplos concretos ya decididos:
+
 - NO crear `/create-pr` como skill separada hasta que `/investigate-bug`
   también lo necesite
 - NO construir MCP server del framework antes de tener necesidad real
@@ -71,8 +72,8 @@ Al revertir una decisión: NUEVO ADR + marcar el anterior como
   como 3 subagents
 - NO "expert personas" en subagents ("you are a Python expert")
 - NO SDD full-blown por ticket (proposal.md + spec.md + design.md
-  + tasks.md). Es teatro burocrático para tests UI. El equivalente
-  ya existe: Jira ticket + AC + Page Object + tests atómicos
+  - tasks.md). Es teatro burocrático para tests UI. El equivalente
+    ya existe: Jira ticket + AC + Page Object + tests atómicos
 - NO adoptar OpenSpec/Kiro/Spec Kit como herramientas. Duplicaría
   el harness propio. Tomar IDEAS (EARS, deltas, constitución), no
   herramientas
@@ -111,7 +112,24 @@ original más abajo donde haya conflicto.
 5. **Bloque A steps 5-7 (skill-audit + pre-commit hook + gate en CI):
    DESCARTADOS.** Ver la anotación inline en el Bloque A para la evidencia.
    `skill-validator` queda como comando manual pre-handoff.
-6. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
+6. **PR rojo: RESUELTO** (ADR-0020, 2026-09-04). `/from-issue` ya no abre
+   PRs rojos. Loop de 3 intentos de arreglo durante el authoring, con
+   diagnóstico previo obligatorio de si el error es del código generado o
+   **de la app** — en el segundo caso para y reporta, porque el test
+   encontró un bug y "arreglarlo" lo borraría. Lista dura de arreglos
+   prohibidos (borrar/skipear tests, debilitar aserciones, cambiar el valor
+   esperado por el que emitió la app). Si no llega a verde: sin rama, sin
+   commit, sin push, sin PR, sin artefacto TCMS. ADR-0020 scopea ADR-0012:
+   el review gate sigue absorbiendo _juicio_, ya no _artefactos rotos_.
+7. **B12b arrancado**: primer script extraído,
+   `from-issue/scripts/typecheck-spec.sh` (Step 9). Al escribirlo apareció
+   un bug latente que la prosa escondía: el workflow decía `npx tsc`, y sin
+   `node_modules` npx baja **`tsc@2.0.4`** del registry — un paquete squatter
+   deprecado que no es el compilador. El skill podía registrar
+   "Typecheck ✅ PASS" sin haber typechequeado nada. El script resuelve `tsc`
+   solo desde `node_modules/.bin` y falla con exit 69 si no está.
+   Es la mejor evidencia del principio #3 que apareció hasta ahora.
+8. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
    pasan a ser artefactos portables — objetivo explícito, porque la idea
    del framework es que alguien se lleve los andamios para arrancar
    automation de otra app. Se convirtieron **56 links** que escapaban del
@@ -257,6 +275,7 @@ paralelo cuando se apruebe explícitamente.
    > es `Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)` — el step pedía
    > agregarle Read/Grep/Glob, lo que **amplía** en vez de restringir.
    > El step se reduce a: revisar caso por caso, no ampliar por defecto.
+
 5. Correr `skill-audit` de dabit3 (https://github.com/dabit3/skill-audit)
    baseline sobre las 4 skills y arreglar findings Critical+High
 6. Activar pre-commit hook local con `skill-audit`
@@ -295,13 +314,13 @@ paralelo cuando se apruebe explícitamente.
 > **Presupuesto de tokens medido (2026-09-04)** — la métrica que sí sirve,
 > y la prueba dura de que ADR-0008 funciona:
 >
-> | Skill | `SKILL.md` (siempre en contexto) | Total con `references/` |
-> | --- | --- | --- |
-> | from-issue | 808 | 23.562 |
-> | playwright-cli | 2.623 | 13.704 |
-> | scaffold-page-object | 346 | 4.149 |
-> | refine-ticket | 635 | 3.969 |
-> | **Total** | **4.412** | **45.384** |
+> | Skill                | `SKILL.md` (siempre en contexto) | Total con `references/` |
+> | -------------------- | -------------------------------- | ----------------------- |
+> | from-issue           | 808                              | 23.562                  |
+> | playwright-cli       | 2.623                            | 13.704                  |
+> | scaffold-page-object | 346                              | 4.149                   |
+> | refine-ticket        | 635                              | 3.969                   |
+> | **Total**            | **4.412**                        | **45.384**              |
 >
 > 4.412 tokens cargan siempre; 41.000 cargan bajo demanda.
 
@@ -318,6 +337,7 @@ paralelo cuando se apruebe explícitamente.
    > y los archivos propuestos ya existen con otros nombres
    > (`pr-description-template.md`, `qa-analysis.md`, etc.). Lo único
    > real que faltaba de este step eran los `scripts/` → ver B12b.
+
 9. **Adoptar EARS notation en `/refine-ticket`** — que los
    acceptance criteria salgan como
    "WHEN [condition/event] THE SYSTEM SHALL [expected behavior]".
@@ -346,14 +366,14 @@ paralelo cuando se apruebe explícitamente.
     > 42 contra ADR-0017 — fix de una línea, no un refactor de contexto.
 
 12b. **Extraer `scripts/` en las skills propias** (item nuevo, abierto
-    2026-09-04). Fase 1 encontró **cero carpetas `scripts/` en las 4
-    skills**: todo es instrucción en prosa. Es el gap más grande contra
-    el principio #3 ("preferir scripts sobre instrucciones dentro de
-    skills"). Candidatos con determinismo real, en orden de ROI:
-    el typecheck aislado (`.tsconfig.scratch.json` de workflow Step 9),
-    el preflight de branch/base (Step 1.5) y el render del PR body
-    (Step 12). Aplicar YAGNI por candidato: extraer solo lo que ya se
-    repite, no los tres de una.
+2026-09-04). Fase 1 encontró **cero carpetas `scripts/` en las 4
+skills**: todo es instrucción en prosa. Es el gap más grande contra
+el principio #3 ("preferir scripts sobre instrucciones dentro de
+skills"). Candidatos con determinismo real, en orden de ROI:
+el typecheck aislado (`.tsconfig.scratch.json` de workflow Step 9),
+el preflight de branch/base (Step 1.5) y el render del PR body
+(Step 12). Aplicar YAGNI por candidato: extraer solo lo que ya se
+repite, no los tres de una.
 
 ### Bloque C — Nuevos mecanismos
 
@@ -455,6 +475,7 @@ mínimo. Se listan acá para que no se cuelen antes de tiempo.
 funcional. NO es proyecto de fin de semana.
 
 **Pasos previos obligatorios**:
+
 1. Analizar últimos 20 bugs reales del equipo (cuando haya cliente
    nuevo) → clasificar cuántos son reproducibles con Playwright web.
    Si <50%, replantear scope. Bugs típicos de UI reproducible: sí.
