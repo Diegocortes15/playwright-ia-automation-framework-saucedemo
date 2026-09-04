@@ -80,22 +80,20 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - **Verification — smoke warnings**: If workflow Step 6 emitted any "invalid smoke value" soft warnings (per [`smoke-policy.md`](smoke-policy.md)), append them as additional bullets at the END of the Verification section, after any bucket warnings. Example: `- ⚠️ LLM emitted invalid smoke value "maybe" for test "<title>" — defaulted to false. Reviewer: verify classification.`
 - **Verification — full suite on PO modify**: when an AUGMENT run modified an existing Page Object method (workflow Step 10 `po_modified`), prefix the Test run list with `- **Full suite run** (existing Page Object method modified — see Notes for reviewer).` and list per-spec PASS/FAIL across the suite, not just the target spec.
 - **Notes for reviewer**: include this section ONLY when the skill made side-effect file changes OR LLM-judgment calls (merge/split/skip per [`qa-analysis.md`](qa-analysis.md)) that the reviewer might disagree with. Each note is a bullet starting with an emoji marker (⚠️ for side effects, ⚙️ for harness growth per [`harness.md`](harness.md), 📝 for judgment calls). If the workflow produced no side effects and no merge/split/skip decisions, OMIT this section entirely. Position: between `Verification` and `Collision warnings` per the Section order rule.
-- **Verification on failure**:
-  - Typecheck FAIL → use `❌ FAIL` and include a fenced code block with the verbatim typecheck errors.
-  - Test FAIL → use `❌ FAIL: <one-line message>` and include a `<details>` block with the verbatim failure output:
+- **Verification — fix attempts**: a PR only exists when the run is green (ADR-0020: a blocked run reports itself and opens nothing). So `❌ FAIL` never appears as a final state. What DOES belong here is the **fix log**, when workflow Step 10.5 ran: the reviewer needs to know the first run was red and what changed to fix it — a spec that needed three attempts deserves a closer read than one that passed first try. Append after the Test run list:
 
     ```markdown
-    - `<test title>` — ❌ FAIL: assertion error
-
+    - **Fix attempts:** 2 (first run red)
       <details>
-      <summary>Failure output</summary>
+      <summary>What changed</summary>
 
-      \`\`\`
-      <verbatim test failure output>
-      \`\`\`
+      1. `Add to cart` button not found — selector guessed from the AC text; verified live with /playwright-cli and corrected to `[data-test="add-to-cart-sauce-labs-backpack"]`.
+      2. Cart badge assertion read the wrong element — pointed at `Header`'s `CartBadge` component instead of the page-direct locator.
 
       </details>
     ```
+
+    Omit the whole item when the first run was green.
 
 - **Collision warnings section is omitted entirely when no collisions occur** — don't render an empty header.
 

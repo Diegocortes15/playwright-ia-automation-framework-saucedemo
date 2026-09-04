@@ -1,7 +1,9 @@
 # 0012 — /from-issue branch / commit / PR conventions + format-agnostic ticket normalization
 
 **Date:** 2026-05-25
-**Status:** Accepted
+**Status:** Accepted. Scoped by [ADR-0020](0020-no-red-pr.md): the PR-as-review-gate model
+still absorbs judgment (thin tickets → best-effort + surfaced assumptions), but a run that
+cannot make its own output compile and pass now opens no PR at all.
 
 ## Context
 
