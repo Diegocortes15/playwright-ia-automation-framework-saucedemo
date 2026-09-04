@@ -36,7 +36,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - **Test run:**
   - `<test title 1>` — ✅ PASS
   - `<test title 2>` — ✅ PASS
-- 🗂️ **TCMS records:** `.tcms/records/<KEY>.json` written + committed (Qase syncs at merge — see [ADR-0017](../../../docs/adr/0017-tcms-sync-at-merge.md)).
+- 🗂️ **TCMS records:** `.tcms/records/<KEY>.json` written + committed (Qase syncs at merge — see ADR-0017).
 
 ## Notes for reviewer
 
@@ -46,7 +46,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - ⚠️ **Side effect (externalized data):** per [`data-placement.md`](data-placement.md), N `<feature>` scenario(s) were externalized to `data/scenarios/<feature>/` + a loader in `data/fixtures.ts` (reused/large/named-scenario data). Reviewer: verify the loader + payloads. _(Omit when data stayed inline — the default for small, test-local parameterization.)_
 - 🔁 **Augment:** this PR **augmented** an existing spec `tests/<feature>/<feature>.spec.ts` (prior contributors: `<KEY-list>`) rather than creating a new file. AC-coverage rows below are marked `added` or `skipped (already covered)`.
 - ➕ **Page Object additions:** appended `<members>` to `<PageObject>` for the new tests (existing members untouched).
-- ⚙️ **Harness grew:** wired the `<user>` project + auth setup (first ticket needing `<user>`) by appending to `tests/users.ts` `AUTH_USERS` (per [ADR-0014](../../../docs/adr/0014-from-issue-harness-growth.md)). Reviewer: confirm. _(Omit when no new user was wired.)_
+- ⚙️ **Harness grew:** wired the `<user>` project + auth setup (first ticket needing `<user>`) by appending to `tests/users.ts` `AUTH_USERS` (per ADR-0014). Reviewer: confirm. _(Omit when no new user was wired.)_
 - ⚠️ **Page Object modification:** modified existing method `<Method>` on `<PageObject>`. Because other specs may call it, the **full suite** ran locally (see Verification). Reviewer: confirm no dependent spec regressed.
 - ⏭️ **Skipped (duplicate):** AC <id> maps to a test already present (`<existing test>`); not re-added. Reviewer: push back if the existing test doesn't actually cover it.
 - _(Include only the augment notes that apply; omit this whole group for plain CREATE-NEW runs.)_
@@ -64,7 +64,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 ## Rules
 
 - **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional). (No `## Source` footer — the `Source ticket:` line in "What I understood" already names + links the ticket.)
-- **"What I understood" block** (adaptive, per [ADR-0012](../../../docs/adr/0012-from-issue-conventions.md)):
+- **"What I understood" block** (adaptive, per ADR-0012):
   - **Summary** lead (`> `) — one TL;DR line: `Automated Playwright coverage for <KEY> (<feature>): N tests, all passing.`
   - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`. This is the key the GitHub-for-Jira app matches in the PR body to link the PR onto the ticket — so no separate `## Source` footer is needed.
   - **`Feature:`** — the snake_case feature.
@@ -73,7 +73,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
   - There is no `Page Name` or `User Story` line — the Page Object is covered by the Notes-for-reviewer scaffold/collision note, and the requirement is conveyed by `Requirement (as written)`.
 - **AC coverage table**:
   - Truncate long AC text to ≤80 chars; reviewers can click through to the ticket for full text.
-  - "Test" column: backtick-wrapped **prose** test title for generated ACs (titles no longer contain tags — tags live in the `{ tag }` option per [ADR-0015](../../../docs/adr/0015-spec-tags-via-tag-option.md)); em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for tests tagged `@smoke` (the test's `{ tag }`), e.g., `` `⚡ standard_user logs in and lands on inventory` ``. Non-smoke tests have no prefix.
+  - "Test" column: backtick-wrapped **prose** test title for generated ACs (titles no longer contain tags — tags live in the `{ tag }` option per ADR-0015); em-dash `—` for skipped. Prepend `⚡ ` INSIDE the backticks for tests tagged `@smoke` (the test's `{ tag }`), e.g., `` `⚡ standard_user logs in and lands on inventory` ``. Non-smoke tests have no prefix.
   - "Bucket" column: exactly one of `Positive` / `Negative` / `Edge` for generated tests; em-dash `—` for skipped ACs. Classification follows [`bucket-classification.md`](bucket-classification.md).
   - "Status" column: `✅ generated` or `⚠️ skipped: <one-line rationale>`. **For AUGMENT runs:** use `✅ added` for tests inserted into an existing file, and `⏭️ skipped (already covered)` for duplicate-guard skips.
 - **Verification — bucket warnings**: If workflow Step 6 emitted any "invalid bucket" soft warnings (per [`bucket-classification.md`](bucket-classification.md)), append them as additional bullets at the END of the Verification section, after the Test run list. Example: `- ⚠️ LLM emitted invalid bucket "Boundary" for test "<title>" — defaulted to Edge. Reviewer: verify classification.`

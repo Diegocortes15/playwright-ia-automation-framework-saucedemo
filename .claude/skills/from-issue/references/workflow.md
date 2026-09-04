@@ -1,11 +1,11 @@
 # from-issue Workflow
 
-The procedural workflow Claude follows when the `from-issue` skill is invoked. The source ticket is a **Jira** issue (project `SW`), read via the Atlassian MCP — see [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md). (Originally 13 GitHub-Issue steps; Step 3 was dropped and Step 13's Jira write-back removed in Phase E.)
+The procedural workflow Claude follows when the `from-issue` skill is invoked. The source ticket is a **Jira** issue (project `SW`), read via the Atlassian MCP — see ADR-0011. (Originally 13 GitHub-Issue steps; Step 3 was dropped and Step 13's Jira write-back removed in Phase E.)
 
 ## Inputs
 
 - **Jira issue key** (required, positional) — e.g., `/from-issue SW-123` (project key `SW`).
-- **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), Step 8).
+- **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per ADR-0010, Step 8).
 - **`dry-run`** (optional flag) — skip steps 11–12 (branch, push, PR). Files written and tests run locally only.
 
 ## Steps
@@ -58,7 +58,7 @@ There is no label/status gate. Explicitly invoking `/from-issue <KEY>` is the in
 
 ### 4. LLM normalization
 
-Tickets are authored many ways and at any quality (trainee → senior BA). **Normalize whatever the ticket contains — format- AND quality-agnostic** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): a formal "As a / I want / so that" narrative, Given/When/Then scenarios, a bullet/numbered AC list, plain prose, structured fields, or a partial/mixed blob all reduce to the same internal AC records. Extract from the summary + description:
+Tickets are authored many ways and at any quality (trainee → senior BA). **Normalize whatever the ticket contains — format- AND quality-agnostic** (per ADR-0012): a formal "As a / I want / so that" narrative, Given/When/Then scenarios, a bullet/numbered AC list, plain prose, structured fields, or a partial/mixed blob all reduce to the same internal AC records. Extract from the summary + description:
 
 - **Feature** (single-line slug) — drives `tests/<feature>/`. If not stated, infer it from the summary/subject (and record the inference as an assumption, below).
 - **Acceptance Criteria** — one behavior each, derived from whatever form the ticket used.
@@ -89,20 +89,20 @@ For each Acceptance Criterion, build an internal record:
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
 
-**Vague / low-quality tickets** (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)): do NOT abort and do NOT pause to ask. Produce a **best-effort** normalization, record every inference in `assumptions[]`, and let the PR's **⚠️ Assumptions & open questions** block surface them for the reviewer (the PR is the review gate). Abort **only** when nothing testable can be extracted at all:
+**Vague / low-quality tickets** (per ADR-0012): do NOT abort and do NOT pause to ask. Produce a **best-effort** normalization, record every inference in `assumptions[]`, and let the PR's **⚠️ Assumptions & open questions** block surface them for the reviewer (the PR is the review gate). Abort **only** when nothing testable can be extracted at all:
 
-> _"Couldn't extract any testable behavior from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
+> _"Couldn't extract any testable behavior from ticket `<KEY>`. Ask the reporter to follow `docs/jira-tickets.md`."_
 
-**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Report the per-AC rationale to the user, with the recommendation to close ticket `<KEY>` if the assessment is correct or refile with more concrete ACs. No Jira write-back is performed (per [ADR-0011](../../../../docs/adr/0011-jira-ticket-source.md)) and no PR is opened. Then stop.
+**If `worth_automating=false` for ALL ACs**, abort BEFORE writing files. Report the per-AC rationale to the user, with the recommendation to close ticket `<KEY>` if the assessment is correct or refile with more concrete ACs. No Jira write-back is performed (per ADR-0011) and no PR is opened. Then stop.
 
 #### Free-form / GWT body handling
 
-A well-authored ticket (per [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)) has a `Feature:` line and one AC per line in the description. If the description uses a looser format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
+A well-authored ticket (per `docs/jira-tickets.md`) has a `Feature:` line and one AC per line in the description. If the description uses a looser format (e.g., free-form Given/When/Then scenarios, no headings, partial structure), best-effort parse:
 
 - Extract the **Feature** field from any heading or first line that looks like a feature name
 - Look for Acceptance Criteria in any list/bullet form, regardless of `### Acceptance Criteria` heading
 - Recognize GWT-style scenarios (`Given... When... Then...`) as ACs, one scenario = one AC candidate
-- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow [`docs/jira-tickets.md`](../../../../docs/jira-tickets.md)."_
+- If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow `docs/jira-tickets.md`."_
 
 (Note: this subsection replaces an earlier shorter free-form note. The behavior was previously implicit — confirmed working in PR #8 of the experiment. Now documented explicitly.)
 
@@ -135,8 +135,8 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 ```
 
 - **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
-  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in [`../../scaffold-page-object/references/page-object-template.md`](../../scaffold-page-object/references/page-object-template.md). Existing members are untouched. When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per [`component-detection.md`](../../scaffold-page-object/references/component-detection.md) ("Parallel-array queries vs a discriminator component"). **Component-extraction judgment applies on augment, not just at page-scaffold:** if the new members form a **distinct sub-widget** — its own panel/menu/region with several locators + actions (e.g. a header burger menu) — prefer extracting a **nested component** (composed by the target, depth ≤ 2 per rule #11, like `CartBadge` under `Header`) over fattening the target into a multi-widget grab-bag. Apply `component-detection.md`'s "is this a component?" test to the new cluster. (SW-10/SW-11's burger menu accreted onto `Header` member-by-member before it was extracted into `BurgerMenu` — the per-ticket append never stepped back to see the emerging widget; this note is that step-back.)
-  - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md), modifying a shared method can regress other specs, so it widens verification.
+  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in `scaffold-page-object/references/page-object-template.md`. Existing members are untouched. When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per `scaffold-page-object/references/component-detection.md` ("Parallel-array queries vs a discriminator component"). **Component-extraction judgment applies on augment, not just at page-scaffold:** if the new members form a **distinct sub-widget** — its own panel/menu/region with several locators + actions (e.g. a header burger menu) — prefer extracting a **nested component** (composed by the target, depth ≤ 2 per rule #11, like `CartBadge` under `Header`) over fattening the target into a multi-widget grab-bag. Apply `component-detection.md`'s "is this a component?" test to the new cluster. (SW-10/SW-11's burger menu accreted onto `Header` member-by-member before it was extracted into `BurgerMenu` — the per-ticket append never stepped back to see the emerging widget; this note is that step-back.)
+  - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per ADR-0010, modifying a shared method can regress other specs, so it widens verification.
   - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting <KEY> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
   - Page name: `<PageName>`
@@ -180,7 +180,7 @@ Per [`references/harness.md`](harness.md) (read it before this step). From the S
 
 For each required user **not** wired in `tests/users.ts` `AUTH_USERS`, **append it autonomously** — no mid-run question, no recovering config from git history. The data-driven `playwright.config.ts` + `tests/auth.setup.ts` derive the project + storageState from the array. If `tests/users.ts` / the data-driven config / `auth.setup.ts` don't exist yet, create all three from the canonical shapes in `harness.md`, seeded with the required users.
 
-**Guardrail ([ADR-0004](../../../../docs/adr/0004-cross-browser-smoke-pattern.md)):** never pre-create unused users; never add `<browser>-<non-standard>` projects. Cross-browser stays out.
+**Guardrail (ADR-0004):** never pre-create unused users; never add `<browser>-<non-standard>` projects. Cross-browser stays out.
 
 Record a side-effect note for the PR body: `⚙️ Harness grew: wired the <user> project + auth setup (first ticket needing <user>). Reviewer: confirm.`
 
@@ -190,7 +190,7 @@ Apply [`references/test-template.md`](test-template.md). Also consult [`referenc
 
 - Top-of-file 5-line provenance block (substitute today's date, Jira key, URL, summary)
 - Imports: `@fixtures/test` (always), `@utils/env` (when password needed)
-- One `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)) — the routing tag lives in the **`{ tag }` option, not the title** (see test-template.md for the context-label mapping). Multiple contexts in one feature = sibling tagged describes in the same file.
+- One `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context (per ADR-0015) — the routing tag lives in the **`{ tag }` option, not the title** (see test-template.md for the context-label mapping). Multiple contexts in one feature = sibling tagged describes in the same file.
 - Inside each context describe, group tests by their `bucket` field into up to three nested `test.describe('Positive' | 'Negative' | 'Edge', ...)` blocks
 - Bucket describes appear in fixed order: **Positive → Negative → Edge** (even if Negative tests outnumber Positive)
 - **Omit empty buckets entirely** — if no tests were classified into a bucket, don't emit its describe block at all
@@ -227,9 +227,9 @@ The new test title format, bucket structure, and the header block are unchanged 
 
 ### 8.5. Insert into the existing file (AUGMENT mode only)
 
-Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` in place with targeted `Edit` calls — never regenerate the whole file (that would destroy manual edits, per [ADR-0010](../../../../docs/adr/0010-from-issue-augment-mode.md)).
+Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` in place with targeted `Edit` calls — never regenerate the whole file (that would destroy manual edits, per ADR-0010).
 
-**Resolve the context describe by tag (per [ADR-0015](../../../../docs/adr/0015-spec-tags-via-tag-option.md)).** The file holds one `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context. Find the sibling describe whose `{ tag }` equals the new tests' routing tag:
+**Resolve the context describe by tag (per ADR-0015).** The file holds one `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` per user-context. Find the sibling describe whose `{ tag }` equals the new tests' routing tag:
 
 - **Match found** → insert the new tests into THAT describe's bucket blocks (the bucket logic below operates within it).
 - **No match** → add a NEW sibling `test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, ...)` (with its own bucket children) after the existing context describes. This is the multi-user case (e.g. file has `@problem`, new tests are `@standard`) — no abort, no `--new-file` needed.
@@ -317,7 +317,7 @@ git branch --show-current   # capture as <base-branch> (e.g. e2e-jira-from-issue
 git checkout -b <KEY>-<feature>
 ```
 
-The branch is named **`<KEY>-<feature>`** — the exact uppercase Jira key first, then the feature slug (e.g., `SW-1-login`). Key-first per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md); the GitHub-for-Jira app matches the key (case-insensitively) to auto-link the PR onto ticket `<KEY>`.
+The branch is named **`<KEY>-<feature>`** — the exact uppercase Jira key first, then the feature slug (e.g., `SW-1-login`). Key-first per ADR-0012; the GitHub-for-Jira app matches the key (case-insensitively) to auto-link the PR onto ticket `<KEY>`.
 
 If the branch already exists, abort with: _"Branch `<KEY>-<feature>` exists — delete it and re-run."_ No PR.
 
@@ -343,7 +343,7 @@ git commit \
 git push -u origin <KEY>-<feature>
 ```
 
-**Conventional Commit (per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md)):** subject `feat(<feature>): automate <KEY> <feature> scenarios` — imperative, ≤ ~72 chars; `<feature>` is the scope. Body explains what + why. `Refs: <KEY>` trailer ties the commit to the ticket. Each block is a **separate `-m`** flag.
+**Conventional Commit (per ADR-0012):** subject `feat(<feature>): automate <KEY> <feature> scenarios` — imperative, ≤ ~72 chars; `<feature>` is the scope. Body explains what + why. `Refs: <KEY>` trailer ties the commit to the ticket. Each block is a **separate `-m`** flag.
 
 **Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
 
@@ -351,7 +351,7 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 
 ### 11.5. Write the TCMS records artifact (Qase, at-merge model)
 
-**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
+**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see ADR-0017), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
 
 ### 12. Open PR
 
@@ -369,7 +369,7 @@ Render the PR body using [`references/pr-description-template.md`](pr-descriptio
    ```
 
    - **`--base <base-branch>`** = the branch recorded in Step 11 (the one you branched from) — the integration branch during a build-up, `main` in normal use. Never hardcode `main`.
-   - **Title** is the Conventional-Commit form (matches the commit subject), per [ADR-0012](../../../../docs/adr/0012-from-issue-conventions.md). The PR body MUST also reference `<KEY>` so the GitHub-for-Jira app links it.
+   - **Title** is the Conventional-Commit form (matches the commit subject), per ADR-0012. The PR body MUST also reference `<KEY>` so the GitHub-for-Jira app links it.
 
 3. After PR creation succeeds, delete the temp file:
 

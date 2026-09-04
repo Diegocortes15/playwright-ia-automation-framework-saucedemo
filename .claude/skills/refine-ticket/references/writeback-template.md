@@ -1,6 +1,6 @@
 # Write-back template — the `## Refined Acceptance Criteria` block
 
-On approval (workflow Step 7), `/refine-ticket` writes the hardened result into the Jira **description** via `editJiraIssue`, then posts an audit comment via `addCommentToJiraIssue`. Per [ADR-0013](../../../../docs/adr/0013-refine-ticket-jira-writeback.md), this is the only Jira mutation and only on human approval.
+On approval (workflow Step 7), `/refine-ticket` writes the hardened result into the Jira **description** via `editJiraIssue`, then posts an audit comment via `addCommentToJiraIssue`. Per ADR-0013, this is the only Jira mutation and only on human approval.
 
 > **No HTML-comment sentinels — Jira descriptions are ADF, not Markdown.** `<!-- ... -->` is stored as _visible literal text_, not a hidden marker (confirmed on a live write). The managed section is therefore bounded by a **visible `---` divider + `## Refined Acceptance Criteria` heading**, which renders cleanly in Jira and still gives a reliable anchor for idempotent re-runs.
 

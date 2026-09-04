@@ -1,6 +1,6 @@
 # TCMS records artifact + at-merge Qase sync
 
-The framework mirrors tests into Qase **one-way, at merge** (see [ADR-0017](../../../../docs/adr/0017-tcms-sync-at-merge.md)), behind the `src/tcms/` seam. `/from-issue` does **not** push to Qase; it writes a committed **records artifact**, and a merge-time CI step (`npm run tcms:sync`) does the authoritative create/update/archive. A rejected PR therefore never mutates Qase.
+The framework mirrors tests into Qase **one-way, at merge** (see ADR-0017), behind the `src/tcms/` seam. `/from-issue` does **not** push to Qase; it writes a committed **records artifact**, and a merge-time CI step (`npm run tcms:sync`) does the authoritative create/update/archive. A rejected PR therefore never mutates Qase.
 
 ## Step 11.5 — write/append `.tcms/records/<feature>.json`
 

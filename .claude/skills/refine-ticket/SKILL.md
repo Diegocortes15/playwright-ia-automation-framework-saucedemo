@@ -6,7 +6,7 @@ allowed-tools: Read Glob Grep mcp__atlassian__getAccessibleAtlassianResources mc
 
 # refine-ticket
 
-Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, scores it against the refinement rubric, and loops — auto-resolving gaps from existing automation + docs and asking you (or a source you point it at) for the rest — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket. It does NOT generate tests; run `/from-issue` after. See [ADR-0013](../../../docs/adr/0013-refine-ticket-jira-writeback.md).
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, scores it against the refinement rubric, and loops — auto-resolving gaps from existing automation + docs and asking you (or a source you point it at) for the rest — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket. It does NOT generate tests; run `/from-issue` after. See ADR-0013.
 
 ## How to use it
 
@@ -24,7 +24,7 @@ During the loop, when asked about a gap you can either answer directly or point 
 
 The full procedural workflow is in [`references/workflow.md`](references/workflow.md). Read that file before executing the skill.
 
-> **Setup note:** the Atlassian MCP must be connected (OAuth) with **write** scope for the Step 7 description update — defined at project scope in [`.mcp.json`](../../../.mcp.json). Its read + write tools are pre-authorized in `allowed-tools` above so the loop doesn't prompt each call. Write-back happens only on your explicit approval (per [ADR-0013](../../../docs/adr/0013-refine-ticket-jira-writeback.md)).
+> **Setup note:** the Atlassian MCP must be connected (OAuth) with **write** scope for the Step 7 description update — defined at project scope in `.mcp.json`. Its read + write tools are pre-authorized in `allowed-tools` above so the loop doesn't prompt each call. Write-back happens only on your explicit approval (per ADR-0013).
 
 ## References
 
@@ -35,9 +35,10 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 
 ## Composition
 
-This skill pairs with [`/from-issue`](../from-issue/SKILL.md): refine first, then generate. It reuses `/from-issue`'s [`bucket-classification.md`](../from-issue/references/bucket-classification.md) and [`qa-analysis.md`](../from-issue/references/qa-analysis.md) for the rubric's coverage/automatable judgment.
+This skill pairs with `/from-issue`: refine first, then generate. It reuses the `/from-issue` skill's `references/bucket-classification.md` and `references/qa-analysis.md` for the rubric's coverage/automatable judgment.
 
 ## See also
 
-- [`docs/refine-ticket.md`](../../../docs/refine-ticket.md) — learning guide with a worked example
-- [`docs/adr/0008-custom-skills-pattern.md`](../../../docs/adr/0008-custom-skills-pattern.md) — why custom skills follow this layout
+- `docs/refine-ticket.md` — learning guide with a worked example
+- ADR-0008 — why custom skills follow this layout
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
