@@ -29,7 +29,6 @@ export class InventoryPage {
     this.title = page.locator('[data-test="title"]');
     // Each product image carries its OWN data-test (`inventory-item-<product>-img`,
     // verified live), so the collection has no shared value to select on.
-    // eslint-disable-next-line no-restricted-syntax -- per-image data-test, none shared
     this.productImages = page.locator('img.inventory_item_img');
     this.productNames = page.locator('[data-test="inventory-item-name"]');
     this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');

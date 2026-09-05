@@ -25,10 +25,9 @@ export class BurgerMenu {
 
   constructor(public readonly page: Page) {
     // The react-burger-menu widget renders its toggle and close button with no data-test
-    // attribute (verified live against the app), so the id is the top level available here.
-    // eslint-disable-next-line no-restricted-syntax -- no data-test on this widget
+    // attribute (verified live), so these ids are the top level available. Both are unique
+    // and stable.
     this.openButton = page.locator('#react-burger-menu-btn');
-    // eslint-disable-next-line no-restricted-syntax -- no data-test on this widget
     this.closeButton = page.locator('#react-burger-cross-btn');
     this.logoutLink = page.locator('[data-test="logout-sidebar-link"]');
     this.allItemsOption = page.locator('[data-test="inventory-sidebar-link"]');

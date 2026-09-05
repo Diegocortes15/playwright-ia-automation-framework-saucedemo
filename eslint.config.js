@@ -19,24 +19,22 @@ export default [
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 
-      // Selector preference order (CLAUDE.md): [data-test] -> getByRole -> text -> CSS,
-      // and never XPath. Prose asked the agent to respect it and nothing checked; these
-      // make the floor deterministic (ADR-0022). A fallback is still allowed — it just has
-      // to be declared with `eslint-disable-next-line no-restricted-syntax -- <reason>`,
-      // which turns an invisible downgrade into a reviewed one.
+      // XPath is the one selector rule CLAUDE.md states as absolute ("Never use XPath"),
+      // and it is the only one worth failing a build over: it encodes document structure,
+      // so it breaks on layout changes that touch nothing else.
+      //
+      // The rest of the preference order ([data-test] -> getByRole -> text -> CSS) stays
+      // AUTHORING guidance, not a build gate. A unique, stable locator that works is fine
+      // regardless of which level it came from; a rule that fails on `#stable-id` only
+      // teaches people to silence it, and eslint-disable sprawl is worse than no rule.
+      // Fragility is proven by a test failing, not by an attribute's name.
       'no-restricted-syntax': [
         'error',
         {
           selector:
             "CallExpression[callee.property.name='locator'][arguments.0.value=/^(\\/\\/|\\(|xpath=)/]",
           message:
-            'XPath is never allowed (CLAUDE.md). Use [data-test="..."], then getByRole, then text.',
-        },
-        {
-          selector:
-            "CallExpression[callee.property.name='locator'][arguments.0.value=/^(?!\\[data-test)/]",
-          message:
-            'Selector below the preferred level: prefer [data-test="..."], then getByRole/getByText. If no data-test exists, or it cannot express what you need (e.g. an error STATE), keep this and add: eslint-disable-next-line no-restricted-syntax -- <verified reason>.',
+            'XPath is never allowed (CLAUDE.md). Use [data-test="..."], then getByRole, then text, then CSS.',
         },
       ],
     },

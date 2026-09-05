@@ -90,14 +90,14 @@ Pick a semantic field name from the element's accessible name. **Naming rule:**
 
 Edge cases (e.g., two buttons with the same name on one page) get caught in C.2 review.
 
-**Check the live DOM before downgrading.** The preference order is `[data-test]` →
-`getByRole` → text → CSS, and `no-restricted-syntax` enforces the floor: a locator below
-`[data-test]` fails lint unless it carries `eslint-disable-next-line no-restricted-syntax --
-<reason>`. Before writing that disable, **verify the attribute is actually absent** —
-`playwright-cli eval "el => el.getAttribute('data-test')" <ref>` — rather than assuming from
-the snapshot. Four selectors in `BurgerMenu.ts` sat on ids for months while the elements had
-`data-test` attributes all along; nobody checked. Note anything you had to disable, and why,
-for Step 12 (ADR-0022), at the moment you make the call.
+**Check the live DOM before settling for a lower level.** The preference order is
+`[data-test]` → `getByRole` → text → CSS; only XPath fails lint, so everything else is on
+your judgment. Before writing a CSS or id locator, **verify the higher level is actually
+absent** — `playwright-cli eval "el => el.getAttribute('data-test')" <ref>` — rather than
+assuming from the snapshot. Four selectors in `BurgerMenu.ts` sat on ids for months while
+the elements had `data-test` attributes all along; nobody checked. A unique, stable id is a
+fine locator; guessing that the attribute was missing is what went wrong. Note what you
+settled for, and why, for Step 12 (ADR-0022), at the moment you make the call.
 
 ### 9. Render the Page Object
 
@@ -201,12 +201,11 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades that lint cannot see.** `no-restricted-syntax` already blocks any
-   locator below `[data-test]` unless it carries an `eslint-disable` with a written reason,
-   so the floor is enforced deterministically — do not re-report what the rule caught.
-   Report the *ceiling*: a better selector existed on the live page and you did not use it,
-   or you had to disable the rule (say why, and confirm you checked the real DOM instead of
-   assuming the attribute was missing).
+1. **Selector downgrades.** The preference order is `[data-test]` → `getByRole` → text →
+   CSS, and only XPath fails lint. So when you write a locator below the highest level
+   *available on the page*, nothing catches it but this line. Name the element, the level
+   available, the level you used, and why. A stable unique id is a perfectly good locator —
+   the point is not to apologise for it, it is that the reviewer learns you looked.
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and
