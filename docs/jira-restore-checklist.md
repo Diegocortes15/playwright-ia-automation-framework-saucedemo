@@ -94,6 +94,7 @@ ever firing. They test the framework's instrumentation, not the application.
 
 - [ ] `rm -rf tests/_framework_validation/`
 - [ ] `rm -f .observations/_framework_validation.json`
+- [ ] Remove the `test:instrumentation` script from `package.json`
 - [ ] Nothing else references them. `src/observations/reporter.test.ts` is **not** part of
       this — those are permanent unit tests for the merge logic and should stay.
 
@@ -105,6 +106,11 @@ What they proved, so the cost of deleting them is known:
 | page-error detector        | Records an uncaught exception thrown from a timer                                                                           |
 | dialog detector            | Records `error_user`'s real `alert()` on sort, dismisses it, page stays usable                                              |
 | `test.fail()` failure path | An observation raised before a failing assertion **survives** into the file — the case that matters most for failure triage |
+
+Run them with `npm run test:instrumentation`. The script deliberately passes **no**
+`--reporter` flag: that flag replaces the config's reporter list and silently drops
+`ObservationsReporter`, so the run would write no `.observations/` file at all. Results land
+in `.observations/_framework_validation.json`.
 
 Keep them until `/from-issue` has run end-to-end at least once; the observation pipeline has
 no other coverage.
