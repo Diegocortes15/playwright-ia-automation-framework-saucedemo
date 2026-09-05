@@ -121,7 +121,25 @@ original más abajo donde haya conflicto.
    esperado por el que emitió la app). Si no llega a verde: sin rama, sin
    commit, sin push, sin PR, sin artefacto TCMS. ADR-0020 scopea ADR-0012:
    el review gate sigue absorbiendo _juicio_, ya no _artefactos rotos_.
-7. **Observaciones de runtime: HECHO** (ADR-0021, 2026-09-04). Ítem NUEVO,
+7. **Obstacles Encountered: HECHO** (ADR-0022, 2026-09-05). Ítem NUEVO,
+   pedido por el user. Sección obligatoria de reporte en las 3 skills propias
+   (`/playwright-cli` queda afuera: es vendored y se regeneraría encima).
+   Se renderiza SIEMPRE, incluso vacía (`None.`) — una sección que se puede
+   omitir es una que el agente aprende a omitir.
+
+   Alcance **definido por exclusión**, para que no duplique lo que ya se
+   reporta (assumptions, fix log, colisiones): lleva solo degradaciones de
+   selector, fricción de herramientas, y **huecos en las propias
+   `references/` de la skill** — este último es el que responde tu pregunta
+   de qué le impide a la skill funcionar como debería, y obliga a nombrar el
+   archivo que debería haber cubierto el caso.
+
+   Las degradaciones de selector se registran **en el momento de elegirlas**
+   (scaffold Step 8, from-issue Step 5), no reconstruidas al final. En
+   `/refine-ticket` va solo a la terminal: nunca al ticket, porque el
+   write-back es el bloque de AC refinados y nada más (ADR-0013).
+
+8. **Observaciones de runtime: HECHO** (ADR-0021, 2026-09-04). Ítem NUEVO,
    fuera del plan original, pedido por el user. Fixture auto-use que graba
    errores de consola, page errors, respuestas 4xx/5xx y diálogos; reporter
    que deduplica por firma y escribe `.observations/<feature>.json`. Nada se
@@ -137,7 +155,7 @@ original más abajo donde haya conflicto.
    50 tests en verde y nadie se enteraba. Corrige lo que yo había afirmado:
    que en saucedemo esto no iba a encontrar nada real.
 
-8. **B12b arrancado**: primer script extraído,
+9. **B12b arrancado**: primer script extraído,
    `from-issue/scripts/typecheck-spec.sh` (Step 9). Al escribirlo apareció
    un bug latente que la prosa escondía: el workflow decía `npx tsc`, y sin
    `node_modules` npx baja **`tsc@2.0.4`** del registry — un paquete squatter
@@ -145,14 +163,14 @@ original más abajo donde haya conflicto.
    "Typecheck ✅ PASS" sin haber typechequeado nada. El script resuelve `tsc`
    solo desde `node_modules/.bin` y falla con exit 69 si no está.
    Es la mejor evidencia del principio #3 que apareció hasta ahora.
-9. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
-   pasan a ser artefactos portables — objetivo explícito, porque la idea
-   del framework es que alguien se lleve los andamios para arrancar
-   automation de otra app. Se convirtieron **56 links** que escapaban del
-   directorio de su skill: citas de ADR a texto plano, paths del repo a
-   prosa con backticks, cross-skill a prosa (sin duplicar), e invocación
-   de skills por nombre. Las 4 skills quedan en verde con `skill-validator`.
-   De paso desaparecieron 4 links rotos en `pr-description-template.md`.
+10. **Portabilidad de skills: HECHO** (ADR-0019, 2026-09-04). Las skills
+    pasan a ser artefactos portables — objetivo explícito, porque la idea
+    del framework es que alguien se lleve los andamios para arrancar
+    automation de otra app. Se convirtieron **56 links** que escapaban del
+    directorio de su skill: citas de ADR a texto plano, paths del repo a
+    prosa con backticks, cross-skill a prosa (sin duplicar), e invocación
+    de skills por nombre. Las 4 skills quedan en verde con `skill-validator`.
+    De paso desaparecieron 4 links rotos en `pr-description-template.md`.
 
 ### Hallazgos de Fase 1 pendientes de arreglar (triviales)
 
