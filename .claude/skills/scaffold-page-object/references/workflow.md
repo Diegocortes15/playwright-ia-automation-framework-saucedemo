@@ -90,11 +90,14 @@ Pick a semantic field name from the element's accessible name. **Naming rule:**
 
 Edge cases (e.g., two buttons with the same name on one page) get caught in C.2 review.
 
-**Record every selector downgrade as you go.** The preference order is `[data-test]` →
-`getByRole` → text → CSS. Whenever an element lands below the top available level, note the
-element, the level you wanted, the level you used, and why — Step 12 reports them (ADR-0022).
-Write it down at the moment you make the call: reconstructing it at the end is how a fallback
-quietly turns into a first choice in the report.
+**Check the live DOM before downgrading.** The preference order is `[data-test]` →
+`getByRole` → text → CSS, and `no-restricted-syntax` enforces the floor: a locator below
+`[data-test]` fails lint unless it carries `eslint-disable-next-line no-restricted-syntax --
+<reason>`. Before writing that disable, **verify the attribute is actually absent** —
+`playwright-cli eval "el => el.getAttribute('data-test')" <ref>` — rather than assuming from
+the snapshot. Four selectors in `BurgerMenu.ts` sat on ids for months while the elements had
+`data-test` attributes all along; nobody checked. Note anything you had to disable, and why,
+for Step 12 (ADR-0022), at the moment you make the call.
 
 ### 9. Render the Page Object
 
@@ -198,10 +201,12 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades** (the most important one for this skill — Step 8 is where selectors are chosen) — every selector that landed below the preference order
-   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
-   the level you used, and why. A fragile selector must arrive labelled as a fallback,
-   not be discovered months later through flakiness.
+1. **Selector downgrades that lint cannot see.** `no-restricted-syntax` already blocks any
+   locator below `[data-test]` unless it carries an `eslint-disable` with a written reason,
+   so the floor is enforced deterministically — do not re-report what the rule caught.
+   Report the *ceiling*: a better selector existed on the live page and you did not use it,
+   or you had to disable the rule (say why, and confirm you checked the real DOM instead of
+   assuming the attribute was missing).
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and

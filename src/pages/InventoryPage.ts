@@ -27,6 +27,9 @@ export class InventoryPage {
     this.footer = new Footer(page);
     this.header = new Header(page);
     this.title = page.locator('[data-test="title"]');
+    // Each product image carries its OWN data-test (`inventory-item-<product>-img`,
+    // verified live), so the collection has no shared value to select on.
+    // eslint-disable-next-line no-restricted-syntax -- per-image data-test, none shared
     this.productImages = page.locator('img.inventory_item_img');
     this.productNames = page.locator('[data-test="inventory-item-name"]');
     this.productDescriptions = page.locator('[data-test="inventory-item-desc"]');
@@ -124,7 +127,9 @@ export class InventoryPage {
   // Composed action — add one product to the cart from its card.
   async addToCart(productName: string): Promise<void> {
     await test.step(`Add "${productName}" to the cart`, async () => {
-      await this.productCard(productName).getByRole('button', { name: /^Add to cart$/i }).click();
+      await this.productCard(productName)
+        .getByRole('button', { name: /^Add to cart$/i })
+        .click();
     });
   }
 

@@ -46,7 +46,11 @@ export class CheckoutInfoPage {
     this.cancelButton = page.locator('[data-test="cancel"]');
     this.errorBanner = page.locator('[data-test="error"]');
     this.errorDismissButton = page.locator('[data-test="error"] button.error-button');
+    // Selects inputs by their ERROR STATE. data-test encodes identity (`firstName`,
+    // verified live), not state, so it cannot express "every field currently invalid".
+    // eslint-disable-next-line no-restricted-syntax -- selects by state, not identity
     this.erroredInputs = page.locator('input.error');
+    // eslint-disable-next-line no-restricted-syntax -- no data-test on the error icon
     this.errorIcons = page.locator('.error_icon');
   }
 

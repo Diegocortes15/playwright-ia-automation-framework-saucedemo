@@ -78,7 +78,9 @@ This project uses the `gh` CLI for GitHub operations (PRs, releases, workflow ru
 
 Never use XPath.
 
-**Every downgrade below the top available level gets reported.** Skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a fragile selector arrives labelled as a fallback instead of being found later through flakiness.
+**The floor is enforced by lint.** `no-restricted-syntax` in `eslint.config.js` fails any `.locator()` below `[data-test="..."]`, and XPath outright. A genuine fallback is still allowed — it just has to declare itself: `eslint-disable-next-line no-restricted-syntax -- <verified reason>`. Verify against the live DOM before disabling; four `BurgerMenu` selectors sat on ids for months while the elements had `data-test` all along.
+
+**Everything lint cannot see gets reported.** Skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a fragile selector arrives labelled as a fallback instead of being found later through flakiness.
 
 ## Tag conventions (Playwright Projects + storageState + role tags)
 

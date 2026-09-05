@@ -477,10 +477,12 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades** — every selector that landed below the preference order
-   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
-   the level you used, and why. A fragile selector must arrive labelled as a fallback,
-   not be discovered months later through flakiness.
+1. **Selector downgrades that lint cannot see.** `no-restricted-syntax` already blocks any
+   locator below `[data-test]` unless it carries an `eslint-disable` with a written reason,
+   so the floor is enforced deterministically — do not re-report what the rule caught.
+   Report the *ceiling*: a better selector existed on the live page and you did not use it,
+   or you had to disable the rule (say why, and confirm you checked the real DOM instead of
+   assuming the attribute was missing).
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and
