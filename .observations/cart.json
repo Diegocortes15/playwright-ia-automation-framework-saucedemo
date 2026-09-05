@@ -8,7 +8,7 @@
       "count": 8,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-05",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/inventory.html",
@@ -16,7 +16,8 @@
         "httpStatus": 404,
         "test": "adding a product shows a cart badge count of one",
         "project": "chromium-standard"
-      }
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else."
     }
   ]
 }

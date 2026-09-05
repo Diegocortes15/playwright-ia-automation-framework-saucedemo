@@ -8,7 +8,7 @@
       "count": 9,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-05",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/checkout-step-one.html",
@@ -16,7 +16,8 @@
         "httpStatus": 404,
         "test": "mandatory fields show their placeholder text",
         "project": "chromium-standard"
-      }
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else."
     },
     {
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
@@ -25,7 +26,7 @@
       "count": 11,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-05",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/inventory.html",
@@ -33,7 +34,8 @@
         "httpStatus": 404,
         "test": "checkout button on the cart page navigates to Checkout: Your Information",
         "project": "chromium-standard"
-      }
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else."
     }
   ]
 }

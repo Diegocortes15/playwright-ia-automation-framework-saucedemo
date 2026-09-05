@@ -52,3 +52,10 @@ export const ATTACHMENT_NAME = 'observations';
 
 /** Per-test cap, so a pathological page can't flood a run. */
 export const MAX_EVENTS_PER_TEST = 200;
+
+/**
+ * How many distinct observations become report annotations before the rest collapse into a
+ * "…and N more" line. Annotations are chips under the test title: a handful reads at a
+ * glance, fifty is wallpaper. Full detail always stays in the attachment.
+ */
+export const ANNOTATION_CAP = 5;

@@ -7,7 +7,14 @@ import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
 import { CheckoutCompletePage } from '@pages/checkout/CheckoutCompletePage';
 import { reportAnnotations } from '@utils/report-annotations';
-import { ATTACHMENT_NAME, MAX_EVENTS_PER_TEST, type ObservationEvent } from '../observations/types';
+import { signatureFor } from '../observations/signature';
+import { ignoredSignatures } from '../observations/triage';
+import {
+  ANNOTATION_CAP,
+  ATTACHMENT_NAME,
+  MAX_EVENTS_PER_TEST,
+  type ObservationEvent,
+} from '../observations/types';
 
 type Pages = {
   loginPage: LoginPage;
@@ -110,6 +117,31 @@ export const test = base.extend<
           body: JSON.stringify(events),
           contentType: 'application/json',
         });
+
+        // Surface a readable summary as report annotations, so a reader sees WHAT the app
+        // did without opening the attachment. The attachment keeps the full detail, and the
+        // trace already carries the raw console/network alongside it.
+        const seen = new Map<string, ObservationEvent>();
+        for (const event of events) {
+          const key = `${event.kind}:${event.httpStatus ?? ''}:${event.url ?? event.message}`;
+          if (!seen.has(key)) seen.set(key, event);
+        }
+        // Anything a human already triaged as `ignored` stays out of the report.
+        const ignored = ignoredSignatures(basename(dirname(testInfo.file)));
+        const distinct = [...seen.values()].filter((e) => !ignored.has(signatureFor(e)));
+        for (const event of distinct.slice(0, ANNOTATION_CAP)) {
+          const where = event.url ? ` (${event.url})` : '';
+          testInfo.annotations.push({
+            type: 'observation',
+            description: `${event.kind}: ${event.message}${where}`.slice(0, 300),
+          });
+        }
+        if (distinct.length > ANNOTATION_CAP) {
+          testInfo.annotations.push({
+            type: 'observation',
+            description: `…and ${distinct.length - ANNOTATION_CAP} more — see the observations attachment`,
+          });
+        }
       }
     },
     { auto: true },
