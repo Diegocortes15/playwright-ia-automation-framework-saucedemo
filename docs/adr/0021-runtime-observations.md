@@ -24,7 +24,7 @@ The gap is real and this framework demonstrates it: every navigation in the app 
 - The console listener skips `Failed to load resource` messages: the browser echoes every failed request there, and the response handler already records those with method, status and URL. Keeping both double-reported one event.
 - Registering a dialog listener disables Playwright's automatic dismissal, so the handler dismisses the dialog itself to preserve default behavior. A test that wants to drive its own dialog registers its own handler; the fixture's dismissal is wrapped so whichever loses the race fails silently. No spec handles dialogs today.
 - The fixture takes `page`, so it only observes the default page — a test driving a second context or popup is not covered. Acceptable now; revisit if multi-page tests appear.
-- Third-party requests that resolve after a test ends are missed: the page closes before the response arrives. This is why the app's own telemetry 401s appear in manual exploration but not in the suite.
+- **Passing `--reporter=...` on the command line drops this reporter.** The flag replaces the config's reporter list, so the run produces no observations at all and the failure is silent. `/from-issue` Step 10 originally did exactly that. _(This corrects an earlier claim in this ADR that third-party requests resolving after a test ends were being missed — they are captured fine; the telemetry 401s were absent because the reporter had been overridden.)_
 - `.observations/` is committed, so an observation showing up in a PR diff is a review signal on its own.
 
 ## Alternatives considered

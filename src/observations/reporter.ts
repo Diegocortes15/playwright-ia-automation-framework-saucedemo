@@ -78,31 +78,42 @@ export default class ObservationsReporter implements Reporter {
 
       for (const [feature, bucket] of this.byFeature) {
         const path = join(OUTPUT_DIR, `${feature}.json`);
-        const merged = new Map<string, Observation>();
-
-        // Existing entries first, so human triage (`status`) and `firstSeen` survive.
-        for (const previous of readExisting(path)) merged.set(previous.signature, previous);
-
-        for (const [signature, fresh] of bucket) {
-          const previous = merged.get(signature);
-          merged.set(
-            signature,
-            previous
-              ? { ...previous, count: fresh.count, lastSeen: fresh.lastSeen, sample: fresh.sample }
-              : fresh,
-          );
-        }
-
-        // Sorted so the file diffs cleanly instead of reshuffling every run.
-        const observations = [...merged.values()].sort(
-          (a, b) => a.kind.localeCompare(b.kind) || a.signature.localeCompare(b.signature),
-        );
+        const observations = mergeObservations(readExisting(path), [...bucket.values()]);
         writeFileSync(path, `${JSON.stringify({ feature, observations }, null, 2)}\n`, 'utf-8');
       }
     } catch {
       // Same contract as onTestEnd: observations never break a run.
     }
   }
+}
+
+/**
+ * Fold this run's observations into what the file already held.
+ *
+ * The contract that matters: a human's triage must survive a re-run. `status`, `note` and
+ * `firstSeen` come from the previous entry and are never overwritten; only `count`,
+ * `lastSeen` and `sample` refresh. Getting this wrong would silently erase triage, which is
+ * why it is a pure function with its own tests rather than inline reporter code.
+ *
+ * Output is sorted so the committed file diffs cleanly instead of reshuffling every run.
+ */
+export function mergeObservations(previous: Observation[], fresh: Observation[]): Observation[] {
+  const merged = new Map<string, Observation>();
+  for (const entry of previous) merged.set(entry.signature, entry);
+
+  for (const entry of fresh) {
+    const before = merged.get(entry.signature);
+    merged.set(
+      entry.signature,
+      before
+        ? { ...before, count: entry.count, lastSeen: entry.lastSeen, sample: entry.sample }
+        : entry,
+    );
+  }
+
+  return [...merged.values()].sort(
+    (a, b) => a.kind.localeCompare(b.kind) || a.signature.localeCompare(b.signature),
+  );
 }
 
 function readExisting(path: string): Observation[] {

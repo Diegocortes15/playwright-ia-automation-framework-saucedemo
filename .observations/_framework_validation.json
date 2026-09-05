@@ -1,0 +1,66 @@
+{
+  "feature": "_framework_validation",
+  "observations": [
+    {
+      "signature": "console-error:OBSERVATION_PROBE console failure",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-05",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE console failure",
+        "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
+        "test": "console-error detector records a console error raised by the page",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
+      "signature": "console-error:OBSERVATION_PROBE from a failing test",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-05",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE from a failing test",
+        "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
+        "test": "a failing test still records its observations (expected to fail, reported green)",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
+      "signature": "dialog:alert:Sorting is broken! This error has been reported to Backtrace.",
+      "kind": "dialog",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-05",
+      "status": "new",
+      "sample": {
+        "message": "Sorting is broken! This error has been reported to Backtrace.",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "dialogType": "alert",
+        "test": "dialog detector records a real alert, and dismissing it keeps the test running",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
+      "signature": "page-error:OBSERVATION_PROBE uncaught failure",
+      "kind": "page-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-05",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE uncaught failure",
+        "url": "https://www.saucedemo.com/",
+        "test": "page-error detector records an uncaught exception in page context",
+        "project": "chromium-no-auth"
+      }
+    }
+  ]
+}

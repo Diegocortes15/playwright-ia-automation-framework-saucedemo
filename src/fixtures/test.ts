@@ -18,7 +18,9 @@ type Pages = {
   checkoutCompletePage: CheckoutCompletePage;
 };
 
-export const test = base.extend<Pages & { _reportAnnotation: void; _observations: void }>({
+export const test = base.extend<
+  Pages & { _reportAnnotation: void; _observations: ObservationEvent[] }
+>({
   // Auto fixture — annotate each test in the Playwright report with its Jira
   // ticket link(s) and the acceptance criterion it covers, derived from
   // `.tcms/records/<feature>.json` (feature = the spec's parent dir). No per-test
@@ -98,7 +100,10 @@ export const test = base.extend<Pages & { _reportAnnotation: void; _observations
         void dialog.dismiss().catch(() => {});
       });
 
-      await use();
+      // Auto fixtures still provide a value, so a test that names `_observations` can read
+      // what the page has produced so far. Nothing else needs it — but without it the
+      // detectors below are unassertable, and three of the four had never fired.
+      await use(events);
 
       if (events.length > 0) {
         await testInfo.attach(ATTACHMENT_NAME, {

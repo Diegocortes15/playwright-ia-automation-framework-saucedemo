@@ -288,16 +288,21 @@ compiler and would hand back a PASS the run never earned.
 - CREATE-NEW, or AUGMENT that only **added** Page Object members (`po_modified` is false) → run the target spec:
 
   ```bash
-  npx playwright test <testfile> --reporter=list
+  npx playwright test <testfile>
   ```
 
 - AUGMENT where `po_modified` is **true** → a shared method changed, so run the **full suite** to catch dependent-spec regressions (the matrix is ~1 min):
 
   ```bash
-  npx playwright test --reporter=list
+  npx playwright test
   ```
 
   Record in the PR's Verification section that the full suite ran because an existing method was modified, plus per-spec PASS/FAIL.
+
+**Never pass `--reporter=...` here.** The flag *replaces* the reporter list from
+`playwright.config.ts`, which silently drops `ObservationsReporter` — the run would produce
+no `.observations/<feature>.json` and Step 11 would stage nothing (ADR-0021). The config
+already includes `list`, so console output is unchanged without the flag.
 
 Capture per-test PASS/FAIL output. Record one line per test for the PR body's Verification section:
 
