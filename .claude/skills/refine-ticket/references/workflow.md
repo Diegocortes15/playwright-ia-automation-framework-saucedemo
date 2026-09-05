@@ -65,6 +65,17 @@ Ask: **"Write this back to `<KEY>`? (yes / edit / no)"**
 
 Suggest the next step: _"`<KEY>` is refined. Run `/from-issue <KEY>` to generate tests — its Assumptions block should now be near-empty."_
 
+Then report **Obstacles encountered** — ALWAYS, even when there are none (one line:
+`Obstacles encountered: none.`). Per ADR-0022 it carries three things: tooling friction (a
+Jira/Confluence MCP call that failed and was retried or worked around), reference gaps
+(where `references/rubric.md` or `references/sources.md` did not cover the case and you
+improvised — **name the file**), and any source you could not reach. Do NOT restate the
+rubric gaps you already presented in Step 6.
+
+This goes to the user in the terminal only. It is **never** written back to the ticket:
+the write-back is the `## Refined Acceptance Criteria` block alone (ADR-0013). Obstacles
+are the agent's own process, not the ticket's content.
+
 ## Error handling (summary)
 
 - Ticket unreadable → abort with MCP error verbatim.
