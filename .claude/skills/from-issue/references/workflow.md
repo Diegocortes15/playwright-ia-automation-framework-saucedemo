@@ -135,7 +135,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 ```
 
 - **Either path exists** → reuse the existing Page Object. Record a collision warning for the PR body. During render (Step 7 / Step 8.5), the Page Object may need changes to support the new tests:
-  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in `scaffold-page-object/references/page-object-template.md`. Existing members are untouched. When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per `scaffold-page-object/references/component-detection.md` ("Parallel-array queries vs a discriminator component"). **Component-extraction judgment applies on augment, not just at page-scaffold:** if the new members form a **distinct sub-widget** — its own panel/menu/region with several locators + actions (e.g. a header burger menu) — prefer extracting a **nested component** (composed by the target, depth ≤ 2 per rule #11, like `CartBadge` under `Header`) over fattening the target into a multi-widget grab-bag. Apply `component-detection.md`'s "is this a component?" test to the new cluster. (SW-10/SW-11's burger menu accreted onto `Header` member-by-member before it was extracted into `BurgerMenu` — the per-ticket append never stepped back to see the emerging widget; this note is that step-back.)
+  - **Add** — a new test needs a locator/method the Page Object lacks → **append** it, following the composed-vs-primitive + `test.step` conventions in `scaffold-page-object/references/page-object-template.md`. Existing members are untouched. Record any selector that lands below the preference order (`[data-test]` → `getByRole` → text → CSS) as you write it — Step 13 reports it (ADR-0022). When the new members query many similar elements (cards/rows), choose parallel-array queries vs a discriminator component per `scaffold-page-object/references/component-detection.md` ("Parallel-array queries vs a discriminator component"). **Component-extraction judgment applies on augment, not just at page-scaffold:** if the new members form a **distinct sub-widget** — its own panel/menu/region with several locators + actions (e.g. a header burger menu) — prefer extracting a **nested component** (composed by the target, depth ≤ 2 per rule #11, like `CartBadge` under `Header`) over fattening the target into a multi-widget grab-bag. Apply `component-detection.md`'s "is this a component?" test to the new cluster. (SW-10/SW-11's burger menu accreted onto `Header` member-by-member before it was extracted into `BurgerMenu` — the per-ticket append never stepped back to see the emerging widget; this note is that step-back.)
   - **Modify** — a new test needs an **existing** method to behave differently → modify it in place and set the run-internal flag **`po_modified = true`** (consumed by Step 10). Per ADR-0010, modifying a shared method can regress other specs, so it widens verification.
   - **Irreconcilable** — if a required change would break the existing method's contract in a way you cannot reconcile, **abort**: _"augmenting <KEY> needs `<Method>` to change incompatibly; edit `<PageObject>` manually, then re-run."_ No PR.
 - **Neither path exists** → invoke `/scaffold-page-object` with inputs:
@@ -468,6 +468,28 @@ Report to the user:
 - Typecheck status
 - Test run result (PASS/FAIL counts)
 - Fix attempts, if Step 10.5 ran: how many, and what each one changed
+- Obstacles encountered (see below) — always, even if none
+
+**Obstacles encountered** — ALWAYS render this section, even when there is nothing to
+report (then it is one line: `Obstacles encountered: none.`). It is a deliberate exception
+to the "omit empty sections" rule (ADR-0022): a section that can be dropped is one the
+agent learns to drop, and the empty state only means something because it cannot be.
+
+It carries exactly three things, and nothing that already has a channel elsewhere:
+
+1. **Selector downgrades** — every selector that landed below the preference order
+   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
+   the level you used, and why. A fragile selector must arrive labelled as a fallback,
+   not be discovered months later through flakiness.
+2. **Tooling friction** — a command or MCP call that failed and was retried or worked
+   around. Say what failed and what you did instead.
+3. **Reference gaps** — where this skill's own `references/` did not cover the case and
+   you had to improvise. **Name the file that should have covered it.** This is the only
+   signal that says what is stopping the skill from working as it should.
+
+Do NOT restate what is already reported: ticket inferences belong in the assumptions
+block, failed runs in the fix log, and collisions / harness growth / skipped ACs in their
+own notes.
 
 Done.
 

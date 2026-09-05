@@ -90,6 +90,12 @@ Pick a semantic field name from the element's accessible name. **Naming rule:**
 
 Edge cases (e.g., two buttons with the same name on one page) get caught in C.2 review.
 
+**Record every selector downgrade as you go.** The preference order is `[data-test]` →
+`getByRole` → text → CSS. Whenever an element lands below the top available level, note the
+element, the level you wanted, the level you used, and why — Step 12 reports them (ADR-0022).
+Write it down at the moment you make the call: reconstructing it at the end is how a fallback
+quietly turns into a first choice in the report.
+
 ### 9. Render the Page Object
 
 Following `references/page-object-template.md`:
@@ -183,3 +189,25 @@ Report to the user:
 - List of generated action methods
 - Isolated-typecheck result (PASS or list of errors verbatim)
 - Confirmation that the top-of-file comment block landed (first 4 lines of the file match the template)
+- Obstacles encountered (see below) — always, even if none
+
+**Obstacles encountered** — ALWAYS render this section, even when there is nothing to
+report (then it is one line: `Obstacles encountered: none.`). It is a deliberate exception
+to the "omit empty sections" rule (ADR-0022): a section that can be dropped is one the
+agent learns to drop, and the empty state only means something because it cannot be.
+
+It carries exactly three things, and nothing that already has a channel elsewhere:
+
+1. **Selector downgrades** (the most important one for this skill — Step 8 is where selectors are chosen) — every selector that landed below the preference order
+   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
+   the level you used, and why. A fragile selector must arrive labelled as a fallback,
+   not be discovered months later through flakiness.
+2. **Tooling friction** — a command or MCP call that failed and was retried or worked
+   around. Say what failed and what you did instead.
+3. **Reference gaps** — where this skill's own `references/` did not cover the case and
+   you had to improvise. **Name the file that should have covered it.** This is the only
+   signal that says what is stopping the skill from working as it should.
+
+Do NOT restate what is already reported: ticket inferences belong in the assumptions
+block, failed runs in the fix log, and collisions / harness growth / skipped ACs in their
+own notes.

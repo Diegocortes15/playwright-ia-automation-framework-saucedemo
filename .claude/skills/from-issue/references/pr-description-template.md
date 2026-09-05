@@ -59,11 +59,19 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 (omit this section entirely if no collisions)
 
 - ⚠️ **Page Name collision** — `<PageName>` already exists at `<resolved-path>` (e.g., `src/pages/<PageName>.ts` or `src/pages/checkout/<PageName>.ts`). Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
+
+## Obstacles encountered
+
+(ALWAYS render this section — when there were none it is exactly: `None.`)
+
+- 🎯 **Selector downgrade** — `<element>`: wanted `<preferred level>`, used `<actual level>` because `<reason>`. Reviewer: this one is a fallback, not a first choice.
+- 🔧 **Tooling friction** — `<what failed>`; `<what you did instead>`.
+- 📚 **Reference gap** — `<case the instructions didn't cover>`; improvised `<what you did>`. Should be covered by `references/<file>.md`.
 ```
 
 ## Rules
 
-- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional). (No `## Source` footer — the `Source ticket:` line in "What I understood" already names + links the ticket.)
+- **Section order is mandatory** — `What I understood` → `AC coverage` → `Verification` → `Notes for reviewer` (optional) → `Collision warnings` (optional) → `Obstacles encountered` (**never optional**). (No `## Source` footer — the `Source ticket:` line in "What I understood" already names + links the ticket.)
 - **"What I understood" block** (adaptive, per ADR-0012):
   - **Summary** lead (`> `) — one TL;DR line: `Automated Playwright coverage for <KEY> (<feature>): N tests, all passing.`
   - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`. This is the key the GitHub-for-Jira app matches in the PR body to link the PR onto the ticket — so no separate `## Source` footer is needed.
@@ -96,6 +104,13 @@ The `/from-issue` skill writes its PR body using this template. Section order is
     Omit the whole item when the first run was green.
 
 - **Verification — observations**: if the run added or changed entries in `.observations/<feature>.json` (ADR-0021), add one bullet after the Test run list naming what appeared. These are things the app did that no test asserted on — never a blocker, and never a claim that something is broken. Example: `- :mag: **Observations:** 1 new — \`GET /checkout-step-one.html\` returns 404 (first-party, 9×). Reviewer: triage in \`.observations/checkout.json\`.` Omit when the run produced nothing new.
+
+- **Obstacles encountered is ALWAYS rendered** (ADR-0022) — the one section that is never omitted. With nothing to report its entire body is `None.` A section that can be dropped is a section the agent learns to drop, and the empty state only carries meaning because it cannot be. It holds exactly three things:
+  1. **Selector downgrades** — anything that landed below the preference order (`[data-test]` → `getByRole` → text → CSS). Name the element, the level wanted, the level used, and why.
+  2. **Tooling friction** — a command or MCP call that failed and was retried or worked around.
+  3. **Reference gaps** — where this skill's `references/` didn't cover the case. **Name the file that should have.**
+
+  Do NOT restate what other sections already carry: ticket inferences go in `⚠️ Assumptions & open questions`, failed runs in the fix log, and collisions / harness growth / skipped ACs in their own notes. A section that repeats what the reader just read is a section they learn to skip.
 
 - **Collision warnings section is omitted entirely when no collisions occur** — don't render an empty header.
 
@@ -133,4 +148,8 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 ## Collision warnings
 
 - ⚠️ **Page Name collision** — `LoginPage` already exists at `src/pages/LoginPage.ts`. Reused the existing Page Object; did NOT call `/scaffold-page-object`. Reviewer: verify the existing Page Object exposes the methods this PR's tests rely on, or refile the ticket with a different Page Name.
+
+## Obstacles encountered
+
+- 🎯 **Selector downgrade** — lockout error banner: wanted `getByRole('alert')`, used `[data-test="error"]` because the banner carries no ARIA role. Reviewer: this one is a fallback, not a first choice.
 ```
