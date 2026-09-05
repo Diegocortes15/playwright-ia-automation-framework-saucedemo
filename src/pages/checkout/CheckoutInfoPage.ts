@@ -46,7 +46,10 @@ export class CheckoutInfoPage {
     this.cancelButton = page.locator('[data-test="cancel"]');
     this.errorBanner = page.locator('[data-test="error"]');
     this.errorDismissButton = page.locator('[data-test="error"] button.error-button');
+    // Selects inputs by their ERROR STATE. data-test encodes identity (`firstName`,
+    // verified live), not state, so it cannot express "every field currently invalid".
     this.erroredInputs = page.locator('input.error');
+    // The error icon carries no data-test attribute (verified live).
     this.errorIcons = page.locator('.error_icon');
   }
 

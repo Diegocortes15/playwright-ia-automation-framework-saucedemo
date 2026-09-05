@@ -24,12 +24,15 @@ export class BurgerMenu {
   private readonly logoutLink: Locator;
 
   constructor(public readonly page: Page) {
+    // The react-burger-menu widget renders its toggle and close button with no data-test
+    // attribute (verified live), so these ids are the top level available. Both are unique
+    // and stable.
     this.openButton = page.locator('#react-burger-menu-btn');
     this.closeButton = page.locator('#react-burger-cross-btn');
-    this.logoutLink = page.locator('#logout_sidebar_link');
-    this.allItemsOption = page.locator('#inventory_sidebar_link');
-    this.aboutOption = page.locator('#about_sidebar_link');
-    this.resetAppStateOption = page.locator('#reset_sidebar_link');
+    this.logoutLink = page.locator('[data-test="logout-sidebar-link"]');
+    this.allItemsOption = page.locator('[data-test="inventory-sidebar-link"]');
+    this.aboutOption = page.locator('[data-test="about-sidebar-link"]');
+    this.resetAppStateOption = page.locator('[data-test="reset-sidebar-link"]');
   }
 
   // Composed actions — each wrapped in exactly one test.step.

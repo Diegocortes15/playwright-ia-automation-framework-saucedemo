@@ -90,11 +90,14 @@ Pick a semantic field name from the element's accessible name. **Naming rule:**
 
 Edge cases (e.g., two buttons with the same name on one page) get caught in C.2 review.
 
-**Record every selector downgrade as you go.** The preference order is `[data-test]` →
-`getByRole` → text → CSS. Whenever an element lands below the top available level, note the
-element, the level you wanted, the level you used, and why — Step 12 reports them (ADR-0022).
-Write it down at the moment you make the call: reconstructing it at the end is how a fallback
-quietly turns into a first choice in the report.
+**Check the live DOM before settling for a lower level.** The preference order is
+`[data-test]` → `getByRole` → text → CSS; only XPath fails lint, so everything else is on
+your judgment. Before writing a CSS or id locator, **verify the higher level is actually
+absent** — `playwright-cli eval "el => el.getAttribute('data-test')" <ref>` — rather than
+assuming from the snapshot. Four selectors in `BurgerMenu.ts` sat on ids for months while
+the elements had `data-test` attributes all along; nobody checked. A unique, stable id is a
+fine locator; guessing that the attribute was missing is what went wrong. Note what you
+settled for, and why, for Step 12 (ADR-0022), at the moment you make the call.
 
 ### 9. Render the Page Object
 
@@ -198,10 +201,11 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades** (the most important one for this skill — Step 8 is where selectors are chosen) — every selector that landed below the preference order
-   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
-   the level you used, and why. A fragile selector must arrive labelled as a fallback,
-   not be discovered months later through flakiness.
+1. **Selector downgrades.** The preference order is `[data-test]` → `getByRole` → text →
+   CSS, and only XPath fails lint. So when you write a locator below the highest level
+   *available on the page*, nothing catches it but this line. Name the element, the level
+   available, the level you used, and why. A stable unique id is a perfectly good locator —
+   the point is not to apologise for it, it is that the reviewer learns you looked.
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and

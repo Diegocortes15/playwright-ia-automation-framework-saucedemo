@@ -477,10 +477,11 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades** — every selector that landed below the preference order
-   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
-   the level you used, and why. A fragile selector must arrive labelled as a fallback,
-   not be discovered months later through flakiness.
+1. **Selector downgrades.** The preference order is `[data-test]` → `getByRole` → text →
+   CSS, and only XPath fails lint. So when you write a locator below the highest level
+   *available on the page*, nothing catches it but this line. Name the element, the level
+   available, the level you used, and why. A stable unique id is a perfectly good locator —
+   the point is not to apologise for it, it is that the reviewer learns you looked.
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and

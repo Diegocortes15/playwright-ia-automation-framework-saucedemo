@@ -78,7 +78,9 @@ This project uses the `gh` CLI for GitHub operations (PRs, releases, workflow ru
 
 Never use XPath.
 
-**Every downgrade below the top available level gets reported.** Skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a fragile selector arrives labelled as a fallback instead of being found later through flakiness.
+**Only XPath is a build gate.** `no-restricted-syntax` in `eslint.config.js` fails it outright — XPath encodes document structure, so it breaks on layout changes that touch nothing else. The rest of the order is **authoring guidance**: prefer the highest level available when writing a locator, but a unique, stable locator that works is fine whatever level it came from. A rule that fails on `#stable-id` only teaches people to silence it, and `eslint-disable` sprawl is worse than no rule.
+
+**Fragility is proven by a test failing, not by an attribute's name.** What does get reported is the _choice_: skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a deliberate fallback arrives labelled at review time.
 
 ## Tag conventions (Playwright Projects + storageState + role tags)
 
