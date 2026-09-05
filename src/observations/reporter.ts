@@ -1,8 +1,14 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
+import { renderDigest } from './digest';
 import { isThirdParty, signatureFor } from './signature';
-import { ATTACHMENT_NAME, type Observation, type ObservationEvent } from './types';
+import {
+  ATTACHMENT_NAME,
+  type Observation,
+  type ObservationEvent,
+  type ObservationsFile,
+} from './types';
 
 // Aggregates the per-test observation attachments produced by the `_observations`
 // fixture and writes one deduplicated file per feature (ADR-0021).
@@ -81,6 +87,16 @@ export default class ObservationsReporter implements Reporter {
         const observations = mergeObservations(readExisting(path), [...bucket.values()]);
         writeFileSync(path, `${JSON.stringify({ feature, observations }, null, 2)}\n`, 'utf-8');
       }
+
+      // The JSON files are the machine index — signatures, counts, triage state, built to
+      // dedupe and to diff in git. SUMMARY.md is the half a person actually reads. It is
+      // rebuilt from every feature on disk, not just the ones this run touched, so it always
+      // shows the whole picture rather than a slice of it.
+      writeFileSync(
+        join(OUTPUT_DIR, 'SUMMARY.md'),
+        renderDigest(readAllFeatures(), new Date().toISOString().slice(0, 10)),
+        'utf-8',
+      );
     } catch {
       // Same contract as onTestEnd: observations never break a run.
     }
@@ -114,6 +130,26 @@ export function mergeObservations(previous: Observation[], fresh: Observation[])
   return [...merged.values()].sort(
     (a, b) => a.kind.localeCompare(b.kind) || a.signature.localeCompare(b.signature),
   );
+}
+
+function readAllFeatures(): ObservationsFile[] {
+  try {
+    return readdirSync(OUTPUT_DIR)
+      .filter((name) => name.endsWith('.json'))
+      .map((name) => join(OUTPUT_DIR, name))
+      .map((path) => ({
+        feature:
+          path
+            .split('/')
+            .pop()
+            ?.replace(/\.json$/, '') ?? 'unknown',
+        observations: readExisting(path),
+      }))
+      .filter((file) => file.observations.length > 0)
+      .sort((a, b) => a.feature.localeCompare(b.feature));
+  } catch {
+    return [];
+  }
 }
 
 function readExisting(path: string): Observation[] {

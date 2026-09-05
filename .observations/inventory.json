@@ -5,7 +5,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 1,
+      "count": 11,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-05",
       "status": "ignored",
@@ -14,8 +14,8 @@
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "problem_user sees one identical broken image for every product",
-        "project": "chromium-problem"
+        "test": "all six product images render with distinct, non-empty sources",
+        "project": "chromium-standard"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else."
     }
