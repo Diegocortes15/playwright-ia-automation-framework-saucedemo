@@ -1,0 +1,99 @@
+# Checklist — first session after Jira access is back
+
+Access to the free Jira instance was lost to inactivity on 2026-09-05 and re-requested.
+Everything below is blocked on it. Nothing here is speculative: each item exists because a
+change was shipped without ever being observed running.
+
+**The honest state:** four ADRs (0019–0022) were designed and merged without `/from-issue`
+being executed once this session. They were reasoned from the code, not from watching the
+pipeline work. This checklist is how that debt gets paid.
+
+---
+
+## 0. Reconnect (blocking — do first)
+
+- [ ] Run `/mcp` in an **interactive** Claude Code session and complete the Atlassian OAuth.
+      A non-interactive session cannot run the flow.
+- [ ] Confirm the MCP answers: ask for `mcp__atlassian__getAccessibleAtlassianResources`,
+      then read any ticket with `mcp__atlassian__getJiraIssue`.
+- [ ] Confirm the `SW` project and its tickets survived the lapse. If they did not, recreate
+      2–3 from `docs/jira-tickets.md` before going further — several items below need a real,
+      unrefined ticket to be meaningful.
+
+## 1. Verify what was built blind
+
+### ADR-0020 — the no-red-PR gate
+
+The gate has never fired. It is the highest-risk change of the four: it is the one that
+decides whether a PR exists at all.
+
+- [ ] **Happy path.** Run `/from-issue <KEY>` on a clean ticket. Expect a green PR, and a
+      `Fix attempts` line absent (first run green).
+- [ ] **Forced failure.** Point a ticket at an element that does not exist, or temporarily
+      break a Page Object method the ticket needs. Expect: 3 diagnosed attempts, then **no
+      branch, no commit, no push, no PR**, and a report naming every file left on disk.
+      _If a PR appears, the gate is broken and that is the top priority._
+- [ ] **App-vs-code diagnosis.** Write a ticket whose AC contradicts real app behavior (e.g.
+      assert the sort dropdown works for `problem_user` — it does not). Expect the run to
+      **stop and report an app/AC contradiction**, not to weaken the test until it passes.
+      This is the branch that protects real bug findings; it has never executed.
+- [ ] Confirm the `typecheck-spec.sh` exit codes behave in a real run — especially 69, which
+      should tell the user to `npm install` and stop, never consume a fix attempt.
+
+### ADR-0022 — Obstacles encountered
+
+- [ ] Confirm the section renders in the PR body **and** the terminal report, and that a
+      clean run renders exactly `None.` rather than omitting it.
+- [ ] Confirm it does **not** restate the assumptions block or the fix log.
+- [ ] Watch for the failure mode the ADR admits: a section that comes back `None.` on a run
+      that visibly hit friction. If that happens, the convention is not working as written —
+      record it and reconsider rather than tightening the prose again.
+- [ ] Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.
+
+### ADR-0021 — Observations
+
+- [ ] Confirm `/from-issue` stages `.observations/<feature>.json` and that new entries show
+      up in the PR diff.
+- [ ] Triage the standing entries: every navigation returns HTTP 404 (GitHub Pages
+      `spa-github-pages` shim). Set `status` + `note` on them so the `new` queue is real.
+- [ ] First ticket that legitimately needs `error_user`: confirm `/from-issue` wires it into
+      `AUTH_USERS` per ADR-0014, and that the **dialog detector finally gets e2e coverage**
+      (`error_user` + sort → `alert()`). It is unit-tested only today.
+
+### ADR-0019 — Portability
+
+- [ ] Run `skill-validator check .claude/skills/<name>` on all four and confirm still green
+      after whatever the above changes.
+
+## 2. Finish Bloque A
+
+- [ ] **Step 2** — run `claude --debug` in the repo and read for silent skill-load errors.
+      Must be run by the user; `claude` is not on PATH in the agent's shell.
+- [ ] **Step 3** — audit each skill's `description` against 3–4 realistic phrasings of how
+      the task would actually be asked. Needs an interactive session to test invocation for
+      real. This is the last substantive item left in Bloque A (5–7 were dropped, ADR-0022
+      alternatives records why).
+
+## 3. Then, and only then, Bloque B
+
+- [ ] **Step 9 — EARS in `/refine-ticket`.** The roadmap's own highest-ROI/lowest-effort
+      item: acceptance criteria as `WHEN <condition> THE SYSTEM SHALL <behavior>`, which map
+      near 1:1 onto `test('...')`. Do this _after_ section 1, so it is written against an
+      observed pipeline rather than an imagined one.
+- [ ] Step 10 — Given/When/Then as the mandatory spec structure.
+- [ ] Step 11 — consolidate `AGENTS.md`.
+
+---
+
+## Not blocked on Jira — can be done any time
+
+- [ ] **Pin Node 22 for local dev.** CI already pins it (`setup-node` with
+      `node-version: '22'` in both workflows), but there is no `.nvmrc` and no `engines`
+      field in `package.json`, so a contributor on Node 20 gets no warning until CI
+      disagrees with their machine. Outstanding since Phase 1.
+- [ ] The 5 files Prettier has always flagged on `main` (`CartPage.ts`, `InventoryPage.ts`,
+      `cart.spec.ts`, `checkout.spec.ts`, `logout.spec.ts`). CI does not run `format:check`,
+      so they break nothing — but they make every `format:check` noisy.
+- [ ] Roadmap item **B12b**: more `scripts/` extraction. One exists
+      (`from-issue/scripts/typecheck-spec.sh`); the next candidates are the base-branch
+      preflight (Step 1.5) and the PR-body render (Step 12). Apply YAGNI per candidate.
