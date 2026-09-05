@@ -87,8 +87,10 @@ decides whether a PR exists at all.
 
 ## Not blocked on Jira — can be done any time
 
-- [ ] **Pin Node 22**: no `.nvmrc`, no `engines` field in `package.json`. Only a README
-      badge claims it. Outstanding since Phase 1.
+- [ ] **Pin Node 22 for local dev.** CI already pins it (`setup-node` with
+      `node-version: '22'` in both workflows), but there is no `.nvmrc` and no `engines`
+      field in `package.json`, so a contributor on Node 20 gets no warning until CI
+      disagrees with their machine. Outstanding since Phase 1.
 - [ ] The 5 files Prettier has always flagged on `main` (`CartPage.ts`, `InventoryPage.ts`,
       `cart.spec.ts`, `checkout.spec.ts`, `logout.spec.ts`). CI does not run `format:check`,
       so they break nothing — but they make every `format:check` noisy.
