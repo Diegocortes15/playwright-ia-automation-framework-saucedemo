@@ -2,24 +2,28 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import { isThirdParty, signatureFor } from './signature';
-import { ATTACHMENT_NAME, type Observation, type ObservationEvent } from './types';
+import {
+  ATTACHMENT_NAME,
+  type Observation,
+  type ObservationEvent,
+  type ObservationsFile,
+} from './types';
 
-// Aggregates the per-test observation attachments produced by the `_observations`
-// fixture and writes one deduplicated file per feature (ADR-0021).
+// Aggregates the per-test observation attachments produced by the `_observations` fixture
+// into one signature-keyed index (ADR-0021).
 //
-// Why a reporter and not a direct write from the fixture: tests run in parallel
-// worker processes, and several workers writing the same file would interleave and
-// corrupt it. Attachments travel to the main process over Playwright's own IPC, so
-// the reporter is the single writer.
+// Why a reporter and not a direct write from the fixture: tests run in parallel worker
+// processes, and several workers writing the same file would interleave and corrupt it.
+// Attachments travel to the main process over Playwright's own IPC, so the reporter is the
+// single writer.
 //
 // CI does not commit what this writes — it uploads it and posts a count to Slack.
-// Committing is a human action (or /from-issue staging its own run's file), which
-// keeps scheduled runs from churning `main` with a commit per night.
 
 const OUTPUT_DIR = '.observations';
+const INDEX_PATH = join(OUTPUT_DIR, 'observations.json');
 
 export default class ObservationsReporter implements Reporter {
-  private readonly byFeature = new Map<string, Map<string, Observation>>();
+  private readonly fresh = new Map<string, Observation>();
   private readonly baseUrl: string;
 
   constructor(options: { baseUrl?: string } = {}) {
@@ -37,20 +41,21 @@ export default class ObservationsReporter implements Reporter {
       const feature = basename(dirname(test.location.file));
       const today = new Date().toISOString().slice(0, 10);
       const project = test.parent.project()?.name ?? 'unknown';
-      const bucket = this.byFeature.get(feature) ?? new Map<string, Observation>();
 
       for (const event of events) {
         const signature = signatureFor(event);
-        const existing = bucket.get(signature);
+        const existing = this.fresh.get(signature);
         if (existing) {
           existing.count += 1;
+          if (!existing.seenIn.includes(feature)) existing.seenIn.push(feature);
           continue;
         }
-        bucket.set(signature, {
+        this.fresh.set(signature, {
           signature,
           kind: event.kind,
           thirdParty: isThirdParty(event.url, this.baseUrl),
           count: 1,
+          seenIn: [feature],
           firstSeen: today,
           lastSeen: today,
           status: 'new',
@@ -65,7 +70,6 @@ export default class ObservationsReporter implements Reporter {
           },
         });
       }
-      this.byFeature.set(feature, bucket);
     } catch {
       // Never let observation bookkeeping affect a run's outcome.
     }
@@ -73,41 +77,57 @@ export default class ObservationsReporter implements Reporter {
 
   onEnd(): void {
     try {
-      if (this.byFeature.size === 0) return;
+      if (this.fresh.size === 0) return;
       if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
 
-      for (const [feature, bucket] of this.byFeature) {
-        const path = join(OUTPUT_DIR, `${feature}.json`);
-        const merged = new Map<string, Observation>();
-
-        // Existing entries first, so human triage (`status`) and `firstSeen` survive.
-        for (const previous of readExisting(path)) merged.set(previous.signature, previous);
-
-        for (const [signature, fresh] of bucket) {
-          const previous = merged.get(signature);
-          merged.set(
-            signature,
-            previous
-              ? { ...previous, count: fresh.count, lastSeen: fresh.lastSeen, sample: fresh.sample }
-              : fresh,
-          );
-        }
-
-        // Sorted so the file diffs cleanly instead of reshuffling every run.
-        const observations = [...merged.values()].sort(
-          (a, b) => a.kind.localeCompare(b.kind) || a.signature.localeCompare(b.signature),
-        );
-        writeFileSync(path, `${JSON.stringify({ feature, observations }, null, 2)}\n`, 'utf-8');
-      }
+      const observations = mergeObservations(readIndex(), [...this.fresh.values()]);
+      // Only the record is written. The prose digest is a view, rendered on demand by
+      // `npm run observations` — a derived file does not belong in version control.
+      writeFileSync(INDEX_PATH, `${JSON.stringify({ observations }, null, 2)}\n`, 'utf-8');
     } catch {
       // Same contract as onTestEnd: observations never break a run.
     }
   }
 }
 
-function readExisting(path: string): Observation[] {
+/**
+ * Fold this run's observations into what the index already held.
+ *
+ * The contract that matters: a human's triage must survive a re-run. `status`, `note` and
+ * `firstSeen` come from the previous entry and are never overwritten; `count`, `lastSeen`
+ * and `sample` refresh, and `seenIn` accumulates so one fact records every feature that
+ * trips it instead of forking into one entry per feature.
+ *
+ * Output is sorted so the committed file diffs cleanly instead of reshuffling every run.
+ */
+export function mergeObservations(previous: Observation[], fresh: Observation[]): Observation[] {
+  const merged = new Map<string, Observation>();
+  for (const entry of previous) merged.set(entry.signature, entry);
+
+  for (const entry of fresh) {
+    const before = merged.get(entry.signature);
+    merged.set(
+      entry.signature,
+      before
+        ? {
+            ...before,
+            count: entry.count,
+            lastSeen: entry.lastSeen,
+            sample: entry.sample,
+            seenIn: [...new Set([...(before.seenIn ?? []), ...entry.seenIn])].sort(),
+          }
+        : { ...entry, seenIn: [...entry.seenIn].sort() },
+    );
+  }
+
+  return [...merged.values()].sort(
+    (a, b) => a.kind.localeCompare(b.kind) || a.signature.localeCompare(b.signature),
+  );
+}
+
+function readIndex(): Observation[] {
   try {
-    const parsed = JSON.parse(readFileSync(path, 'utf-8')) as { observations?: Observation[] };
+    const parsed = JSON.parse(readFileSync(INDEX_PATH, 'utf-8')) as Partial<ObservationsFile>;
     return parsed.observations ?? [];
   } catch {
     return [];

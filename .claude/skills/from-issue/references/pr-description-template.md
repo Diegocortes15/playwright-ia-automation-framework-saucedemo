@@ -103,10 +103,10 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 
     Omit the whole item when the first run was green.
 
-- **Verification — observations**: if the run added or changed entries in `.observations/<feature>.json` (ADR-0021), add one bullet after the Test run list naming what appeared. These are things the app did that no test asserted on — never a blocker, and never a claim that something is broken. Example: `- :mag: **Observations:** 1 new — \`GET /checkout-step-one.html\` returns 404 (first-party, 9×). Reviewer: triage in \`.observations/checkout.json\`.` Omit when the run produced nothing new.
+- **Verification — observations**: if the run added or changed entries in `.observations/observations.json` (ADR-0021), add one bullet after the Test run list naming what appeared. These are things the app did that no test asserted on — never a blocker, and never a claim that something is broken. Example: `- :mag: **Observations:** 1 new — \`GET /checkout-step-one.html\` returns 404 (first-party, 9×). Reviewer: triage in \`.observations/observations.json\`.` Omit when the run produced nothing new.
 
 - **Obstacles encountered is ALWAYS rendered** (ADR-0022) — the one section that is never omitted. With nothing to report its entire body is `None.` A section that can be dropped is a section the agent learns to drop, and the empty state only carries meaning because it cannot be. It holds exactly three things:
-  1. **Selector downgrades** — anything that landed below the preference order (`[data-test]` → `getByRole` → text → CSS). Name the element, the level wanted, the level used, and why.
+  1. **Selector downgrades** — only XPath fails lint, so a locator written below the highest level *available on the page* is caught by nothing else. Name the element, the level available, the level used, and why. A stable unique id is a good locator; the point is that the reviewer learns you checked rather than guessed.
   2. **Tooling friction** — a command or MCP call that failed and was retried or worked around.
   3. **Reference gaps** — where this skill's `references/` didn't cover the case. **Name the file that should have.**
 

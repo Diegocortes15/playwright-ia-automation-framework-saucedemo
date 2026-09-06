@@ -568,6 +568,16 @@ mismo trabajo:
 
 ---
 
+## Bloqueado por Jira (2026-09-05)
+
+Se perdió el acceso a la instancia gratis de Jira por inactividad, y ya se pidió de nuevo.
+Todo lo que necesite leer un ticket está frenado — incluida la validación end-to-end de las
+4 skills. El checklist para retomar cuando vuelva está en `docs/jira-restore-checklist.md`.
+
+Vale decirlo sin adornos: los ADR 0019–0022 se diseñaron y mergearon **sin haber corrido
+`/from-issue` ni una vez** en esa sesión. Salieron de razonar sobre el código, no de ver el
+pipeline funcionando. El checklist es cómo se paga esa deuda.
+
 ## Guardarraíles para Claude Code al ejecutar este plan
 
 Cuando le pases este roadmap a Claude Code:

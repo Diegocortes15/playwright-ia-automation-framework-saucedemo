@@ -1,0 +1,231 @@
+{
+  "observations": [
+    {
+      "signature": "console-error:OBSERVATION_PROBE console failure",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE console failure",
+        "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
+        "test": "console-error detector records a console error raised by the page",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "_framework_validation"
+      ]
+    },
+    {
+      "signature": "console-error:OBSERVATION_PROBE from a failing test",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE from a failing test",
+        "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
+        "test": "a failing test still records its observations (expected to fail, reported green)",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "_framework_validation"
+      ]
+    },
+    {
+      "signature": "dialog:alert:Sorting is broken! This error has been reported to Backtrace.",
+      "kind": "dialog",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "Sorting is broken! This error has been reported to Backtrace.",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "dialogType": "alert",
+        "test": "dialog detector records a real alert, and dismissing it keeps the test running",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "_framework_validation"
+      ]
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/cart.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-06",
+      "status": "ignored",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/cart.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "direct access to /cart.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
+      "seenIn": [
+        "burger_menu",
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/checkout-complete.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "ignored",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/checkout-complete.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "direct access to /checkout-complete.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
+      "seenIn": [
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-one.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-06",
+      "status": "ignored",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/checkout-step-one.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "direct access to /checkout-step-one.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
+      "seenIn": [
+        "checkout",
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-two.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "ignored",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/checkout-step-two.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "direct access to /checkout-step-two.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
+      "seenIn": [
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
+      "kind": "failed-request",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-04",
+      "lastSeen": "2026-09-06",
+      "status": "ignored",
+      "sample": {
+        "message": "404",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "method": "GET",
+        "httpStatus": 404,
+        "test": "direct access to /inventory.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
+      },
+      "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
+      "seenIn": [
+        "burger_menu",
+        "cart",
+        "checkout",
+        "footer",
+        "inventory",
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:POST:https://events.backtrace.io/api/summed-events/submit:401",
+      "kind": "failed-request",
+      "thirdParty": true,
+      "count": 7,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "401 Unauthorized",
+        "url": "https://events.backtrace.io/api/summed-events/submit?universe=UNIVERSE&token=TOKEN",
+        "method": "POST",
+        "httpStatus": 401,
+        "test": "standard_user logs out from the menu and returns to the login page",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "login",
+        "logout"
+      ]
+    },
+    {
+      "signature": "failed-request:POST:https://events.backtrace.io/api/unique-events/submit:401",
+      "kind": "failed-request",
+      "thirdParty": true,
+      "count": 7,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "401 Unauthorized",
+        "url": "https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN",
+        "method": "POST",
+        "httpStatus": 401,
+        "test": "standard_user logs out from the menu and returns to the login page",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "login",
+        "logout"
+      ]
+    },
+    {
+      "signature": "page-error:OBSERVATION_PROBE uncaught failure",
+      "kind": "page-error",
+      "thirdParty": false,
+      "count": 1,
+      "firstSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
+      "status": "new",
+      "sample": {
+        "message": "OBSERVATION_PROBE uncaught failure",
+        "url": "https://www.saucedemo.com/",
+        "test": "page-error detector records an uncaught exception in page context",
+        "project": "chromium-no-auth"
+      },
+      "seenIn": [
+        "_framework_validation"
+      ]
+    }
+  ]
+}

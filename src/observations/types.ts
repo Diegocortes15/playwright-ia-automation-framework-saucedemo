@@ -25,6 +25,8 @@ export interface Observation {
   thirdParty: boolean;
   /** Occurrences in the most recent run that saw it — a noise gauge, not a lifetime total. */
   count: number;
+  /** Features whose specs have produced it. One fact about the app, not one per feature. */
+  seenIn: string[];
   firstSeen: string;
   lastSeen: string;
   /** Human triage. `new` until someone looks: then `triaged`, `ignored`, or `filed:<KEY>`. */
@@ -42,8 +44,16 @@ export interface Observation {
   };
 }
 
+/**
+ * The whole index, keyed by signature rather than split per feature.
+ *
+ * An earlier version wrote `.observations/<feature>.json`, which duplicated one fact about
+ * the app across every feature that happened to trip it — the same 404 appeared six times
+ * and had to be triaged six times, and a new feature hitting it would have come back `new`
+ * again. Triage is a decision about a signature, so the file is keyed by signature and
+ * records where it was seen instead.
+ */
 export interface ObservationsFile {
-  feature: string;
   observations: Observation[];
 }
 

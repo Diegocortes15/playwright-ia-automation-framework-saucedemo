@@ -288,16 +288,21 @@ compiler and would hand back a PASS the run never earned.
 - CREATE-NEW, or AUGMENT that only **added** Page Object members (`po_modified` is false) → run the target spec:
 
   ```bash
-  npx playwright test <testfile> --reporter=list
+  npx playwright test <testfile>
   ```
 
 - AUGMENT where `po_modified` is **true** → a shared method changed, so run the **full suite** to catch dependent-spec regressions (the matrix is ~1 min):
 
   ```bash
-  npx playwright test --reporter=list
+  npx playwright test
   ```
 
   Record in the PR's Verification section that the full suite ran because an existing method was modified, plus per-spec PASS/FAIL.
+
+**Never pass `--reporter=...` here.** The flag *replaces* the reporter list from
+`playwright.config.ts`, which silently drops `ObservationsReporter` — the run would produce
+no `.observations/<feature>.json` and Step 11 would stage nothing (ADR-0021). The config
+already includes `list`, so console output is unchanged without the flag.
 
 Capture per-test PASS/FAIL output. Record one line per test for the PR body's Verification section:
 
@@ -400,9 +405,11 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-# If the run produced runtime observations (ADR-0021), stage the feature's file so
-# anything new the app did shows up in the PR diff:
-#   git add .observations/<feature>.json
+# If the run produced runtime observations (ADR-0021), stage the index so anything new
+# the app did shows up in the PR diff. One signature-keyed file, not one per feature:
+#   git add .observations/observations.json
+# Only the index is committed. The prose view is derived — render it with
+# `npm run observations`, and put the new entries in the PR body (see the template).
 # If Step 6.5 grew the harness (per harness.md), also stage the changed source of truth
 # (and, on first-time creation, the config + auth setup):
 #   git add tests/users.ts
@@ -477,10 +484,11 @@ agent learns to drop, and the empty state only means something because it cannot
 
 It carries exactly three things, and nothing that already has a channel elsewhere:
 
-1. **Selector downgrades** — every selector that landed below the preference order
-   (`[data-test]` → `getByRole` → text → CSS). Name the element, the level you wanted,
-   the level you used, and why. A fragile selector must arrive labelled as a fallback,
-   not be discovered months later through flakiness.
+1. **Selector downgrades.** The preference order is `[data-test]` → `getByRole` → text →
+   CSS, and only XPath fails lint. So when you write a locator below the highest level
+   *available on the page*, nothing catches it but this line. Name the element, the level
+   available, the level you used, and why. A stable unique id is a perfectly good locator —
+   the point is not to apologise for it, it is that the reviewer learns you looked.
 2. **Tooling friction** — a command or MCP call that failed and was retried or worked
    around. Say what failed and what you did instead.
 3. **Reference gaps** — where this skill's own `references/` did not cover the case and

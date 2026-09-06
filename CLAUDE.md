@@ -78,7 +78,9 @@ This project uses the `gh` CLI for GitHub operations (PRs, releases, workflow ru
 
 Never use XPath.
 
-**Every downgrade below the top available level gets reported.** Skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a fragile selector arrives labelled as a fallback instead of being found later through flakiness.
+**Only XPath is a build gate.** `no-restricted-syntax` in `eslint.config.js` fails it outright — XPath encodes document structure, so it breaks on layout changes that touch nothing else. The rest of the order is **authoring guidance**: prefer the highest level available when writing a locator, but a unique, stable locator that works is fine whatever level it came from. A rule that fails on `#stable-id` only teaches people to silence it, and `eslint-disable` sprawl is worse than no rule.
+
+**Fragility is proven by a test failing, not by an attribute's name.** What does get reported is the _choice_: skills declare a mandatory `Obstacles encountered` section ([ADR-0022](docs/adr/0022-obstacles-encountered.md)) carrying selector downgrades, tooling friction, and gaps in their own `references/`. It renders even when empty (`None.`), so a deliberate fallback arrives labelled at review time.
 
 ## Tag conventions (Playwright Projects + storageState + role tags)
 
@@ -97,18 +99,18 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 
 ## Where things live
 
-| What                                            | Where                                                                                                              |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Page objects                                    | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                                     |
-| Components                                      | `src/components/` (`Header.ts`, `Footer.ts`, `CartBadge.ts`, `BurgerMenu.ts`)                                      |
-| Fixture (auto-injects pages)                    | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test`                |
-| Test data + types + loaders                     | `data/` (use `@data/*` alias)                                                                                      |
-| env config                                      | `src/utils/env.ts` (single read point for `process.env`)                                                           |
-| Specs                                           | `tests/<feature>/*.spec.ts`                                                                                        |
-| Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                              |
-| Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                             |
-| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); output in `.observations/<feature>.json`          |
-| TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`) |
+| What                                            | Where                                                                                                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Page objects                                    | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                                                                   |
+| Components                                      | `src/components/` (`Header.ts`, `Footer.ts`, `CartBadge.ts`, `BurgerMenu.ts`)                                                                    |
+| Fixture (auto-injects pages)                    | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test`                                              |
+| Test data + types + loaders                     | `data/` (use `@data/*` alias)                                                                                                                    |
+| env config                                      | `src/utils/env.ts` (single read point for `process.env`)                                                                                         |
+| Specs                                           | `tests/<feature>/*.spec.ts`                                                                                                                      |
+| Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                                                            |
+| Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                                                           |
+| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); index in `.observations/observations.json`; read it with `npm run observations` |
+| TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`)                               |
 
 ## Path aliases
 

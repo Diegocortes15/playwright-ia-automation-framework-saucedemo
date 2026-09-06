@@ -9,7 +9,7 @@ An agent left to choose what to mention reports the happy path: "PR opened ✅".
 
 `/from-issue` already surfaces two kinds honestly: inferences about a thin ticket (`⚠️ Assumptions & open questions`, ADR-0012) and failed runs it had to fix (the fix log, ADR-0020). Three kinds have no home at all:
 
-- **Selector downgrades.** CLAUDE.md defines a preference order — `[data-test]` → `getByRole` → text → CSS. Nothing reports when the agent went down that list. A fragile selector is deuda paid months later in flakiness, by someone who has no idea it was a fallback.
+- **Selector downgrades.** CLAUDE.md defines a preference order — `[data-test]` → `getByRole` → text → CSS. Nothing reports when the agent goes down that list. A reviewer has no way to tell a checked choice from a guess.
 - **Tooling friction.** A command that failed and was retried, an MCP call that timed out, a step worked around.
 - **Reference gaps.** Where the skill's own `references/` didn't cover the case and the agent improvised. This is the only signal that says _what is stopping the skill from working as it should_ — and without it, skills only improve when a human happens to notice.
 
@@ -36,3 +36,4 @@ An agent left to choose what to mention reports the happy path: "PR opened ✅".
 - **Omit the section when empty**, like collision warnings. Cheaper output, but it removes the guarantee: an absent section is indistinguishable from an agent that chose not to mention anything. Rejected — the guarantee is the entire point.
 - **One shared reference file across the skills.** Avoids restating the rule three times, but reintroduces the cross-skill dependency ADR-0019 removed, for roughly ten lines of text. Rejected.
 - **Enforce it with a lint over the PR body.** Deterministic, and it can only check that the heading exists, not that the content is honest. Not worth the machinery yet; revisit if sections start coming back empty when they shouldn't.
+- **Enforce the whole selector preference order with a lint rule.** Tried, and rolled back to XPath only. Turning the broad rule on was worth it once — it found four locators sitting on ids whose elements had `data-test` attributes all along — but as a standing gate it fails on `#stable-id`, which is a perfectly good locator. The only thing such a rule teaches is the `eslint-disable` reflex, and disable sprawl is worse than no rule: it manufactures a paper trail of justifications that look verified. Fragility is proven by a test failing, not by an attribute's name. XPath stays a hard gate because it encodes document structure and breaks on layout changes that touch nothing else.

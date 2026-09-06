@@ -7,6 +7,9 @@ import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
 import { CheckoutCompletePage } from '@pages/checkout/CheckoutCompletePage';
 import { reportAnnotations } from '@utils/report-annotations';
+import { describeEvent, groupOf, iconFor, type ObservationGroup } from '../observations/digest';
+import { isThirdParty, signatureFor } from '../observations/signature';
+import { ignoredSignatures } from '../observations/triage';
 import { ATTACHMENT_NAME, MAX_EVENTS_PER_TEST, type ObservationEvent } from '../observations/types';
 
 type Pages = {
@@ -18,7 +21,9 @@ type Pages = {
   checkoutCompletePage: CheckoutCompletePage;
 };
 
-export const test = base.extend<Pages & { _reportAnnotation: void; _observations: void }>({
+export const test = base.extend<
+  Pages & { _reportAnnotation: void; _observations: ObservationEvent[] }
+>({
   // Auto fixture — annotate each test in the Playwright report with its Jira
   // ticket link(s) and the acceptance criterion it covers, derived from
   // `.tcms/records/<feature>.json` (feature = the spec's parent dir). No per-test
@@ -37,7 +42,7 @@ export const test = base.extend<Pages & { _reportAnnotation: void; _observations
   // deterministic and never judges; the ObservationsReporter deduplicates and writes.
   // Every handler swallows its own errors: observations must never fail a test.
   _observations: [
-    async ({ page }, use, testInfo) => {
+    async ({ page, baseURL }, use, testInfo) => {
       const events: ObservationEvent[] = [];
       const record = (event: ObservationEvent): void => {
         if (events.length < MAX_EVENTS_PER_TEST) events.push(event);
@@ -98,13 +103,51 @@ export const test = base.extend<Pages & { _reportAnnotation: void; _observations
         void dialog.dismiss().catch(() => {});
       });
 
-      await use();
+      // Auto fixtures still provide a value, so a test that names `_observations` can read
+      // what the page has produced so far. Nothing else needs it — but without it the
+      // detectors below are unassertable, and three of the four had never fired.
+      await use(events);
 
       if (events.length > 0) {
+        // Structured record for ObservationsReporter — not meant to be read by a person.
         await testInfo.attach(ATTACHMENT_NAME, {
           body: JSON.stringify(events),
           contentType: 'application/json',
         });
+
+        const ignored = ignoredSignatures();
+        const seen = new Map<string, ObservationEvent>();
+        for (const event of events) {
+          const key = `${event.kind}:${event.httpStatus ?? ''}:${event.url ?? event.message}`;
+          if (!seen.has(key) && !ignored.has(signatureFor(event))) seen.set(key, event);
+        }
+
+        // Grouped the way a reader would look for them — the devtools tabs they map to.
+        const groups = new Map<ObservationGroup, string[]>();
+        for (const event of seen.values()) {
+          const group = groupOf(event.kind);
+          const icon = iconFor(event.kind, event.httpStatus);
+          const line = `${icon} ${describeEvent(event.kind, event, isThirdParty(event.url, baseURL ?? ''))}`;
+          groups.set(group, [...(groups.get(group) ?? []), line]);
+        }
+
+        for (const [group, lines] of groups) {
+          // text/plain renders inline in the HTML report, so it reads without downloading.
+          await testInfo.attach(`observations — ${group}`, {
+            body: lines.map((line) => `• ${line}`).join('\n\n'),
+            contentType: 'text/plain',
+          });
+
+          // One chip per group under the test title. The annotation TYPE is shown as its
+          // label, so Network and Console separate visually instead of blurring together.
+          testInfo.annotations.push({
+            type: `observations: ${group.toLowerCase()}`,
+            description:
+              lines.length === 1
+                ? lines[0].slice(0, 300)
+                : `${lines.length} — see the "observations — ${group}" attachment`,
+          });
+        }
       }
     },
     { auto: true },
