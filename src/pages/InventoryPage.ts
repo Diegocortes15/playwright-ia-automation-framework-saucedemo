@@ -132,6 +132,17 @@ export class InventoryPage {
     });
   }
 
+  // Composed action — remove one product from the cart, from its inventory card.
+  // saucedemo swaps the card's button to "Remove" once the product is in the cart,
+  // so removal happens here without visiting the cart page (SW-901).
+  async removeFromCart(productName: string): Promise<void> {
+    await test.step(`Remove "${productName}" from the cart`, async () => {
+      await this.productCard(productName)
+        .getByRole('button', { name: /^Remove$/i })
+        .click();
+    });
+  }
+
   // Composed action — open the cart from the header.
   async openCart(): Promise<void> {
     await this.header.openCart();

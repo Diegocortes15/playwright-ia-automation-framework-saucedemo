@@ -8,7 +8,12 @@
       "bucket": "Edge",
       "feature": "inventory",
       "contextLabel": "problem_user",
-      "jira": [{ "key": "SW-3", "url": "https://diegocortes15.atlassian.net/browse/SW-3" }]
+      "jira": [
+        {
+          "key": "SW-3",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-3"
+        }
+      ]
     },
     {
       "title": "all six product images render with distinct, non-empty sources",
@@ -18,7 +23,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "all six product titles render exactly and in catalog order",
@@ -28,7 +38,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "every product shows its exact description",
@@ -38,7 +53,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "every product price is formatted with a leading dollar sign",
@@ -48,7 +68,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "every product offers an enabled Add to cart button",
@@ -58,7 +83,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "hovering a product title turns its text the brand green (#3ddc91)",
@@ -68,7 +98,12 @@
       "bucket": "Edge",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-4", "url": "https://diegocortes15.atlassian.net/browse/SW-4" }]
+      "jira": [
+        {
+          "key": "SW-4",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-4"
+        }
+      ]
     },
     {
       "title": "products default to Name (A to Z) order with the matching active sort label",
@@ -78,7 +113,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+      "jira": [
+        {
+          "key": "SW-5",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-5"
+        }
+      ]
     },
     {
       "title": "selecting \"Name (A to Z)\" sorts products by name ascending",
@@ -88,7 +128,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+      "jira": [
+        {
+          "key": "SW-5",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-5"
+        }
+      ]
     },
     {
       "title": "selecting \"Name (Z to A)\" sorts products by name descending",
@@ -98,7 +143,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+      "jira": [
+        {
+          "key": "SW-5",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-5"
+        }
+      ]
     },
     {
       "title": "selecting \"Price (low to high)\" sorts products by price ascending",
@@ -108,7 +158,12 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+      "jira": [
+        {
+          "key": "SW-5",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-5"
+        }
+      ]
     },
     {
       "title": "selecting \"Price (high to low)\" sorts products by price descending",
@@ -118,7 +173,32 @@
       "bucket": "Positive",
       "feature": "inventory",
       "contextLabel": "standard_user",
-      "jira": [{ "key": "SW-5", "url": "https://diegocortes15.atlassian.net/browse/SW-5" }]
+      "jira": [
+        {
+          "key": "SW-5",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-5"
+        }
+      ]
+    },
+    {
+      "title": "cart badge counts each product added from the inventory page",
+      "acText": "Adding a product to the cart from the inventory page shows the cart badge with the number of items in the cart; adding a second product increments it.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": []
+    },
+    {
+      "title": "cart badge disappears when the last product is removed",
+      "acText": "Removing the only product from the cart, from the inventory page, leaves no cart badge shown.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "standard_user",
+      "jira": []
     }
   ]
 }

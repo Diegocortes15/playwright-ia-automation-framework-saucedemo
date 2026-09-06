@@ -145,7 +145,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 40,
+      "count": 14,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-06",
       "status": "ignored",
@@ -154,7 +154,7 @@
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "burger menu lists the All Items, About, and Reset App State options",
+        "test": "every product price is formatted with a leading dollar sign",
         "project": "chromium-standard"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
