@@ -11,6 +11,12 @@ The `/from-issue` skill renders generated test files following this template. Th
 // Manual edits are welcome — this file is not regenerated automatically.
 // Re-running /from-issue against a contributing issue will refuse to overwrite.
 
+**Provenance when the run used `--from-file`** (workflow Step 2): line 1 reads
+`from local file <path>` instead of `from Jira <KEY>`, and the `// Source:` line is that same
+path — never a Jira URL. A spec must not claim a ticket that was never read; a reader six
+months from now clicking a fabricated browse link is exactly the confusion this avoids.
+The `// Title:` line still carries the summary from the file's front matter.
+
 import { test, expect } from '@fixtures/test';
 import { env } from '@utils/env';
 

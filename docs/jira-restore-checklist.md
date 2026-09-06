@@ -20,6 +20,22 @@ pipeline work. This checklist is how that debt gets paid.
       2–3 from `docs/jira-tickets.md` before going further — several items below need a real,
       unrefined ticket to be meaningful.
 
+## 0.5 You can start before Jira returns
+
+`--from-file` reads a ticket from disk, so everything downstream of the ticket read can be
+exercised now. Two fixtures ship in `tickets/`:
+
+- [ ] `/from-issue --from-file tickets/SW-901-inventory-cart-badge.md` — the happy path.
+      Expect a green PR, `"jira": []` in the TCMS record, and a `// Source:` line naming the
+      file rather than a browse URL.
+- [ ] `/from-issue --from-file tickets/SW-902-problem-user-sort.md` — **the branch that has
+      never fired.** Its AC asserts `problem_user` can sort, which `docs/app/users.md`
+      documents as broken. A correct run stops and reports an app-versus-AC contradiction.
+      **A green PR here is a bug in the gate, not a success.**
+
+Only the ticket _read_ still needs Jira. Everything below is about the read itself, or about
+behaviour that only a real ticket exercises.
+
 ## 1. Verify what was built blind
 
 ### ADR-0020 — the no-red-PR gate
@@ -133,6 +149,13 @@ no other coverage.
       no XPath are lint rules, ADR-0004 is enforced by `playwright.config.ts` deriving its
       projects from `AUTH_USERS`. What matters is finding the ones that state a mechanical
       invariant with nothing checking it: those are the next ADR-0005.
+- [ ] **`/from-issue` is now flagged for size.** `skill-validator` warns at 25,451 tokens of
+      references; `workflow.md` alone is 9,966, up from 8,075 at the start of this work. Three
+      additions did it: the fix loop (ADR-0020), Obstacles (ADR-0022), and `--from-file`. The
+      warning is real — an agent loading several references in one session pays for all of it.
+      The fix is roadmap item B12b: move procedure into `scripts/` where it is deterministic.
+      `typecheck-spec.sh` proved it works; the base-branch preflight (Step 1.5) and the PR-body
+      render (Step 12) are the next candidates.
 - [ ] Roadmap item **B12b**: more `scripts/` extraction. One exists
       (`from-issue/scripts/typecheck-spec.sh`); the next candidates are the base-branch
       preflight (Step 1.5) and the PR-body render (Step 12). Apply YAGNI per candidate.

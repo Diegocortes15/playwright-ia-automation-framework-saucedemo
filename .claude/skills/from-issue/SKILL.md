@@ -20,6 +20,12 @@ Or for experimentation (skip push/PR):
 
 > Use the from-issue skill on SW-123 with dry-run.
 
+Or read the ticket from a local file instead of Jira — same pipeline, no Atlassian connection needed:
+
+> Use the from-issue skill with --from-file tickets/SW-901-inventory-cart-badge.md
+
+Jira stays the real ticket source (ADR-0011); a file is for exercising the pipeline and for testing changes to this skill without burning a real ticket. A file-sourced run never claims a Jira URL it did not read — see `references/workflow.md` Step 2 and `tickets/README.md`.
+
 If the ticket's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see ADR-0010. Re-running any ticket that already contributed to the file refuses. To force a separate file instead of augmenting:
 
 > Use the from-issue skill on SW-123 with --new-file.

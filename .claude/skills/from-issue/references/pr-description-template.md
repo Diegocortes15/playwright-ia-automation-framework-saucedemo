@@ -75,6 +75,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - **"What I understood" block** (adaptive, per ADR-0012):
   - **Summary** lead (`> `) — one TL;DR line: `Automated Playwright coverage for <KEY> (<feature>): N tests, all passing.`
   - **`Source ticket:`** — mandatory: `[<KEY>](<jira-url>) — <issue-type>: "<summary>"`. This is the key the GitHub-for-Jira app matches in the PR body to link the PR onto the ticket — so no separate `## Source` footer is needed.
+  - **`Source ticket:` for a `--from-file` run** — render it as `` `<KEY>` — from local file `<path>` (not a Jira ticket) ``, unlinked. Add one line at the top of the PR body: `> ⚠️ Generated from a local ticket file, not a Jira ticket. The GitHub-for-Jira link will not appear.` A reviewer must never have to work out why a plausible-looking key resolves to nothing.
   - **`Feature:`** — the snake_case feature.
   - **`Requirement (as written):`** — restate the requirement in whatever form the ticket used (`requirement_restated` from Step 4): the narrative if present, a scenario summary for GWT, a paraphrase for prose. Never assert a fixed structure.
   - **`⚠️ Assumptions & open questions:`** — render ONLY when Step 4's `assumptions[]` is non-empty; one bullet per inference/ambiguity, each inviting reviewer confirmation. Omit the whole block when the ticket was fully explicit.
