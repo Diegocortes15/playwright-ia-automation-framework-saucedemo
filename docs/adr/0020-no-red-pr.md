@@ -1,7 +1,8 @@
 # 0020 — /from-issue never opens a red PR (scopes ADR-0012)
 
 **Date:** 2026-09-04
-**Status:** Accepted. Scopes the PR-as-review-gate model of [ADR-0012](0012-from-issue-conventions.md): the gate still absorbs _judgment_, but no longer absorbs _broken artifacts_.
+**Status:** Accepted. Extended by [ADR-0024](0024-blocked-test-lands-as-expected-failure.md), which
+says what becomes of the test this ADR refuses to ship. Scopes the PR-as-review-gate model of [ADR-0012](0012-from-issue-conventions.md): the gate still absorbs _judgment_, but no longer absorbs _broken artifacts_.
 
 ## Context
 

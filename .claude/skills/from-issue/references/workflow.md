@@ -429,6 +429,13 @@ Report to the user:
 
 Then stop. Do not ask whether to open the PR anyway — the gate is the point.
 
+**Where the test goes next is not your call** (ADR-0024). If the user decides the application
+is at fault and files a defect, the test lands annotated with `test.fail()` referencing that
+defect — it runs for real, keeps CI green while the bug lives, and turns red the day the fix
+lands. **Never apply that annotation yourself, and never offer to.** An agent that can mark
+any failing test as expected-to-fail has a one-line way to make anything green, which is the
+same escape hatch as weakening an assertion. Report; the person decides.
+
 ### 11. Branch + commit + push
 
 **Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
