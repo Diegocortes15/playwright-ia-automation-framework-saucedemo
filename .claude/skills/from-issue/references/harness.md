@@ -7,7 +7,7 @@ How `/from-issue` resolves and **grows** the authenticated-test harness (the Pla
 ```ts
 // Single source of truth for the authenticated projects + auth setup.
 // /from-issue appends a user here (and nowhere else) the first time a ticket
-// needs that user's authenticated page (Phase H / ADR-0014). Grows one user at
+// needs that user's authenticated page (ADR-0014). Grows one user at
 // a time — do NOT pre-populate unused users (ADR-0004).
 export const AUTH_USERS = ['standard'] as const;
 ```

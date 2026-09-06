@@ -167,13 +167,21 @@ no other coverage.
       no XPath are lint rules, ADR-0004 is enforced by `playwright.config.ts` deriving its
       projects from `AUTH_USERS`. What matters is finding the ones that state a mechanical
       invariant with nothing checking it: those are the next ADR-0005.
-- [ ] **`/from-issue` is now flagged for size.** `skill-validator` warns at 25,451 tokens of
-      references; `workflow.md` alone is 9,966, up from 8,075 at the start of this work. Three
-      additions did it: the fix loop (ADR-0020), Obstacles (ADR-0022), and `--from-file`. The
-      warning is real — an agent loading several references in one session pays for all of it.
-      The fix is roadmap item B12b: move procedure into `scripts/` where it is deterministic.
-      `typecheck-spec.sh` proved it works; the base-branch preflight (Step 1.5) and the PR-body
-      render (Step 12) are the next candidates.
+- [x] ~~**`/from-issue` is flagged for size.**~~ Audited 2026-09-06, and the conclusion is that
+      most of the content earns its place. What the warning cannot know: ADR-0019 requires a
+      skill to be self-contained, so the overlap with `CLAUDE.md` (selector order, no manual
+      waits) is deliberate rather than redundant; references load on demand, so a green run
+      never opens `fix-loop.md`; and the bulk is instruction, not padding —
+      `pr-description-template.md` is 3,313 tokens of which 1,469 are rules and only 326 the
+      worked example, which shapes output better than the abstract template does.
+      **What was actually wrong was citations nobody could follow**: `spec §2 Decision 5/11/13`
+      naming no file, `D1-OBS-001`, `PR #8 of the experiment`, `v2`/`v5` run IDs, `Phase E/H`,
+      and a Step 3 that existed only to announce it had been removed. A citation that cannot be
+      followed is worse than none — it implies authority that is not there. Removed, keeping
+      every rule they were attached to. The `References` list now names the step each file
+      serves, which addresses the warning's real concern (how many get loaded per run) without
+      deleting anything. Net 25,384 -> 25,195 tokens; the number barely moved, which is itself
+      the finding.
 - [ ] Roadmap item **B12b**: more `scripts/` extraction. One exists
       (`from-issue/scripts/typecheck-spec.sh`); the next candidates are the base-branch
       preflight (Step 1.5) and the PR-body render (Step 12). Apply YAGNI per candidate.
