@@ -134,10 +134,11 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
   const out: string[] = [
     '# What the app did that no test asserted on',
     '',
-    `Generated ${generatedOn} from the last run. Do not edit — it is rebuilt every time.`,
-    'Each entry is one fact about the application, not one per feature: to change how it is',
-    'classified, edit its `status` and `note` **once** in `.observations/observations.json`.',
-    'Marking an entry `ignored` also stops it annotating the Playwright report, everywhere.',
+    `Rendered ${generatedOn} from \`.observations/observations.json\`.`,
+    '',
+    'Each entry is one fact about the application, not one per feature. To change how one is',
+    'classified, edit its `status` and `note` **once** in that file; marking it `ignored` also',
+    'stops it annotating the Playwright report, everywhere.',
     '',
     `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
   ];

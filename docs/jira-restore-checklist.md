@@ -112,8 +112,8 @@ What they proved, so the cost of deleting them is known:
 
 Run them with `npm run test:instrumentation`. The script deliberately passes **no**
 `--reporter` flag: that flag replaces the config's reporter list and silently drops
-`ObservationsReporter`, so the run would write no `.observations/` file at all. Results land
-in `.observations/_framework_validation.json`.
+`ObservationsReporter`, so the run would write no `.observations/` file at all. Results land in `.observations/observations.json`;
+read them with `npm run observations`.
 
 Keep them until `/from-issue` has run end-to-end at least once; the observation pipeline has
 no other coverage.

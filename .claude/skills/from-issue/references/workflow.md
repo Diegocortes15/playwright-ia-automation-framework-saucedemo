@@ -407,7 +407,9 @@ git add <testfile>
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
 # If the run produced runtime observations (ADR-0021), stage the index so anything new
 # the app did shows up in the PR diff. One signature-keyed file, not one per feature:
-#   git add .observations/observations.json .observations/SUMMARY.md
+#   git add .observations/observations.json
+# Only the index is committed. The prose view is derived — render it with
+# `npm run observations`, and put the new entries in the PR body (see the template).
 # If Step 6.5 grew the harness (per harness.md), also stage the changed source of truth
 # (and, on first-time creation, the config + auth setup):
 #   git add tests/users.ts

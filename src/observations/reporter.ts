@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
-import { renderDigest } from './digest';
 import { isThirdParty, signatureFor } from './signature';
 import {
   ATTACHMENT_NAME,
@@ -22,7 +21,6 @@ import {
 
 const OUTPUT_DIR = '.observations';
 const INDEX_PATH = join(OUTPUT_DIR, 'observations.json');
-const DIGEST_PATH = join(OUTPUT_DIR, 'SUMMARY.md');
 
 export default class ObservationsReporter implements Reporter {
   private readonly fresh = new Map<string, Observation>();
@@ -83,12 +81,9 @@ export default class ObservationsReporter implements Reporter {
       if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
 
       const observations = mergeObservations(readIndex(), [...this.fresh.values()]);
+      // Only the record is written. The prose digest is a view, rendered on demand by
+      // `npm run observations` — a derived file does not belong in version control.
       writeFileSync(INDEX_PATH, `${JSON.stringify({ observations }, null, 2)}\n`, 'utf-8');
-      writeFileSync(
-        DIGEST_PATH,
-        renderDigest({ observations }, new Date().toISOString().slice(0, 10)),
-        'utf-8',
-      );
     } catch {
       // Same contract as onTestEnd: observations never break a run.
     }
