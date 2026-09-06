@@ -56,15 +56,18 @@ test.describe('logout — no auth', { tag: '@no-auth' }, () => {
       },
       {
         path: '/checkout-step-one.html',
-        error: "Epic sadface: You can only access '/checkout-step-one.html' when you are logged in.",
+        error:
+          "Epic sadface: You can only access '/checkout-step-one.html' when you are logged in.",
       },
       {
         path: '/checkout-step-two.html',
-        error: "Epic sadface: You can only access '/checkout-step-two.html' when you are logged in.",
+        error:
+          "Epic sadface: You can only access '/checkout-step-two.html' when you are logged in.",
       },
       {
         path: '/checkout-complete.html',
-        error: "Epic sadface: You can only access '/checkout-complete.html' when you are logged in.",
+        error:
+          "Epic sadface: You can only access '/checkout-complete.html' when you are logged in.",
       },
     ];
 

@@ -120,13 +120,13 @@ no other coverage.
 
 ## Not blocked on Jira — can be done any time
 
-- [ ] **Pin Node 22 for local dev.** CI already pins it (`setup-node` with
-      `node-version: '22'` in both workflows), but there is no `.nvmrc` and no `engines`
-      field in `package.json`, so a contributor on Node 20 gets no warning until CI
-      disagrees with their machine. Outstanding since Phase 1.
-- [ ] The 5 files Prettier has always flagged on `main` (`CartPage.ts`, `InventoryPage.ts`,
-      `cart.spec.ts`, `checkout.spec.ts`, `logout.spec.ts`). CI does not run `format:check`,
-      so they break nothing — but they make every `format:check` noisy.
+- [x] ~~**Pin Node 22 for local dev.**~~ Done 2026-09-06: `.nvmrc`, an `engines` field of
+      `22.x`, and `engine-strict=true` in `.npmrc` so npm refuses to install on the wrong
+      major instead of only warning. Matches the `node-version: '22'` both workflows use.
+- [x] ~~The files Prettier has always flagged on `main`.~~ Done 2026-09-06: formatted, and
+      `npm run format:check` is now a CI gate beside typecheck and lint — they drifted for
+      months precisely because nothing checked. `.observations/` is excluded in
+      `.prettierignore`: it is machine-written by the reporter, not source.
 - [ ] Roadmap item **B12b**: more `scripts/` extraction. One exists
       (`from-issue/scripts/typecheck-spec.sh`); the next candidates are the base-branch
       preflight (Step 1.5) and the PR-body render (Step 12). Apply YAGNI per candidate.

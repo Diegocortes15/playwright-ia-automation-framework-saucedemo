@@ -46,7 +46,9 @@ export class CartPage {
   // Composed action — remove one product from the cart.
   async removeItem(productName: string): Promise<void> {
     await test.step(`Remove "${productName}" from the cart`, async () => {
-      await this.cartItem(productName).getByRole('button', { name: /^Remove$/i }).click();
+      await this.cartItem(productName)
+        .getByRole('button', { name: /^Remove$/i })
+        .click();
     });
   }
 
@@ -82,29 +84,34 @@ export class CartPage {
 
   async getItemQuantity(productName: string): Promise<string> {
     return (
-      (await this.cartItem(productName).locator('[data-test="item-quantity"]').textContent())?.trim() ??
-      ''
+      (
+        await this.cartItem(productName).locator('[data-test="item-quantity"]').textContent()
+      )?.trim() ?? ''
     );
   }
 
   async getItemDescription(productName: string): Promise<string> {
     return (
-      (await this.cartItem(productName)
-        .locator('[data-test="inventory-item-desc"]')
-        .textContent())?.trim() ?? ''
+      (
+        await this.cartItem(productName).locator('[data-test="inventory-item-desc"]').textContent()
+      )?.trim() ?? ''
     );
   }
 
   async getItemPrice(productName: string): Promise<string> {
     return (
-      (await this.cartItem(productName)
-        .locator('[data-test="inventory-item-price"]')
-        .textContent())?.trim() ?? ''
+      (
+        await this.cartItem(productName).locator('[data-test="inventory-item-price"]').textContent()
+      )?.trim() ?? ''
     );
   }
 
   async hasRemoveButton(productName: string): Promise<boolean> {
-    return (await this.cartItem(productName).getByRole('button', { name: /^Remove$/i }).count()) > 0;
+    return (
+      (await this.cartItem(productName)
+        .getByRole('button', { name: /^Remove$/i })
+        .count()) > 0
+    );
   }
 
   /** Cart count from the header badge; 0 when the badge is absent (empty cart). */

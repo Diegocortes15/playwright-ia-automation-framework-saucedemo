@@ -15,13 +15,15 @@ const backpack = products.find((p) => p.name === BACKPACK)!;
 test.describe('cart — standard_user', { tag: '@standard' }, () => {
   test.describe('Positive', () => {
     // AC 1
-    test('adding a product shows a cart badge count of one', { tag: '@smoke' }, async ({
-      inventoryPage,
-    }) => {
-      await inventoryPage.goto();
-      await inventoryPage.addToCart(BACKPACK);
-      await expect.poll(() => inventoryPage.getCartBadgeCount()).toBe(1);
-    });
+    test(
+      'adding a product shows a cart badge count of one',
+      { tag: '@smoke' },
+      async ({ inventoryPage }) => {
+        await inventoryPage.goto();
+        await inventoryPage.addToCart(BACKPACK);
+        await expect.poll(() => inventoryPage.getCartBadgeCount()).toBe(1);
+      },
+    );
 
     // AC 2 + AC 3 (merged): one add-three flow proves both the badge count and
     // that the cart lists the products in the order they were added.
@@ -36,9 +38,7 @@ test.describe('cart — standard_user', { tag: '@standard' }, () => {
       await expect.poll(() => inventoryPage.getCartBadgeCount()).toBe(3);
 
       await inventoryPage.openCart();
-      await expect
-        .poll(() => cartPage.getItemNames())
-        .toEqual([BACKPACK, BIKE_LIGHT, BOLT_TSHIRT]);
+      await expect.poll(() => cartPage.getItemNames()).toEqual([BACKPACK, BIKE_LIGHT, BOLT_TSHIRT]);
     });
 
     // AC 4

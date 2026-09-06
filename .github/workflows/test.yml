@@ -39,6 +39,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Formatting drifts silently without a gate: four files sat unformatted on main for
+      # months because nothing checked. `.observations/` is excluded in .prettierignore —
+      # it is machine-written, not source.
+      - name: Format check
+        run: npm run format:check
+
       - name: Cache Playwright browsers
         uses: actions/cache@v6
         with:
