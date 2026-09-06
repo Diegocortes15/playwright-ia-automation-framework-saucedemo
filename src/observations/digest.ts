@@ -72,22 +72,22 @@ export function describeObservation(observation: Observation): string {
 /**
  * Severity at a glance, the way a console does it.
  *
- * The group already says what KIND of thing it is (Network / Console / Dialogs), so the icon
- * carries how bad it is instead — that is the part a reader cannot get from the heading.
- * A 500 from your own server and a 404 on a stale link are both "failed-request" and are
- * not remotely the same problem.
+ * Four icons, deliberately. The group heading already says what KIND of thing this is
+ * (Network / Console / Dialogs) and the sentence underneath already says the precise status
+ * — "rejected as unauthorised", "was not found on the server". So the icon only has to carry
+ * the one distinction that changes what you do about it: did the application break, or did
+ * it simply refuse or not have something?
+ *
+ * An earlier version had eight, splitting 401 from 404 from 429. It needed a legend to be
+ * readable, which is the tell that the encoding was doing too much: the icon was repeating
+ * text that sat one line below it.
  */
 export function iconFor(kind: ObservationKind, httpStatus?: number): string {
-  if (kind === 'page-error') return '💥'; // uncaught exception — the page broke
   if (kind === 'console-error') return '❗';
   if (kind === 'dialog') return '💬';
-
-  if (httpStatus === undefined) return '⚠️';
-  if (httpStatus >= 500) return '🔥'; // the server itself failed
-  if (httpStatus === 401 || httpStatus === 403) return '🔒'; // rejected, not broken
-  if (httpStatus === 404) return '🔍'; // asked for something that isn't there
-  if (httpStatus === 408 || httpStatus === 429) return '⏳'; // throttled or timed out
-  return '⚠️'; // any other 4xx
+  if (kind === 'page-error') return '🔥'; // uncaught exception — the page broke
+  if (httpStatus !== undefined && httpStatus >= 500) return '🔥'; // the server itself failed
+  return '⚠️'; // 4xx and anything unclassified: refused or missing, not broken
 }
 
 function headline(observation: Observation): string {
@@ -140,9 +140,6 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
     'Marking an entry `ignored` also stops it annotating the Playwright report, everywhere.',
     '',
     `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
-    '',
-    '🔥 server error (5xx) · 🔒 rejected (401/403) · 🔍 not found (404) · ⏳ throttled or timed out',
-    '💥 uncaught exception · ❗ console error · 💬 dialog · ⚠️ other',
   ];
 
   if (all.length === 0) {

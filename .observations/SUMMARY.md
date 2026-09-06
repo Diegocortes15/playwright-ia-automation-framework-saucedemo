@@ -7,9 +7,6 @@ Marking an entry `ignored` also stops it annotating the Playwright report, every
 
 **6 not yet reviewed · 5 reviewed.**
 
-🔥 server error (5xx) · 🔒 rejected (401/403) · 🔍 not found (404) · ⏳ throttled or timed out
-💥 uncaught exception · ❗ console error · 💬 dialog · ⚠️ other
-
 ## Not yet reviewed
 
 #### ❗ console error
@@ -36,7 +33,7 @@ Seen once between 2026-09-05 and 2026-09-06, across the `_framework_validation` 
 
 **Not yet reviewed.**
 
-#### 🔒 failed request _(third party)_
+#### ⚠️ failed request _(third party)_
 
 The page asked a third-party service for `POST https://events.backtrace.io/api/summed-events/submit?universe=UNIVERSE&token=TOKEN` and got back **401** — the request was rejected as unauthorised.
 
@@ -44,7 +41,7 @@ Seen 7 times between 2026-09-05 and 2026-09-06, across 2 features (`login`, `log
 
 **Not yet reviewed.**
 
-#### 🔒 failed request _(third party)_
+#### ⚠️ failed request _(third party)_
 
 The page asked a third-party service for `POST https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN` and got back **401** — the request was rejected as unauthorised.
 
@@ -52,7 +49,7 @@ Seen 7 times between 2026-09-05 and 2026-09-06, across 2 features (`login`, `log
 
 **Not yet reviewed.**
 
-#### 💥 page error
+#### 🔥 page error
 
 JavaScript on the page threw an error nobody caught: _"OBSERVATION_PROBE uncaught failure"_.
 
@@ -62,7 +59,7 @@ Seen once between 2026-09-05 and 2026-09-06, across the `_framework_validation` 
 
 ## Already reviewed
 
-#### 🔍 failed request _(reviewed)_
+#### ⚠️ failed request _(reviewed)_
 
 The page asked the application for `GET https://www.saucedemo.com/cart.html` and got back **404** — the address was not found on the server.
 
@@ -70,7 +67,7 @@ Seen once between 2026-09-04 and 2026-09-06, across 2 features (`burger_menu`, `
 
 **Reviewed — marked `ignored`.** saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.
 
-#### 🔍 failed request _(reviewed)_
+#### ⚠️ failed request _(reviewed)_
 
 The page asked the application for `GET https://www.saucedemo.com/checkout-complete.html` and got back **404** — the address was not found on the server.
 
@@ -78,7 +75,7 @@ Seen once between 2026-09-05 and 2026-09-06, across the `logout` tests. Example:
 
 **Reviewed — marked `ignored`.** saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.
 
-#### 🔍 failed request _(reviewed)_
+#### ⚠️ failed request _(reviewed)_
 
 The page asked the application for `GET https://www.saucedemo.com/checkout-step-one.html` and got back **404** — the address was not found on the server.
 
@@ -86,7 +83,7 @@ Seen once between 2026-09-04 and 2026-09-06, across 2 features (`checkout`, `log
 
 **Reviewed — marked `ignored`.** saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.
 
-#### 🔍 failed request _(reviewed)_
+#### ⚠️ failed request _(reviewed)_
 
 The page asked the application for `GET https://www.saucedemo.com/checkout-step-two.html` and got back **404** — the address was not found on the server.
 
@@ -94,7 +91,7 @@ Seen once between 2026-09-05 and 2026-09-06, across the `logout` tests. Example:
 
 **Reviewed — marked `ignored`.** saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.
 
-#### 🔍 failed request _(reviewed)_
+#### ⚠️ failed request _(reviewed)_
 
 The page asked the application for `GET https://www.saucedemo.com/inventory.html` and got back **404** — the address was not found on the server.
 

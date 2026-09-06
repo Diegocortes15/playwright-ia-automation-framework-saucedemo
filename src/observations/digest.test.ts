@@ -103,19 +103,19 @@ test('kinds map to the devtools tab a reader would go looking in', () => {
   expect(groupOf('dialog')).toBe('Dialogs');
 });
 
-test('the icon carries severity, so a 500 never looks like a 404', () => {
-  expect(iconFor('failed-request', 500)).toBe('🔥'); // the server itself failed
+test('the icon separates "the app broke" from "the app refused or lacked something"', () => {
+  // Broke:
+  expect(iconFor('failed-request', 500)).toBe('🔥');
   expect(iconFor('failed-request', 503)).toBe('🔥');
-  expect(iconFor('failed-request', 401)).toBe('🔒'); // rejected, not broken
-  expect(iconFor('failed-request', 403)).toBe('🔒');
-  expect(iconFor('failed-request', 404)).toBe('🔍');
-  expect(iconFor('failed-request', 429)).toBe('⏳');
-  expect(iconFor('failed-request', 418)).toBe('⚠️'); // any other 4xx
+  expect(iconFor('page-error')).toBe('🔥'); // an uncaught exception is the page breaking
+  // Refused or missing — the sentence below the icon says which:
+  expect(iconFor('failed-request', 401)).toBe('⚠️');
+  expect(iconFor('failed-request', 404)).toBe('⚠️');
+  expect(iconFor('failed-request', 429)).toBe('⚠️');
   expect(iconFor('failed-request', undefined)).toBe('⚠️');
 });
 
-test('non-network kinds get their own icon regardless of status code', () => {
-  expect(iconFor('page-error')).toBe('💥'); // uncaught — the page broke
+test('console errors and dialogs keep their own icon', () => {
   expect(iconFor('console-error')).toBe('❗');
   expect(iconFor('dialog')).toBe('💬');
 });
