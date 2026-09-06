@@ -31,7 +31,19 @@ Do **not** hunt for these facts by hand if the script fails — fix the run, the
 
 They are indistinguishable from the failure alone. A report that asserts "the application has a bug" when the truth was a badly written AC sends someone chasing a ghost, and the credibility of every later report goes with it.
 
-Where the repository already documents the behaviour (`docs/app/`), say so and cite it — that usually settles it, and it is evidence rather than opinion. Where it does not, present both and stop.
+Where the repository documents the behaviour (`docs/app/`), cite it — but **citing it does not
+settle the question**. Documentation records two different things that look identical on the
+page, and they point in opposite directions:
+
+- **A specification** — "the system shall do X". The app not doing X is a defect.
+- **A defect log** — "X is broken for this user". That records that a bug *exists*; it is not
+  evidence the bug is *correct*.
+
+`docs/app/users.md` calling something a "Broken sort dropdown" is the second kind. Quoting it
+proves the behaviour is known, not that the ticket was wrong to expect otherwise.
+
+State which kind you found, quote it, and **still present both readings**. The only thing that
+genuinely settles it is a person who knows whether the behaviour is intended.
 
 ### 3. Render the draft
 

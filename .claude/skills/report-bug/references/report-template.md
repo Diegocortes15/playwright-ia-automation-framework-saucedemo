@@ -28,7 +28,7 @@ reports should find the same thing in the same place every time.
 
 - **If the application:** <one sentence>
 - **If the ticket:** <one sentence>
-- <the repository's own documentation on this behaviour, cited, when it exists — this usually settles it>
+- <the repository's own documentation, cited, when it covers this — say whether it specifies intended behaviour or records a known defect; the second does not make the behaviour correct>
 
 ## Evidence
 
@@ -44,7 +44,7 @@ reports should find the same thing in the same place every time.
 
 ## Rules
 
-- **`Which is wrong?` is never omitted, and never resolved unilaterally.** The one case where you may state a conclusion is when the repository documents the behaviour — then cite the file and say so. Everywhere else, both readings stand and the human decides.
+- **`Which is wrong?` is never omitted, and never resolved unilaterally — not even by documentation.** Cite `docs/app/` when it covers the behaviour, and say which kind of record it is: a **specification** ("the system shall do X" — then not doing X is a defect) or a **defect log** ("X is broken for this user" — which proves the bug is *known*, not that it is *correct*). Both readings still stand afterwards. A file describing something as "broken" is the strongest possible evidence that someone considered it a bug.
 - **Steps are the `test.step` titles verbatim.** They describe what actually ran. Rewriting them into prettier prose breaks the guarantee that following the steps reproduces the failure.
 - **Expected prefers the acceptance criterion over the assertion.** The AC is what a person agreed the system should do; the assertion is one engineer's encoding of it. When the script found no AC, say the report is falling back to the assertion — that absence is itself worth knowing.
 - **Observations are context, never a conclusion.** A 404 recorded during the test may explain the failure or may be unrelated noise already triaged as `ignored`. Present them; do not build the diagnosis on them.
