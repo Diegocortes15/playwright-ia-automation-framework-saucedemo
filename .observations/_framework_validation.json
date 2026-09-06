@@ -7,7 +7,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE console failure",
@@ -22,7 +22,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE from a failing test",
@@ -37,7 +37,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "Sorting is broken! This error has been reported to Backtrace.",
@@ -53,7 +53,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE uncaught failure",

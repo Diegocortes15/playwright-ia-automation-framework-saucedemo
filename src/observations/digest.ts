@@ -1,4 +1,4 @@
-import type { Observation, ObservationsFile } from './types';
+import type { Observation, ObservationKind, ObservationsFile } from './types';
 
 // The human-readable half of ADR-0021.
 //
@@ -18,12 +18,33 @@ function httpMeaning(status: number | undefined): string {
   return '';
 }
 
+/** The fields the prose needs, shared by a raw event and a stored observation. */
+export interface Describable {
+  message: string;
+  url?: string;
+  method?: string;
+  httpStatus?: number;
+  dialogType?: string;
+}
+
+/** Which devtools tab a reader would go looking in. */
+export type ObservationGroup = 'Network' | 'Console' | 'Dialogs';
+
+export function groupOf(kind: ObservationKind): ObservationGroup {
+  if (kind === 'failed-request') return 'Network';
+  if (kind === 'dialog') return 'Dialogs';
+  return 'Console';
+}
+
 /** One plain-language sentence describing what the app did. */
-export function describeObservation(observation: Observation): string {
-  const { sample, kind } = observation;
+export function describeEvent(
+  kind: ObservationKind,
+  sample: Describable,
+  thirdParty: boolean,
+): string {
   switch (kind) {
     case 'failed-request': {
-      const who = observation.thirdParty ? 'a third-party service' : 'the application';
+      const who = thirdParty ? 'a third-party service' : 'the application';
       return (
         `The page asked ${who} for \`${sample.method ?? 'GET'} ${sample.url ?? 'an address'}\` ` +
         `and got back **${sample.httpStatus ?? 'an error'}**${httpMeaning(sample.httpStatus)}.`
@@ -41,6 +62,11 @@ export function describeObservation(observation: Observation): string {
     default:
       return sample.message;
   }
+}
+
+/** Same sentence, for an entry already folded into `.observations/<feature>.json`. */
+export function describeObservation(observation: Observation): string {
+  return describeEvent(observation.kind, observation.sample, observation.thirdParty);
 }
 
 function headline(observation: Observation): string {

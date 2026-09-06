@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { describeObservation, renderDigest } from './digest';
+import { describeObservation, groupOf, renderDigest } from './digest';
 import type { Observation } from './types';
 
 function obs(overrides: Partial<Observation> = {}): Observation {
@@ -84,4 +84,12 @@ test('an empty run says so instead of rendering empty headings', () => {
   const digest = renderDigest([], '2026-09-05');
   expect(digest).toContain('Nothing recorded.');
   expect(digest).not.toContain('## Not yet reviewed');
+});
+
+test('kinds map to the devtools tab a reader would go looking in', () => {
+  expect(groupOf('failed-request')).toBe('Network');
+  expect(groupOf('console-error')).toBe('Console');
+  // An uncaught exception surfaces in the console, so it belongs with console errors.
+  expect(groupOf('page-error')).toBe('Console');
+  expect(groupOf('dialog')).toBe('Dialogs');
 });

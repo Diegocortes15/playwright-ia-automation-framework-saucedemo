@@ -7,7 +7,7 @@
       "thirdParty": true,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "401 Unauthorized",
@@ -24,7 +24,7 @@
       "thirdParty": true,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-05",
+      "lastSeen": "2026-09-06",
       "status": "new",
       "sample": {
         "message": "401 Unauthorized",
