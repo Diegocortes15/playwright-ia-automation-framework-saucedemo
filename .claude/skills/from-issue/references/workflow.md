@@ -5,6 +5,11 @@ The procedural workflow Claude follows when the `from-issue` skill is invoked. T
 ## Inputs
 
 - **Jira issue key** (required, positional) — e.g., `/from-issue SW-123` (project key `SW`).
+- **`--from-file <path>`** (optional; replaces the key) — read the ticket from a local file
+  instead of Jira, e.g. `/from-issue --from-file tickets/SW-99-login.md`. Jira stays the real
+  ticket source (ADR-0011); this exists so the rest of the pipeline can be exercised without
+  a live Atlassian connection, and so changes to this skill can be tested without burning a
+  real ticket. Everything downstream of Step 2 is identical.
 - **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per ADR-0010, Step 8).
 - **`dry-run`** (optional flag) — skip steps 11–12 (branch, push, PR). Files written and tests run locally only.
 
@@ -12,9 +17,13 @@ The procedural workflow Claude follows when the `from-issue` skill is invoked. T
 
 ### 1. Validate inputs
 
-Check that a Jira issue **key** is present and matches `^[A-Z][A-Z0-9]+-\d+$` (e.g. `SW-123`). If missing or malformed, ask the user — don't guess.
+**With `--from-file <path>`:** check the file exists and is readable. If not, abort with the
+path and the error — don't guess at a nearby filename. Skip the key and MCP checks below; the
+key comes from the file's front matter. `gh auth status` is still required unless `dry-run`.
 
-Confirm the **Atlassian MCP** is connected (the skill reads tickets through it). If no Atlassian MCP tool is available, abort with: _"The Atlassian MCP isn't connected. Connect it in Claude Code (OAuth), then re-run."_
+**Otherwise:** check that a Jira issue **key** is present and matches `^[A-Z][A-Z0-9]+-\d+$` (e.g. `SW-123`). If missing or malformed, ask the user — don't guess.
+
+Confirm the **Atlassian MCP** is connected (the skill reads tickets through it). If no Atlassian MCP tool is available, abort with: _"The Atlassian MCP isn't connected. Connect it in Claude Code (OAuth), then re-run — or pass `--from-file <path>` to read a ticket from disk instead."_
 
 Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort with: _"`gh` is not authenticated. Run `gh auth login` and re-run."_
 
@@ -44,7 +53,47 @@ git fetch origin "$base"
 
 Together this makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: the new ticket branches from a current integration base that includes prior merged work, so this run **augments** the existing feature instead of forking a conflicting copy.
 
-### 2. Fetch the Jira ticket
+### 2. Fetch the ticket
+
+#### With `--from-file <path>`
+
+`Read` the file. It carries the same three fields the MCP returns, so everything after this
+step is unchanged:
+
+```markdown
+---
+key: SW-99
+summary: [SW][QA][Login] User login
+---
+
+Feature: login
+
+Scenario 1: Successful login
+Given a valid standard_user
+...
+```
+
+- Front matter gives `<KEY>` and `summary`; everything after it is the `description`, verbatim.
+- The body is exactly what would go in a Jira description (see `docs/jira-tickets.md`), so a
+  file doubles as a draft of a ticket not yet created.
+- If the front matter is missing `key` or `summary`, abort naming which — do not invent them.
+
+**Record `ticketSource = file:<path>` for the run.** It changes three things downstream, and
+nothing else:
+
+1. **Step 7 provenance header** — the generated spec's `// Source:` line reads
+   `local file <path>`, not a Jira browse URL. A spec must never claim a Jira ticket that was
+   never read.
+2. **Step 11.5 TCMS records** — write `"jira": []`. There is no ticket to link, and a
+   fabricated key would corrupt the Qase mirror and the report annotations that read it.
+3. **Step 12 PR body** — the "What I understood" block names the file as the source, and the
+   PR carries a line stating it was generated from a local ticket file, so a reviewer is
+   never left wondering which `SW-99` this was.
+
+The GitHub-for-Jira auto-link (Step 13) simply won't fire: there is no ticket to link to.
+That is expected, not an error.
+
+#### Otherwise
 
 Read the ticket via the **Atlassian MCP's get-issue tool** for the key (e.g. `SW-123`), requesting the rendered/text form of the description.
 

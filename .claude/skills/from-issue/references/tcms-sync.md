@@ -42,3 +42,10 @@ Skip under `dry-run`. The sync rejects any record missing a non-empty `jira` arr
 - Find-or-create (never references an unknown id), one run per sync, writes `qase-map.json` (test → case id), and **archives** cases whose records vanished.
 
 Mapping lives in `src/tcms/case-mapper.ts` + `suite-sync.ts` — do not re-derive.
+
+## Runs sourced from a local file
+
+When the run used `--from-file` (workflow Step 2), write `"jira": []` on every record. There
+is no ticket to link, and inventing a key would corrupt both the Qase mirror and the report
+annotations that `src/utils/report-annotations.ts` derives from this file — a test would be
+labelled with an issue that does not exist.

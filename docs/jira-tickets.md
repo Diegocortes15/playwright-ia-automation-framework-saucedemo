@@ -40,3 +40,17 @@ Run `/refine-ticket SW-123` first — it scores the ticket against exactly these
 ## What happens next
 
 The skill generates tests on branch `SW-123-<feature>` (key-first, per [ADR-0012](adr/0012-from-issue-conventions.md)), opens a GitHub PR, and the GitHub-for-Jira app links the PR onto the ticket. The PR is the review gate. Re-running a ticket that already contributed to a spec refuses (see [ADR-0010](adr/0010-from-issue-augment-mode.md)); the skill augments the existing spec when a _new_ ticket extends a feature.
+
+## Drafting without Jira
+
+The same description can live in a file and be fed straight to the skill:
+
+```bash
+/from-issue --from-file tickets/SW-901-inventory-cart-badge.md
+```
+
+The file's front matter carries `key` and `summary`; everything after it is the description
+in exactly the form documented above. That makes a file both a way to run the pipeline
+without a live Atlassian connection and a place to draft a ticket before creating it. See
+`tickets/README.md` — and note that a file-sourced run deliberately produces no Jira link,
+because there is no ticket to link to.
