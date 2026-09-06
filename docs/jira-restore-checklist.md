@@ -36,6 +36,26 @@ exercised now. Two fixtures ship in `tickets/`:
 Only the ticket _read_ still needs Jira. Everything below is about the read itself, or about
 behaviour that only a real ticket exercises.
 
+## 0.7 Gaps found by actually running the pipeline
+
+Both surfaced running `--from-file`, not by reading the code. Neither is fixed.
+
+- [ ] **Provenance in AUGMENT mode is unspecified.** Workflow Step 2 says a file-sourced run
+      writes `// Source: local file <path>`, but that header is rendered in Step 7, which only
+      runs for CREATE-NEW. In AUGMENT the header belongs to the originating ticket and Step 8.5
+      only appends `<KEY> (YYYY-MM-DD)` to `Augmented by:`. There is no specified place to record
+      that a ticket came from a file. Decide: a suffix on that line, or accept the loss.
+- [ ] **ADR-0020 says what NOT to do, not what to do.** It forbids opening a red PR when the app
+      contradicts an AC, and stops there. It never says what should become of the test. The
+      professional destination is `test.fail()` referencing a filed bug — it runs for real, keeps
+      CI green while the defect lives, and **turns red the day the fix lands**, so the follow-up
+      is automatic instead of depending on memory. `skip` cannot do that; nobody comes back.
+      **The agent must not choose this unilaterally** — an escape hatch shaped exactly like
+      weakening an assertion. Human decides, then the test lands annotated. Worth an ADR.
+- [ ] **A blocked run in AUGMENT mode leaves a committed spec dirty**, which blocks the next run
+      (Step 1.5 requires a clean tree). Fine for CREATE-NEW — an untracked new file. Unspecified
+      cleanup for AUGMENT.
+
 ## 1. Verify what was built blind
 
 ### ADR-0020 — the no-red-PR gate
