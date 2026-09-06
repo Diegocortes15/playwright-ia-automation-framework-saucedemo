@@ -4,6 +4,7 @@
 **Status:** Accepted. Scoped by [ADR-0020](0020-no-red-pr.md): the PR-as-review-gate model
 still absorbs judgment (thin tickets → best-effort + surfaced assumptions), but a run that
 cannot make its own output compile and pass now opens no PR at all.
+**Enforced by:** **Nothing — prose only.** Conventions followed by the agent; a lint could check a branch name's shape but not that the normalization was faithful.
 
 ## Context
 

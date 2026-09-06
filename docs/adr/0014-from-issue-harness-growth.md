@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-27
 **Status:** Accepted
+**Enforced by:** **Partly.** The harness _shape_ is structural — `playwright.config.ts` and `tests/auth.setup.ts` both derive from `AUTH_USERS`, so a user without an entry has no project. That the skill grows the array autonomously is prose.
 
 ## Context
 

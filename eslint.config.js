@@ -28,8 +28,21 @@ export default [
       // regardless of which level it came from; a rule that fails on `#stable-id` only
       // teaches people to silence it, and eslint-disable sprawl is worse than no rule.
       // Fragility is proven by a test failing, not by an attribute's name.
+      // ADR-0015: routing tags live in the { tag } option, never in the title string.
+      // Playwright's project grep matches the title too, so a tag in the title still routes
+      // — which is why this drifted undetected: it fails silently, in style not behaviour.
       'no-restricted-syntax': [
         'error',
+        {
+          selector: "CallExpression[callee.name='test'] > Literal:first-child[value=/@/]",
+          message:
+            'ADR-0015: put routing tags in the { tag } option, not the test title. Titles are prose.',
+        },
+        {
+          selector:
+            "CallExpression[callee.object.name='test'][callee.property.name='describe'] > Literal:first-child[value=/@/]",
+          message: 'ADR-0015: put routing tags in the { tag } option, not the describe title.',
+        },
         {
           // ADR-0023: JSON is loaded through the typed fs loader in data/fixtures.ts, not
           // ESM import attributes. ADR-0005 chose attributes, they were implemented, and they
@@ -44,6 +57,60 @@ export default [
             "CallExpression[callee.property.name='locator'][arguments.0.value=/^(\\/\\/|\\(|xpath=)/]",
           message:
             'XPath is never allowed (CLAUDE.md). Use [data-test="..."], then getByRole, then text, then CSS.',
+        },
+      ],
+    },
+  },
+  {
+    // ADR-0001 rule #3: Pages never import other Pages. Fluent navigation was explicitly
+    // rejected; a Page returning a Page is how it creeps back in.
+    files: ['src/pages/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@pages/*', './*Page', '../*Page'],
+              message:
+                'ADR-0001 rule #3: Pages never import other Pages. Tests navigate explicitly via injected fixtures.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "TSTypeReference[typeName.name='Promise'] > TSTypeParameterInstantiation > TSTypeReference[typeName.name='Locator']",
+          message:
+            'ADR-0001 rule #8: queries return data, never a Locator. Return the value the test needs.',
+        },
+      ],
+    },
+  },
+  {
+    // ADR-0001 rule #4: tests know about Pages and Data only — never raw Locators.
+    // ADR-0003: specs read data through @data/fixtures, never JSON off disk.
+    files: ['tests/**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:fs',
+              message:
+                'ADR-0003: specs never read data off disk. Add a typed loader to data/fixtures.ts and import from @data/fixtures.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@components/*'],
+              message:
+                'ADR-0001 rule #4: tests use Pages and Data only, never Components directly.',
+            },
+          ],
         },
       ],
     },

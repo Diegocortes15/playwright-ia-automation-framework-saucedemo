@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-27
 **Status:** Accepted
+**Enforced by:** `eslint.config.js` — `no-restricted-syntax` fails a `test()` or `test.describe()` whose title string contains `@`. This one drifts silently without a gate: Playwright's project `grep` matches the title too, so a tag in the title still routes correctly and the mistake shows up only as style.
 
 ## Context
 

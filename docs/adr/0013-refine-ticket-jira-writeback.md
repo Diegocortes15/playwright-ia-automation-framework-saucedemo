@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-26
 **Status:** Accepted
+**Enforced by:** **Partly.** `/refine-ticket` is the only skill whose `allowed-tools` declares Atlassian write tools, so no other skill can write to Jira. The approval-before-writing rule is prose.
 
 ## Context
 

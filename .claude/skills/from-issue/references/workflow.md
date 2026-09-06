@@ -1,6 +1,6 @@
 # from-issue Workflow
 
-The procedural workflow Claude follows when the `from-issue` skill is invoked. The source ticket is a **Jira** issue (project `SW`), read via the Atlassian MCP — see ADR-0011. (Originally 13 GitHub-Issue steps; Step 3 was dropped and Step 13's Jira write-back removed in Phase E.)
+The procedural workflow Claude follows when the `from-issue` skill is invoked. The source ticket is a **Jira** issue (project `SW`), read via the Atlassian MCP — see ADR-0011.
 
 ## Inputs
 
@@ -95,10 +95,6 @@ Read the ticket via the **Atlassian MCP's get-issue tool** for the key (e.g. `SW
 
 Capture: `<KEY>` (the issue key), `summary` (the title), and `description` (rendered text). If the ticket doesn't exist or you lack access, abort with the MCP error verbatim.
 
-### 3. (Removed in Phase E — no readiness gate)
-
-There is no label/status gate. Explicitly invoking `/from-issue <KEY>` is the intent signal; the Step 4 "no ACs worth automating → abort" backstop fails safe if pointed at a non-spec ticket.
-
 ### 4. LLM normalization
 
 Tickets are authored many ways and at any quality (trainee → senior BA). **Normalize whatever the ticket contains — format- AND quality-agnostic** (per ADR-0012): a formal "As a / I want / so that" narrative, Given/When/Then scenarios, a bullet/numbered AC list, plain prose, structured fields, or a partial/mixed blob all reduce to the same internal AC records. Extract from the summary + description:
@@ -127,7 +123,7 @@ For each Acceptance Criterion, build an internal record:
 }
 ```
 
-**Skip-signal = LLM judgment from AC text** (spec §2 Decision 11). Examples of ACs to skip:
+**Skip-signal = LLM judgment from AC text.** Examples of ACs to skip:
 - "Visual aesthetic — manual review only"
 - "Verify the spelling of the button label" (low automation value)
 - "Confirm legal copy matches the marketing-approved version" (data may shift)
@@ -146,8 +142,6 @@ A well-authored ticket (per `docs/jira-tickets.md`) has a `Feature:` line and on
 - Look for Acceptance Criteria in any list/bullet form, regardless of `### Acceptance Criteria` heading
 - Recognize GWT-style scenarios (`Given... When... Then...`) as ACs, one scenario = one AC candidate
 - If parsing fails entirely (no recognizable ACs anywhere), abort with: _"Couldn't extract ACs from ticket `<KEY>`. Ask the reporter to follow `docs/jira-tickets.md`."_
-
-(Note: this subsection replaces an earlier shorter free-form note. The behavior was previously implicit — confirmed working in PR #8 of the experiment. Now documented explicitly.)
 
 #### Page inference from AC text
 
@@ -190,7 +184,7 @@ ls src/pages/checkout/<PageName>.ts 2>/dev/null
 
 ### 6. Analyze ACs
 
-Group the `worth_automating=true` AC records into a set of tests. One test may cover multiple ACs (spec §2 Decision 5 — adaptive multi-test). For each test, record:
+Group the `worth_automating=true` AC records into a set of tests. One test may cover multiple ACs. For each test, record:
 
 ```
 {
@@ -406,7 +400,7 @@ git push -u origin <KEY>-<feature>
 
 **Conventional Commit (per ADR-0012):** subject `feat(<feature>): automate <KEY> <feature> scenarios` — imperative, ≤ ~72 chars; `<feature>` is the scope. Body explains what + why. `Refs: <KEY>` trailer ties the commit to the ticket. Each block is a **separate `-m`** flag.
 
-**Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject — a v5 run used PowerShell here-string syntax inside the Bash tool and produced a literal `@` prefix on the subject, forcing an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping. (Same class of defect as D1-OBS-001, which moved the PR body to `--body-file` in Step 12.)
+**Commit message — never use a shell here-string.** Keep the subject as one `-m`, and pass any body or trailer (e.g. the `Co-Authored-By:` line the project requires) as **additional `-m` flags**, as shown above. Do NOT use `<<'EOF'` (bash) or `@'...'@` (PowerShell): wrong-shell heredoc syntax leaks stray characters into the commit subject. This has happened: PowerShell here-string syntax used inside the Bash tool produced a literal `@` prefix on the subject and forced an amend + force-push. Repeated `-m` flags are cross-shell safe and need no escaping — same reason Step 12 writes the PR body to a file.
 
 If `git push` fails (no remote, no auth), abort with the git error verbatim. The local branch and files remain on disk.
 
@@ -442,7 +436,7 @@ Capture the returned PR URL — `gh pr create` writes it to stdout on success (t
 
 If `gh pr create` fails (no remote, no permission), abort with the `gh` error verbatim. The local branch and pushed branch remain on the remote.
 
-**Why `--body-file` instead of `--body "$(cat <<'EOF' ... EOF)"`:** the inline heredoc pattern (used in earlier workflow versions) is fragile when the PR body contains backtick-wrapped code spans (e.g., `` `/from-issue` ``, `` `LoginPage` ``, `` `src/fixtures/test.ts` ``). The skill can mis-escape the backticks and leak template-literal-style syntax (`` ` + "..." + ` ``) into the rendered PR body. Writing to a file first eliminates the escaping problem entirely. (Surfaced as D1-OBS-001 during the v2 experiment verification of D.1.)
+**Why `--body-file` instead of `--body "$(cat <<'EOF' ... EOF)"`:** the inline heredoc pattern (used in earlier workflow versions) is fragile when the PR body contains backtick-wrapped code spans (e.g., `` `/from-issue` ``, `` `LoginPage` ``, `` `src/fixtures/test.ts` ``). The skill can mis-escape the backticks and leak template-literal-style syntax (`` ` + "..." + ` ``) into the rendered PR body. Writing to a file first eliminates the escaping problem entirely.
 
 ### 13. Report to user
 

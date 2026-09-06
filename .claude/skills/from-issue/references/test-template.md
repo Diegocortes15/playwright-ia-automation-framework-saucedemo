@@ -118,7 +118,7 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
 
 Saucedemo's per-user storageState files live under `auth/<user>.json` (e.g., `auth/standard.json`). The orchestrator does NOT load storageState explicitly in the test code — the describe's routing tag routes the test to the matching Playwright project, whose `storageState` config (derived from `tests/users.ts` `AUTH_USERS`, per ADR-0014) wires the session.
 
-If the AC text doesn't declare a user, default to `standard_user` (spec §2 Decision 13).
+If the AC text doesn't declare a user, default to `standard_user`.
 
 ## Example: multi-context inventory file (two user-contexts, one file)
 

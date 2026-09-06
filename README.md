@@ -223,7 +223,9 @@ Each report's header also records **how long the run took** and the **environmen
 
 ### Prerequisites
 
-- Node.js **22.x** or newer · `git` · ~300 MB free disk for the Chromium browser
+- Node.js **22.x** · `git` · ~300 MB free disk for the Chromium browser
+
+`22.x` is enforced, not suggested: `.nvmrc`, an `engines` field, and `engine-strict=true` in `.npmrc` mean `npm install` refuses to run on another major rather than warning. Both CI workflows pin the same version.
 
 ### Install & run
 
@@ -237,6 +239,27 @@ npm test                      # full suite, green in ~under a minute
 ```
 
 > The AI-authoring workflow (the `/from-issue` etc. skills) additionally requires Claude Code, the Atlassian MCP connected, and `gh` authenticated. The tests themselves need none of that.
+
+### Optional: validating the skills
+
+Only needed if you're **editing a skill**. [`skill-validator`](https://github.com/agent-ecosystem/skill-validator) is what checks that a skill directory stays self-contained — no markdown link resolving outside it — which is the invariant [ADR-0019](docs/adr/0019-skill-portability.md) rests on. Nothing else in the toolchain checks it, and it is deliberately a manual check rather than a CI gate (ADR-0019 records why).
+
+```bash
+brew tap agent-ecosystem/tap
+brew trust --formula agent-ecosystem/tap/skill-validator   # Homebrew requires this for third-party taps
+brew install skill-validator
+
+skill-validator check .claude/skills/<name>
+```
+
+Prefer not to trust a tap? The formula only downloads a GoReleaser tarball, so fetching the release directly and verifying its checksum is equivalent — see the formula for the current version and SHA.
+
+**Two known false positives in this repo**, both documented rather than worked around:
+
+- **`total reference files: N tokens`.** Anthropic's own guidance says the opposite — _"a skill's body loads only when it's used, so long reference material costs almost nothing until you need it."_ The per-file warning is worth acting on; this one measures a sum that is not paid. See `docs/jira-restore-checklist.md`.
+- **HTTP link checks against saucedemo.** It is a SPA on GitHub Pages, so every deep link returns 404 on a direct fetch while working fine in a browser.
+
+For which skills actually get used and what they cost in context, Claude Code ships [`/skill-doctor`](https://code.claude.com/docs/en/skills) (v2.1.252+). It measures observed usage — a different question from whether a skill is well-formed, and the two do not overlap.
 
 ---
 

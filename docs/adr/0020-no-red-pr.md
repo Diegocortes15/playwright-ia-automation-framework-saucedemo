@@ -3,6 +3,7 @@
 **Date:** 2026-09-04
 **Status:** Accepted. Extended by [ADR-0024](0024-blocked-test-lands-as-expected-failure.md), which
 says what becomes of the test this ADR refuses to ship. Scopes the PR-as-review-gate model of [ADR-0012](0012-from-issue-conventions.md): the gate still absorbs _judgment_, but no longer absorbs _broken artifacts_.
+**Enforced by:** **Nothing — prose only.** It governs what an agent does with a failing run; no check can verify that a diagnosis was honest. ADR-0024 records the same limit for its own human-approval half.
 
 ## Context
 

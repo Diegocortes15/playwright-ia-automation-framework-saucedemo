@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-15
 **Status:** Accepted — scoped by [ADR-0011](0011-jira-ticket-source.md) (Atlassian MCP adopted for Jira; gh CLI retained for GitHub)
+**Enforced by:** **Nothing — prose only.** Records a choice about what to install. `.mcp.json` holding only the Atlassian server corroborates it but does not enforce it.
 
 ## Context
 

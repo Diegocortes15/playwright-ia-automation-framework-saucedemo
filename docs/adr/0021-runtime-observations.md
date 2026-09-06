@@ -2,6 +2,7 @@
 
 **Date:** 2026-09-04
 **Status:** Accepted
+**Enforced by:** **Partly.** `src/observations/*.test.ts` cover the signature, merge and digest logic, and `tests/_framework_validation/` exercises all four detectors including the failure path. The "an observation never fails a test" contract rests on the fixture swallowing its own errors — reviewed, not gated.
 
 ## Context
 

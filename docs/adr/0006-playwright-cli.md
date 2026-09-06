@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-10
 **Status:** Accepted
+**Enforced by:** **Nothing — prose only.** Records a tooling choice; there is no invariant to check.
 
 ## Context
 

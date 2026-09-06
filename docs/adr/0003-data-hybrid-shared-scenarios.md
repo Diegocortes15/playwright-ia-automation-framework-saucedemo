@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-09
 **Status:** Accepted
+**Enforced by:** `eslint.config.js` — `no-restricted-imports` bans `node:fs` inside `tests/**/*.spec.ts`, so a spec cannot read data off disk instead of importing a typed loader from `@data/fixtures`.
 
 ## Context
 
