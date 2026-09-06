@@ -1,7 +1,10 @@
 # 0005 — ESM Import Attributes for JSON
 
 **Date:** 2026-05-10
-**Status:** Accepted
+**Status:** Superseded by [ADR-0023](0023-json-via-typed-fs-loader.md). The attributes were
+implemented, then removed on 2026-05-24 (`63fae8e`) as brittle through Playwright's ESM
+loader; this record sat `Accepted` for three and a half months afterwards because nothing
+checked. `data/fixtures.ts` reads JSON through `fs` — do not "fix" it back to match this.
 
 ## Context
 

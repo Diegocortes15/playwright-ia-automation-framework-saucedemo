@@ -82,28 +82,26 @@ test.describe('checkout — standard_user', { tag: '@standard' }, () => {
     });
 
     // AC 9: a complete, valid information form routes to Checkout: Overview.
-    test('valid information routes to Checkout: Overview', { tag: '@smoke' }, async ({
-      inventoryPage,
-      cartPage,
-      checkoutInfoPage,
-      checkoutOverviewPage,
-      page,
-    }) => {
-      await inventoryPage.goto();
-      await inventoryPage.addToCart(BACKPACK);
-      await inventoryPage.openCart();
-      await cartPage.checkout();
+    test(
+      'valid information routes to Checkout: Overview',
+      { tag: '@smoke' },
+      async ({ inventoryPage, cartPage, checkoutInfoPage, checkoutOverviewPage, page }) => {
+        await inventoryPage.goto();
+        await inventoryPage.addToCart(BACKPACK);
+        await inventoryPage.openCart();
+        await cartPage.checkout();
 
-      await checkoutInfoPage.fillInformation(
-        VALID_INFO.firstName,
-        VALID_INFO.lastName,
-        VALID_INFO.postalCode,
-      );
-      await checkoutInfoPage.clickContinue();
+        await checkoutInfoPage.fillInformation(
+          VALID_INFO.firstName,
+          VALID_INFO.lastName,
+          VALID_INFO.postalCode,
+        );
+        await checkoutInfoPage.clickContinue();
 
-      await expect(page).toHaveURL(/\/checkout-step-two\.html$/);
-      expect(await checkoutOverviewPage.getTitle()).toBe('Checkout: Overview');
-    });
+        await expect(page).toHaveURL(/\/checkout-step-two\.html$/);
+        expect(await checkoutOverviewPage.getTitle()).toBe('Checkout: Overview');
+      },
+    );
 
     // AC 1 + AC 2 (SW-8): the exit controls render on the information page.
     test('Cancel button and cart icon are visible on the Checkout: Your Information page', async ({
@@ -147,12 +145,16 @@ test.describe('checkout — standard_user', { tag: '@standard' }, () => {
     }) => {
       await reachCheckoutOverview(inventoryPage, cartPage, checkoutInfoPage);
 
-      expect(await checkoutOverviewPage.getProductNames()).toEqual(CART_PRODUCTS.map((p) => p.name));
+      expect(await checkoutOverviewPage.getProductNames()).toEqual(
+        CART_PRODUCTS.map((p) => p.name),
+      );
       expect(await checkoutOverviewPage.getProductQuantities()).toEqual(['1', '1', '1']);
       expect(await checkoutOverviewPage.getProductDescriptions()).toEqual(
         CART_PRODUCTS.map((p) => p.description),
       );
-      expect(await checkoutOverviewPage.getProductPrices()).toEqual(CART_PRODUCTS.map((p) => p.price));
+      expect(await checkoutOverviewPage.getProductPrices()).toEqual(
+        CART_PRODUCTS.map((p) => p.price),
+      );
     });
 
     // AC 2 + AC 3 (SW-9): the payment and shipping information sections show their values.
@@ -203,39 +205,67 @@ test.describe('checkout — standard_user', { tag: '@standard' }, () => {
 
     // AC 10–13 (SW-9): Finish is visible and completes the order — landing on
     // Checkout: Complete! with both confirmation messages and a Back Home button.
-    test('finishing the order shows the confirmation page with a Back Home button', { tag: '@smoke' }, async ({
-      inventoryPage,
-      cartPage,
-      checkoutInfoPage,
-      checkoutOverviewPage,
-      checkoutCompletePage,
-      page,
-    }) => {
-      await reachCheckoutOverview(inventoryPage, cartPage, checkoutInfoPage);
+    test(
+      'finishing the order shows the confirmation page with a Back Home button',
+      { tag: '@smoke' },
+      async ({
+        inventoryPage,
+        cartPage,
+        checkoutInfoPage,
+        checkoutOverviewPage,
+        checkoutCompletePage,
+        page,
+      }) => {
+        await reachCheckoutOverview(inventoryPage, cartPage, checkoutInfoPage);
 
-      await expect(checkoutOverviewPage.finishButton).toBeVisible();
-      await checkoutOverviewPage.finish();
+        await expect(checkoutOverviewPage.finishButton).toBeVisible();
+        await checkoutOverviewPage.finish();
 
-      await expect(page).toHaveURL(/\/checkout-complete\.html$/);
-      expect(await checkoutCompletePage.getTitle()).toBe('Checkout: Complete!');
-      expect(await checkoutCompletePage.getCompleteHeader()).toBe('Thank you for your order!');
-      // Live copy differs slightly from SW-9's paraphrase ("dispatched, and will
-      // arrive just as fast…") — the app is the source of truth for exact strings.
-      expect(await checkoutCompletePage.getCompleteText()).toBe(
-        'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
-      );
-      await expect(checkoutCompletePage.backHomeButton).toBeVisible();
-    });
+        await expect(page).toHaveURL(/\/checkout-complete\.html$/);
+        expect(await checkoutCompletePage.getTitle()).toBe('Checkout: Complete!');
+        expect(await checkoutCompletePage.getCompleteHeader()).toBe('Thank you for your order!');
+        // Live copy differs slightly from SW-9's paraphrase ("dispatched, and will
+        // arrive just as fast…") — the app is the source of truth for exact strings.
+        expect(await checkoutCompletePage.getCompleteText()).toBe(
+          'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
+        );
+        await expect(checkoutCompletePage.backHomeButton).toBeVisible();
+      },
+    );
   });
 
   test.describe('Negative', () => {
     // AC 3–6: saucedemo validates required fields sequentially (First → Last →
     // Zip), reports the first missing one, and flags all three inputs at once.
     const validationCases = [
-      { desc: 'all fields empty', firstName: '', lastName: '', postalCode: '', error: 'Error: First Name is required' },
-      { desc: 'only first name', firstName: 'John', lastName: '', postalCode: '', error: 'Error: Last Name is required' },
-      { desc: 'only last name', firstName: '', lastName: 'Doe', postalCode: '', error: 'Error: First Name is required' },
-      { desc: 'only postal code', firstName: '', lastName: '', postalCode: '12345', error: 'Error: First Name is required' },
+      {
+        desc: 'all fields empty',
+        firstName: '',
+        lastName: '',
+        postalCode: '',
+        error: 'Error: First Name is required',
+      },
+      {
+        desc: 'only first name',
+        firstName: 'John',
+        lastName: '',
+        postalCode: '',
+        error: 'Error: Last Name is required',
+      },
+      {
+        desc: 'only last name',
+        firstName: '',
+        lastName: 'Doe',
+        postalCode: '',
+        error: 'Error: First Name is required',
+      },
+      {
+        desc: 'only postal code',
+        firstName: '',
+        lastName: '',
+        postalCode: '12345',
+        error: 'Error: First Name is required',
+      },
     ];
 
     for (const { desc, firstName, lastName, postalCode, error } of validationCases) {

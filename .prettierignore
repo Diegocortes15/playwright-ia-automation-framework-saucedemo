@@ -5,3 +5,6 @@ blob-report/
 auth/
 package-lock.json
 .claude/
+
+# Machine-written by ObservationsReporter — Prettier is not its author (ADR-0021)
+.observations/
