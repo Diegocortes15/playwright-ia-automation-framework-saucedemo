@@ -8,6 +8,7 @@ function obs(overrides: Partial<Observation> = {}): Observation {
     kind: 'failed-request',
     thirdParty: false,
     count: 1,
+    seenIn: ['checkout'],
     firstSeen: '2026-01-01',
     lastSeen: '2026-01-01',
     status: 'new',
@@ -63,15 +64,12 @@ test('a third-party request is described as third party, a first-party one is no
 
 test('unreviewed entries come first — the digest is a queue, not an archive', () => {
   const digest = renderDigest(
-    [
-      {
-        feature: 'checkout',
-        observations: [
-          obs({ signature: 'a', status: 'ignored', note: 'known' }),
-          obs({ signature: 'b', status: 'new' }),
-        ],
-      },
-    ],
+    {
+      observations: [
+        obs({ signature: 'a', status: 'ignored', note: 'known' }),
+        obs({ signature: 'b', status: 'new' }),
+      ],
+    },
     '2026-09-05',
   );
 
@@ -80,8 +78,19 @@ test('unreviewed entries come first — the digest is a queue, not an archive', 
   expect(digest).toContain('**Reviewed — marked `ignored`.** known');
 });
 
+test('one fact seen across several features renders as one entry, naming them all', () => {
+  const digest = renderDigest(
+    { observations: [obs({ seenIn: ['cart', 'checkout', 'inventory'], count: 6 })] },
+    '2026-09-05',
+  );
+  expect(digest).toContain('3 features (`cart`, `checkout`, `inventory`)');
+  expect(digest).toContain('Seen 6 times');
+  // One entry, not one per feature — that was the bug this shape fixes.
+  expect(digest.split('#### ').length - 1).toBe(1);
+});
+
 test('an empty run says so instead of rendering empty headings', () => {
-  const digest = renderDigest([], '2026-09-05');
+  const digest = renderDigest({ observations: [] }, '2026-09-05');
   expect(digest).toContain('Nothing recorded.');
   expect(digest).not.toContain('## Not yet reviewed');
 });

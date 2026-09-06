@@ -54,8 +54,11 @@ decides whether a PR exists at all.
 
 - [ ] Confirm `/from-issue` stages `.observations/<feature>.json` and that new entries show
       up in the PR diff.
-- [ ] Triage the standing entries: every navigation returns HTTP 404 (GitHub Pages
-      `spa-github-pages` shim). Set `status` + `note` on them so the `new` queue is real.
+- [ ] Triage the standing entries in `.observations/observations.json`. The 404s are already
+      marked `ignored` (GitHub Pages `spa-github-pages` shim). Still open: the
+      **`events.backtrace.io` 401s** — the app's own error-reporting telemetry is being
+      rejected. Harmless on a demo; on a client app it would mean production error reporting
+      is dead and nobody would notice, because the UI works fine either way. Decide and record.
 - [ ] First ticket that legitimately needs `error_user`: confirm `/from-issue` wires it into
       `AUTH_USERS` per ADR-0014, and that the **dialog detector finally gets e2e coverage**
       (`error_user` + sort → `alert()`). It is unit-tested only today.
@@ -93,7 +96,7 @@ ever firing. They test the framework's instrumentation, not the application.
 **To remove, in full:**
 
 - [ ] `rm -rf tests/_framework_validation/`
-- [ ] `rm -f .observations/_framework_validation.json`
+- [ ] Remove the four `OBSERVATION_PROBE` / dialog entries from `.observations/observations.json`
 - [ ] Remove the `test:instrumentation` script from `package.json`
 - [ ] Nothing else references them. `src/observations/reporter.test.ts` is **not** part of
       this — those are permanent unit tests for the merge logic and should stay.

@@ -109,7 +109,7 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 | Specs                                           | `tests/<feature>/*.spec.ts`                                                                                        |
 | Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                              |
 | Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                             |
-| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); output in `.observations/<feature>.json`          |
+| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); output in `.observations/observations.json` + `SUMMARY.md`          |
 | TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`) |
 
 ## Path aliases

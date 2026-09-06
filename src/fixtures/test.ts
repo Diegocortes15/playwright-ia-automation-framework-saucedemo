@@ -115,7 +115,7 @@ export const test = base.extend<
           contentType: 'application/json',
         });
 
-        const ignored = ignoredSignatures(basename(dirname(testInfo.file)));
+        const ignored = ignoredSignatures();
         const seen = new Map<string, ObservationEvent>();
         for (const event of events) {
           const key = `${event.kind}:${event.httpStatus ?? ''}:${event.url ?? event.message}`;

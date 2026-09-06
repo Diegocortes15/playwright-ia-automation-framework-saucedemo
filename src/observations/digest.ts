@@ -76,16 +76,20 @@ function headline(observation: Observation): string {
 }
 
 function renderOne(observation: Observation): string {
-  const { count, firstSeen, lastSeen, sample, status, note } = observation;
+  const { count, firstSeen, lastSeen, sample, status, note, seenIn } = observation;
   const times = count === 1 ? 'once' : `${count} times`;
   const when = firstSeen === lastSeen ? `on ${firstSeen}` : `between ${firstSeen} and ${lastSeen}`;
+  const where =
+    seenIn.length === 1
+      ? `the \`${seenIn[0]}\` tests`
+      : `${seenIn.length} features (\`${seenIn.join('`, `')}\`)`;
 
   const lines = [
     headline(observation),
     '',
     describeObservation(observation),
     '',
-    `Seen ${times} ${when}. First noticed while running _"${sample.test}"_ (${sample.project}).`,
+    `Seen ${times} ${when}, across ${where}. Example: _"${sample.test}"_ (${sample.project}).`,
   ];
 
   if (status === 'new') {
@@ -97,21 +101,21 @@ function renderOne(observation: Observation): string {
 }
 
 /**
- * Render every feature's observations as one readable document.
+ * Render the whole index as one readable document.
  * Unreviewed entries come first: that is the queue.
  */
-export function renderDigest(files: ObservationsFile[], generatedOn: string): string {
-  const all = files.flatMap((f) => f.observations.map((o) => ({ feature: f.feature, o })));
-  const unreviewed = all.filter((x) => x.o.status === 'new');
-  const reviewed = all.filter((x) => x.o.status !== 'new');
+export function renderDigest(file: ObservationsFile, generatedOn: string): string {
+  const all = file.observations;
+  const unreviewed = all.filter((o) => o.status === 'new');
+  const reviewed = all.filter((o) => o.status !== 'new');
 
   const out: string[] = [
     '# What the app did that no test asserted on',
     '',
     `Generated ${generatedOn} from the last run. Do not edit — it is rebuilt every time.`,
-    'To change how an entry is classified, edit its `status` and `note` in the matching',
-    '`.observations/<feature>.json`; marking one `ignored` also stops it annotating the',
-    'Playwright report.',
+    'Each entry is one fact about the application, not one per feature: to change how it is',
+    'classified, edit its `status` and `note` **once** in `.observations/observations.json`.',
+    'Marking an entry `ignored` also stops it annotating the Playwright report, everywhere.',
     '',
     `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
   ];
@@ -127,14 +131,7 @@ export function renderDigest(files: ObservationsFile[], generatedOn: string): st
   ] as const) {
     if (group.length === 0) continue;
     out.push('', title);
-    let feature = '';
-    for (const { feature: f, o } of group) {
-      if (f !== feature) {
-        feature = f;
-        out.push('', `### \`${f}\``);
-      }
-      out.push('', renderOne(o));
-    }
+    for (const observation of group) out.push('', renderOne(observation));
   }
 
   return `${out.join('\n')}\n`;

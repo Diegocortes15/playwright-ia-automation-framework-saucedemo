@@ -8,6 +8,7 @@ function obs(overrides: Partial<Observation> = {}): Observation {
     kind: 'failed-request',
     thirdParty: false,
     count: 1,
+    seenIn: ['checkout'],
     firstSeen: '2026-01-01',
     lastSeen: '2026-01-01',
     status: 'new',

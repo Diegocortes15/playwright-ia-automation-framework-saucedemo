@@ -405,9 +405,9 @@ git add <testfile>
 #   git add src/pages/checkout/<PageName>.ts
 # If Step 7 externalized data per data-placement.md, also stage the data file(s) + loader:
 #   git add data/scenarios/<feature>/<name>.json data/shared/<name>.json data/fixtures.ts data/types.ts
-# If the run produced runtime observations (ADR-0021), stage the feature's file so
-# anything new the app did shows up in the PR diff:
-#   git add .observations/<feature>.json
+# If the run produced runtime observations (ADR-0021), stage the index so anything new
+# the app did shows up in the PR diff. One signature-keyed file, not one per feature:
+#   git add .observations/observations.json .observations/SUMMARY.md
 # If Step 6.5 grew the harness (per harness.md), also stage the changed source of truth
 # (and, on first-time creation, the config + auth setup):
 #   git add tests/users.ts
