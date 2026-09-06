@@ -12,6 +12,12 @@ pipeline work. This checklist is how that debt gets paid.
 
 ## 0. Reconnect (blocking — do first)
 
+> **Status 2026-09-06:** the site is confirmed alive — `/rest/api/3/serverInfo` answers with
+> `deploymentType: Cloud`, so it was never deactivated. What remains is the OAuth reconnect,
+> and it must happen in a **fresh** session: MCP connections are established at session start,
+> so authorizing in one window does not retrofit into an already-running one. If Claude reports
+> no `mcp__atlassian__*` tools, restart rather than re-authorizing.
+
 - [ ] Run `/mcp` in an **interactive** Claude Code session and complete the Atlassian OAuth.
       A non-interactive session cannot run the flow.
 - [ ] Confirm the MCP answers: ask for `mcp__atlassian__getAccessibleAtlassianResources`,
