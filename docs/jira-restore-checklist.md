@@ -45,13 +45,11 @@ Both surfaced running `--from-file`, not by reading the code. Neither is fixed.
       runs for CREATE-NEW. In AUGMENT the header belongs to the originating ticket and Step 8.5
       only appends `<KEY> (YYYY-MM-DD)` to `Augmented by:`. There is no specified place to record
       that a ticket came from a file. Decide: a suffix on that line, or accept the loss.
-- [ ] **ADR-0020 says what NOT to do, not what to do.** It forbids opening a red PR when the app
-      contradicts an AC, and stops there. It never says what should become of the test. The
-      professional destination is `test.fail()` referencing a filed bug — it runs for real, keeps
-      CI green while the defect lives, and **turns red the day the fix lands**, so the follow-up
-      is automatic instead of depending on memory. `skip` cannot do that; nobody comes back.
-      **The agent must not choose this unilaterally** — an escape hatch shaped exactly like
-      weakening an assertion. Human decides, then the test lands annotated. Worth an ADR.
+- [x] ~~**ADR-0020 says what NOT to do, not what to do.**~~ Closed by **ADR-0024**
+      (2026-09-06): the test lands as `test.fail()` referencing the filed defect, applied
+      only after a human decides — never by the agent. Recorded honestly that the
+      human-approval half is unenforceable, and that a `test.fail()` test passes for _any_
+      failure, not only the original one, which is why the annotation must name the bug.
 - [ ] **A blocked run in AUGMENT mode leaves a committed spec dirty**, which blocks the next run
       (Step 1.5 requires a clean tree). Fine for CREATE-NEW — an untracked new file. Unspecified
       cleanup for AUGMENT.

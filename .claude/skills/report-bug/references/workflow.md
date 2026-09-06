@@ -53,7 +53,11 @@ Repro steps come from the script's `reproSteps` — these are the `test.step` ti
 
 ### 4. Hand it over
 
-Print the draft. **File nothing.** Say plainly that it is a draft for the user to review, and that the tracker write is deliberately not implemented (see the skill's Scope section).
+Print the draft. **File nothing.**
+
+If the user concludes the application is at fault and files the defect, the blocked test's
+destination is `test.fail()` referencing it (ADR-0024) — never applied by you, and never
+offered. Say where the draft goes; do not act on it. Say plainly that it is a draft for the user to review, and that the tracker write is deliberately not implemented (see the skill's Scope section).
 
 Then report **Obstacles encountered** — ALWAYS, even when there are none (one line: `Obstacles encountered: none.`). Per ADR-0022 it carries three things:
 
