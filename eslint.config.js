@@ -31,6 +31,15 @@ export default [
       'no-restricted-syntax': [
         'error',
         {
+          // ADR-0023: JSON is loaded through the typed fs loader in data/fixtures.ts, not
+          // ESM import attributes. ADR-0005 chose attributes, they were implemented, and they
+          // were removed months later as brittle through Playwright's ESM loader — while the
+          // ADR sat 'Accepted' the whole time because nothing checked. This is that check.
+          selector: 'ImportDeclaration[attributes.length>0]',
+          message:
+            "Import attributes are not used in this project (ADR-0023, superseding ADR-0005): they proved brittle through Playwright's ESM loader. Load JSON via the typed loader in data/fixtures.ts.",
+        },
+        {
           selector:
             "CallExpression[callee.property.name='locator'][arguments.0.value=/^(\\/\\/|\\(|xpath=)/]",
           message:
