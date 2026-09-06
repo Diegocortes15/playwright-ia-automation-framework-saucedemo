@@ -7,7 +7,7 @@ import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
 import { CheckoutCompletePage } from '@pages/checkout/CheckoutCompletePage';
 import { reportAnnotations } from '@utils/report-annotations';
-import { describeEvent, groupOf, type ObservationGroup } from '../observations/digest';
+import { describeEvent, groupOf, iconFor, type ObservationGroup } from '../observations/digest';
 import { isThirdParty, signatureFor } from '../observations/signature';
 import { ignoredSignatures } from '../observations/triage';
 import { ATTACHMENT_NAME, MAX_EVENTS_PER_TEST, type ObservationEvent } from '../observations/types';
@@ -126,14 +126,15 @@ export const test = base.extend<
         const groups = new Map<ObservationGroup, string[]>();
         for (const event of seen.values()) {
           const group = groupOf(event.kind);
-          const line = describeEvent(event.kind, event, isThirdParty(event.url, baseURL ?? ''));
+          const icon = iconFor(event.kind, event.httpStatus);
+          const line = `${icon} ${describeEvent(event.kind, event, isThirdParty(event.url, baseURL ?? ''))}`;
           groups.set(group, [...(groups.get(group) ?? []), line]);
         }
 
         for (const [group, lines] of groups) {
           // text/plain renders inline in the HTML report, so it reads without downloading.
           await testInfo.attach(`observations — ${group}`, {
-            body: lines.map((line, i) => `${i + 1}. ${line}`).join('\n\n'),
+            body: lines.map((line) => `• ${line}`).join('\n\n'),
             contentType: 'text/plain',
           });
 

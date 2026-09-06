@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { describeObservation, groupOf, renderDigest } from './digest';
+import { describeObservation, groupOf, iconFor, renderDigest } from './digest';
 import type { Observation } from './types';
 
 function obs(overrides: Partial<Observation> = {}): Observation {
@@ -101,4 +101,21 @@ test('kinds map to the devtools tab a reader would go looking in', () => {
   // An uncaught exception surfaces in the console, so it belongs with console errors.
   expect(groupOf('page-error')).toBe('Console');
   expect(groupOf('dialog')).toBe('Dialogs');
+});
+
+test('the icon carries severity, so a 500 never looks like a 404', () => {
+  expect(iconFor('failed-request', 500)).toBe('🔥'); // the server itself failed
+  expect(iconFor('failed-request', 503)).toBe('🔥');
+  expect(iconFor('failed-request', 401)).toBe('🔒'); // rejected, not broken
+  expect(iconFor('failed-request', 403)).toBe('🔒');
+  expect(iconFor('failed-request', 404)).toBe('🔍');
+  expect(iconFor('failed-request', 429)).toBe('⏳');
+  expect(iconFor('failed-request', 418)).toBe('⚠️'); // any other 4xx
+  expect(iconFor('failed-request', undefined)).toBe('⚠️');
+});
+
+test('non-network kinds get their own icon regardless of status code', () => {
+  expect(iconFor('page-error')).toBe('💥'); // uncaught — the page broke
+  expect(iconFor('console-error')).toBe('❗');
+  expect(iconFor('dialog')).toBe('💬');
 });

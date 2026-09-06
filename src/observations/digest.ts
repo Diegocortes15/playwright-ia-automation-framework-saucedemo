@@ -69,10 +69,32 @@ export function describeObservation(observation: Observation): string {
   return describeEvent(observation.kind, observation.sample, observation.thirdParty);
 }
 
+/**
+ * Severity at a glance, the way a console does it.
+ *
+ * The group already says what KIND of thing it is (Network / Console / Dialogs), so the icon
+ * carries how bad it is instead — that is the part a reader cannot get from the heading.
+ * A 500 from your own server and a 404 on a stale link are both "failed-request" and are
+ * not remotely the same problem.
+ */
+export function iconFor(kind: ObservationKind, httpStatus?: number): string {
+  if (kind === 'page-error') return '💥'; // uncaught exception — the page broke
+  if (kind === 'console-error') return '❗';
+  if (kind === 'dialog') return '💬';
+
+  if (httpStatus === undefined) return '⚠️';
+  if (httpStatus >= 500) return '🔥'; // the server itself failed
+  if (httpStatus === 401 || httpStatus === 403) return '🔒'; // rejected, not broken
+  if (httpStatus === 404) return '🔍'; // asked for something that isn't there
+  if (httpStatus === 408 || httpStatus === 429) return '⏳'; // throttled or timed out
+  return '⚠️'; // any other 4xx
+}
+
 function headline(observation: Observation): string {
-  const icon = observation.status === 'ignored' ? '🔇' : '🔎';
   const tag = observation.thirdParty ? ' _(third party)_' : '';
-  return `#### ${icon} ${observation.kind.replace('-', ' ')}${tag}`;
+  const muted = observation.status !== 'new' ? ' _(reviewed)_' : '';
+  const icon = iconFor(observation.kind, observation.sample.httpStatus);
+  return `#### ${icon} ${observation.kind.replace('-', ' ')}${tag}${muted}`;
 }
 
 function renderOne(observation: Observation): string {
@@ -118,6 +140,9 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
     'Marking an entry `ignored` also stops it annotating the Playwright report, everywhere.',
     '',
     `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
+    '',
+    '🔥 server error (5xx) · 🔒 rejected (401/403) · 🔍 not found (404) · ⏳ throttled or timed out',
+    '💥 uncaught exception · ❗ console error · 💬 dialog · ⚠️ other',
   ];
 
   if (all.length === 0) {
