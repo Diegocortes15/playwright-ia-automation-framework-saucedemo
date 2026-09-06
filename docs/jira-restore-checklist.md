@@ -182,6 +182,12 @@ no other coverage.
       serves, which addresses the warning's real concern (how many get loaded per run) without
       deleting anything. Net 25,384 -> 25,195 tokens; the number barely moved, which is itself
       the finding.
+- [ ] **Run `/skill-doctor`** (Claude Code v2.1.252+, terminal only — not over Remote Control).
+      It reports what each skill actually costs in context and how often it is invoked. That is
+      the observed-usage data the reference audit lacked: the `skill-validator` total-token
+      warning is a heuristic Anthropic's own docs contradict — _"a skill's body loads only when
+      it's used, so long reference material costs almost nothing until you need it"_ — whereas
+      this measures what is really paid. Decide any further trimming from it, not from the sum.
 - [ ] Roadmap item **B12b**: more `scripts/` extraction. One exists
       (`from-issue/scripts/typecheck-spec.sh`); the next candidates are the base-branch
       preflight (Step 1.5) and the PR-body render (Step 12). Apply YAGNI per candidate.
