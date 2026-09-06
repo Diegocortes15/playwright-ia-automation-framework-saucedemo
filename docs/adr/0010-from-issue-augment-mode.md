@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-24
 **Status:** Accepted
+**Enforced by:** **Nothing — prose only.** Lives in `/from-issue`'s workflow; it governs agent behaviour, which no check can verify.
 
 ## Context
 

@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-09
 **Status:** Accepted
+**Enforced by:** `playwright.config.ts` derives every project, its `grep` and its `storageState` from `tests/users.ts` `AUTH_USERS`. Structural — the pattern cannot be departed from without rewriting the config.
 
 ## Context
 

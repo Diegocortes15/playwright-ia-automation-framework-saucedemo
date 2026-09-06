@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-29
 **Status:** Accepted. Extends [ADR-0016](0016-tcms-mirror.md): the mirror becomes whole-suite and authoritative **at merge**, not per-ticket at PR creation.
+**Enforced by:** **Partly.** CI runs `npm run tcms:sync` only on merge, so the at-merge model is structural. `suite-sync.test.ts` covers create/update/archive.
 
 ## Context
 

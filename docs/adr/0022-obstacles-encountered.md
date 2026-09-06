@@ -2,6 +2,7 @@
 
 **Date:** 2026-09-04
 **Status:** Accepted
+**Enforced by:** **Nothing — prose only.** This ADR's own alternatives explain why: a lint over the PR body could check that the heading exists, never that the content is honest.
 
 ## Context
 

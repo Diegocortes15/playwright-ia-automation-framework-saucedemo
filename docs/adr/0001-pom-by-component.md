@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-09
 **Status:** Accepted
+**Enforced by:** `eslint.config.js`. Rule #3 (Pages never import Pages) and rule #4 (tests use Pages and Data, never Components) are `no-restricted-imports`; rule #8 (queries return data, never a `Locator`) and rule #12 (no `waitForTimeout`) are `no-restricted-syntax` and the Playwright plugin. Rule #5 (`readonly` locator fields) remains prose — it is checkable but not yet checked.
 
 ## Context
 

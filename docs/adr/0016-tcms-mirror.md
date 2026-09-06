@@ -4,6 +4,7 @@
 **Status:** Accepted. Scopes the "no TCMS" stance in
 [`docs/test-case-management.md`](../test-case-management.md): TCMS stays **off by
 default**; this adds an **opt-in** mirror.
+**Enforced by:** **Partly.** `src/tcms/*.test.ts` cover the mapper and sync logic. That the mirror stays opt-in is prose plus the `QASE_*` self-skip.
 
 ## Context
 

@@ -5,6 +5,7 @@
 implemented, then removed on 2026-05-24 (`63fae8e`) as brittle through Playwright's ESM
 loader; this record sat `Accepted` for three and a half months afterwards because nothing
 checked. `data/fixtures.ts` reads JSON through `fs` — do not "fix" it back to match this.
+**Enforced by:** N/A — superseded. ADR-0023 carries the enforcement (a lint rule banning import attributes).
 
 ## Context
 

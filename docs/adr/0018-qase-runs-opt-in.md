@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-29
 **Status:** Accepted. Scopes [ADR-0017](0017-tcms-sync-at-merge.md): the at-merge sync no longer creates a Qase **run** — it keeps the **catalog** current only. Runs become opt-in.
+**Enforced by:** **Partly.** The sync self-skips without `QASE_*`, and `run-report.test.ts` covers the run-title and trigger logic.
 
 ## Context
 

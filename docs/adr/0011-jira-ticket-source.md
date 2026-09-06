@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-24
 **Status:** Accepted
+**Enforced by:** **Partly.** The skills' `allowed-tools` grant only the Atlassian MCP read tools and no GitHub issue tool, so a run cannot silently switch sources. Which source a ticket _should_ come from is prose.
 
 ## Context
 

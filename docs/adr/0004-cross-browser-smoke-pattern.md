@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-10
 **Status:** Accepted
+**Enforced by:** `playwright.config.ts` derives its projects from `AUTH_USERS` (same mechanism as ADR-0002), so the per-user-per-browser matrix cannot appear without editing that array by hand. Structural.
 
 ## Context
 
