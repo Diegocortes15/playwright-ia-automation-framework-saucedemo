@@ -29,29 +29,23 @@ Check `gh auth status` exits 0 (needed for the PR in Step 12). If not, abort wit
 
 ### 1.5. Resolve and sync the base branch
 
-`/from-issue` branches off the base captured in Step 11, and the Step 5/8 "does this feature already exist?" checks read **that branch's tree**. Two failure modes are prevented here, **before any inspection** — first pick the *right* base, then make it current.
-
-**(a) Never branch from a leftover ticket branch.** A previous `/from-issue` run leaves the working tree on **its** `<KEY>-<feature>` branch, so the next run starts there by default. Branching the new ticket off that one stacks it on unmerged work and targets the wrong base — this is what forced SW-11 to stop and ask.
-
 ```bash
-current=$(git branch --show-current)
+base=$(.claude/skills/from-issue/scripts/sync-base-branch.sh)
 ```
 
-- If `current` matches `^[A-Z][A-Z0-9]*-[0-9]+-` (a ticket branch from a prior run), it is **not** a valid base. Resolve the **integration base** — the branch this project's ticket PRs target (commonly `main`, or a long-lived integration branch during a build-up). Prefer the branch `current` was cut from; if you cannot determine it unambiguously, **ask the user**: _"You're on `<current>` (a prior ticket's branch). Which branch should `<KEY>` branch from?"_ Then `git checkout <integration-base>`.
-- Otherwise `current` already is the base.
+The script resolves the branch this run will branch from (Step 11 targets it, and the Step 5/8
+"does this feature already exist?" checks read its tree), verifies the tree is clean, and
+fast-forwards it onto its remote. It never forces and never auto-merges.
 
-**(b) Sync the chosen base with its remote** — catches a stale local base (work merged on the remote but not pulled), so the existence checks don't wrongly conclude a feature is new and fork a colliding copy (the SW-7/SW-8 collision).
+| Exit | Meaning |
+| ---- | ------- |
+| 0 | `$base` holds the resolved branch — continue |
+| 10 | You are on a previous ticket's branch. **Ask the user** which branch `<KEY>` should branch from, check it out, re-run. Never guess |
+| 11 | Working tree is dirty. Abort with the script's message |
+| 12 | The base diverged from its remote. Abort with the script's message |
 
-```bash
-base=$(git branch --show-current)   # the resolved integration base from (a)
-git fetch origin "$base"
-```
-
-- **Working tree must be clean.** If `git status --porcelain` is non-empty, abort: _"working tree is dirty — commit/stash before running /from-issue."_
-- If `origin/$base` exists, **fast-forward only**: `git merge --ff-only "origin/$base"`. If that fails (local diverged from the remote), abort: _"`<base>` isn't a clean fast-forward of `origin/<base>` — reconcile them, then re-run."_ Never force or auto-merge.
-- If `origin/$base` has no remote-tracking counterpart (purely local base), skip the sync.
-
-Together this makes the "let a feature's PR merge before the next ticket on that feature" discipline reliable: the new ticket branches from a current integration base that includes prior merged work, so this run **augments** the existing feature instead of forking a conflicting copy.
+Exit 10 is the one case that needs a person: the script can tell that the current branch is a
+prior run's, but not which base was intended.
 
 ### 2. Fetch the ticket
 
@@ -362,79 +356,11 @@ If every test passed **and** Step 9 was clean, continue to Step 11. If anything 
 
 ### 10.5. Fix loop — the no-red-PR gate
 
-A `/from-issue` run **never opens a red PR** (ADR-0020, which supersedes the treatment of
-failures in Steps 9 and 10). Enter this step whenever the typecheck or any test failed.
+**Only if Step 9 or Step 10 failed.** A run never opens a red PR (ADR-0020). Read
+[`fix-loop.md`](fix-loop.md) and follow it — the diagnosis, the 3-attempt budget, the list of
+fixes that are never allowed, and what a blocked run reports instead of opening a PR.
 
-#### First: is the generated code wrong, or is the app wrong?
-
-Diagnose before editing anything. A failing test is not automatically a broken test — this is
-a QA framework, and a test that faithfully encodes its AC while the app misbehaves has found
-a bug. "Fixing" it would delete the finding.
-
-- **Generated code is wrong** — wrong selector, bad import, a Page Object method that doesn't
-  do what the test assumed, a tag routed to a project that isn't wired, a type error →
-  fixable. Continue the loop.
-- **The app is wrong** — the selector resolves, the flow runs, and the app's actual behavior
-  contradicts an AC the ticket asserts → **STOP.** Do not touch the test. Go to "Reporting a
-  blocked run" and say plainly that the ticket's AC and the app disagree.
-- **Cannot tell** → treat it as "the app is wrong" and stop. Guessing produces a test that
-  passes by meaning nothing.
-
-#### The loop
-
-Budget: **3 fix attempts.** For each attempt:
-
-1. State the diagnosis in one line before editing — what failed and why.
-2. Apply the **narrowest** fix, and only to artifacts THIS run produced: the spec, and the
-   Page Object if this run created it or appended to it. Verify a corrected selector against
-   the live page with `/playwright-cli` instead of guessing a second time.
-3. Re-run Step 9 (if the typecheck failed) and Step 10.
-4. Record the attempt: diagnosis, what changed, resulting status.
-
-**Stop early** when the same failure signature repeats on two consecutive attempts. The
-diagnosis isn't converging, and further attempts spend tokens without producing information.
-
-**Never, on any attempt:**
-
-- delete a failing test, or mark it `.skip()` / `.fixme()`
-- weaken an assertion, or change an expected value to whatever the app happened to emit
-- add `await page.waitForTimeout()` (lint blocks it — use auto-waiting assertions)
-- reinterpret an AC to match observed behavior
-- edit a spec or Page Object member this run did not generate — the one exception is the
-  deliberate `po_modified` modification already resolved in Step 5
-
-Each of these reaches green by making the run worthless. If green is only reachable that way,
-the run is blocked: report it.
-
-#### Outcome
-
-- **Green within budget** → continue to Step 11. Carry the attempt log into the PR body's
-  Verification section (per `pr-description-template.md`): the reviewer needs to see that the
-  first run was red and what changed to fix it.
-- **Budget exhausted, non-converging, or blocked** → "Reporting a blocked run", below.
-
-#### Reporting a blocked run
-
-**Skip Steps 11, 11.5 and 12 entirely.** No branch, no commit, no push, no PR, no TCMS
-artifact. The generated files stay on disk for you to inspect and finish by hand.
-
-Report to the user:
-
-- Why the run is blocked: budget exhausted, non-converging, or an app/AC contradiction.
-- Every file this run wrote or modified, by path.
-- The final failure output, verbatim — type errors and/or the failing tests.
-- The full attempt log: per attempt, the diagnosis, what changed, and the resulting failure.
-- The recommended next step. For an app/AC contradiction, say that the ticket may be
-  describing a real defect and should go back to the reporter rather than into a spec.
-
-Then stop. Do not ask whether to open the PR anyway — the gate is the point.
-
-**Where the test goes next is not your call** (ADR-0024). If the user decides the application
-is at fault and files a defect, the test lands annotated with `test.fail()` referencing that
-defect — it runs for real, keeps CI green while the bug lives, and turns red the day the fix
-lands. **Never apply that annotation yourself, and never offer to.** An agent that can mark
-any failing test as expected-to-fail has a one-line way to make anything green, which is the
-same escape hatch as weakening an assertion. Report; the person decides.
+If both steps passed, skip straight to Step 11.
 
 ### 11. Branch + commit + push
 

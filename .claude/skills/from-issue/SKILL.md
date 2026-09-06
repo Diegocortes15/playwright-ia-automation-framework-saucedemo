@@ -39,6 +39,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 ## References
 
 - [`references/workflow.md`](references/workflow.md) — the procedural workflow
+- [`references/fix-loop.md`](references/fix-loop.md) — the no-red-PR gate: diagnosis, retry budget, forbidden fixes (Step 10.5; read only when a run goes red)
 - [`references/test-template.md`](references/test-template.md) — canonical test-file template
 - [`references/pr-description-template.md`](references/pr-description-template.md) — structured PR body template
 - [`references/bucket-classification.md`](references/bucket-classification.md) — Positive/Negative/Edge bucket definitions + worked examples (C.2.b)
@@ -51,6 +52,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 
 ## Scripts
 
+- [`scripts/sync-base-branch.sh`](scripts/sync-base-branch.sh) — resolves the base branch, refuses a prior ticket's branch, and fast-forwards onto the remote. Used by workflow Step 1.5.
 - [`scripts/typecheck-spec.sh`](scripts/typecheck-spec.sh) — typechecks the files a run generated against the project's own `tsconfig.json` (path aliases included), always cleaning up its throwaway config. Resolves `tsc` from `node_modules/.bin` only. Used by workflow Step 9.
 
 ## Composition
