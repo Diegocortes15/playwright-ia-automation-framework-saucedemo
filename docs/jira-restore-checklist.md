@@ -54,13 +54,34 @@ exercised now. Two fixtures ship in `tickets/`:
       Ran green and produced **PR #46**, which was then **closed unmerged on 2026-09-06** — see
       "The `--from-file` TCMS contradiction" below. It could not be merged without breaking the
       merge build, which is a finding rather than a failure of the run.
-- [ ] `/from-issue --from-file tickets/SW-902-problem-user-sort.md` — **the branch that has
-      never fired.** Its AC asserts `problem_user` can sort, which `docs/app/users.md`
-      documents as broken. A correct run stops and reports an app-versus-AC contradiction.
-      **A green PR here is a bug in the gate, not a success.**
+- [x] ~~`/from-issue --from-file tickets/SW-902-problem-user-sort.md` — **the branch that has
+      never fired.**~~ **Superseded by a better test.** That branch fired on 2026-09-06 against a
+      **real Jira ticket** (SW-13), which is strictly stronger evidence than the file fixture would
+      have been: only Step 2 differs between the two paths, and the Jira path was the one never
+      exercised. The run stopped and reported the contradiction with 0 fix attempts. See §1.
 
 Only the ticket _read_ still needs Jira. Everything below is about the read itself, or about
 behaviour that only a real ticket exercises.
+
+### `tickets/` is not scratch — do not delete it
+
+Considered and rejected on 2026-09-07. The two fixtures look like leftovers now that SW-13 exists,
+but three things depend on them:
+
+- **[ADR-0024](adr/0024-blocked-test-lands-as-expected-failure.md)'s Context cites the SW-902 run**
+  as the concrete case that motivated the whole decision. ADRs are superseded, never edited, so
+  deleting the file leaves an ADR citing something that does not exist — the exact defect the
+  `/from-issue` citation audit was cleaning up ("a citation that cannot be followed is worse than
+  none").
+- **`--from-file` is a shipped feature** (#42), still documented in `from-issue/SKILL.md`,
+  `references/workflow.md` and `docs/jira-tickets.md`. `tickets/README.md` plus these two files are
+  its only worked examples.
+- **The `--from-file` TCMS contradiction is still undecided** (see §0.7). These fixtures are the
+  test material for whichever way it goes.
+
+Also worth correcting a natural assumption: **SW-901's content is not in Jira.** SW-902's became
+SW-13, but SW-901 was the cart-badge scenario, and PR #46 closed unmerged — so that file is the
+only place its acceptance criteria now exist.
 
 ## 0.7 Gaps found by actually running the pipeline
 
@@ -320,18 +341,40 @@ client?_ The prose in the tickets was close to fine. These two are not about pro
 
 ---
 
-## Temporary validation tests — DELETE WHEN NO LONGER NEEDED
+## ~~Temporary~~ validation tests — NO LONGER DELETABLE
 
 Added 2026-09-05 to verify the observation detectors, three of which had shipped without
 ever firing. They test the framework's instrumentation, not the application.
 
-**To remove, in full:**
+> **Reversed 2026-09-07. Do not delete these.** The removal plan below said "nothing else
+> references them", and that is **false**: [ADR-0021](adr/0021-runtime-observations.md)'s
+> `Enforced by:` field names them —
+>
+> > `src/observations/*.test.ts` cover the signature, merge and digest logic, and
+> > **`tests/_framework_validation/` exercises all four detectors including the failure path.**
+>
+> Deleting them would falsify that field, which is precisely the failure ADR-0023 exists to
+> record. It cannot be patched by editing ADR-0021 either — ADRs are superseded, never edited —
+> so removal would need a new ADR downgrading the enforcement to prose only. Five kilobytes of
+> tests is a much better deal than that.
+>
+> The contradiction is chronological, not anyone's mistake: the "deletable once `/from-issue`
+> has run" note was written 2026-09-05, and the `Enforced by:` backfill (#45) landed **after**
+> and made these tests load-bearing. Two items written days apart, pointing opposite ways.
+>
+> The spec file's own header comment (`_framework_validation.spec.ts:11-12`) repeats the same
+> stale "Nothing else references them" claim and should be corrected to point at ADR-0021.
 
-- [ ] `rm -rf tests/_framework_validation/`
-- [ ] Remove the four `OBSERVATION_PROBE` / dialog entries from `.observations/observations.json`
-- [ ] Remove the `test:instrumentation` script from `package.json`
-- [ ] Nothing else references them. `src/observations/reporter.test.ts` is **not** part of
-      this — those are permanent unit tests for the merge logic and should stay.
+**If a future session still wants them gone**, the honest route is: keep the `test.fail()`
+failure-path probe (the only case the real runs do not cover — see the table below), drop the
+rest, and write the ADR that adjusts ADR-0021's `Enforced by:` to match. Not worth it today.
+
+~~- [ ] `rm -rf tests/_framework_validation/`~~
+~~- [ ] Remove the four `OBSERVATION_PROBE` / dialog entries from `.observations/observations.json`~~
+~~- [ ] Remove the `test:instrumentation` script from `package.json`~~
+~~- [ ] Nothing else references them.~~ — **the last line was the wrong one.**
+`src/observations/reporter.test.ts` is still **not** part of this; those are permanent unit
+tests for the merge logic and should stay.
 
 What they proved, so the cost of deleting them is known:
 
@@ -348,13 +391,14 @@ Run them with `npm run test:instrumentation`. The script deliberately passes **n
 read them with `npm run observations`.
 
 ~~Keep them until `/from-issue` has run end-to-end at least once; the observation pipeline has
-no other coverage.~~ **That condition is now met** (2026-09-06): `/from-issue` ran end-to-end on
-SW-12 and SW-13, and both runs exercised the observation pipeline through the real reporter. So
-these are now deletable — the four steps above are unblocked. The one thing they still cover that
-the real runs do not is the **`test.fail()` failure path** ("an observation raised before a failing
-assertion survives into the file"), which is worth a thought now that SW-13's landed tests are
-`test.fail()` in earnest: check whether the real annotated tests record observations before deleting
-the probe that proved they could.
+no other coverage.~~ That condition was met on 2026-09-06 — `/from-issue` ran end-to-end on SW-12
+and SW-13, both through the real reporter — but it turned out not to be the condition that
+mattered. See the reversal above.
+
+- [ ] Worth checking regardless: **do SW-13's landed `test.fail()` tests record observations?**
+      That is the one case these probes uniquely cover, and there are now real annotated tests to
+      compare against. If the real ones cover it, the failure-path probe becomes redundant and the
+      removal conversation gets simpler.
 
 ## Not blocked on Jira — can be done any time
 
