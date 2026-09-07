@@ -62,6 +62,12 @@ comes up most often:
 That is a definition-of-done item the person fixing the defect genuinely needs; the ADR number is
 not.
 
+**A defect is filed as a `Bug`, never a `Story`.** The `SW` project gained a `Bug` issue type on
+2026-09-07; before that, SW-14 was filed as a `Story` with a `defect` label and a `[BUG]` summary
+prefix, and both were workarounds that went away with their cause. This is not cosmetic: a tracker
+where defects are Stories breaks filters, dashboards, defect-density reporting and any SLA built on
+issue type. Whoever files — a person today, possibly a skill later — picks `Bug`.
+
 **The asymmetry is deliberate.** References from the repo _into_ a ticket are load-bearing — a
 spec's `// Source:` header, a `.tcms/records/` entry's `jira` array, a branch named key-first —
 because that traceability is the point. References from a ticket _out_ to an ADR pay nothing back.

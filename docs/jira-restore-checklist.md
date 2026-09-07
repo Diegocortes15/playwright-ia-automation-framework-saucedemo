@@ -301,11 +301,10 @@ None of these came from reading code. They are ordered by how much damage they w
 Prompted by the right question: _is this professional for an automation framework, assuming a real
 client?_ The prose in the tickets was close to fine. These two are not about prose.
 
-- [ ] **The `SW` project has no `Bug` issue type**, so SW-14 was filed as a `Story` with a `defect`
-      label and a `[BUG]` summary prefix. That is a workaround, and in a client engagement it is the
-      thing a PM notices within a week: a tracker where defects are Stories breaks filters,
-      dashboards, defect-density reporting and any SLA. **Fix the project before filing the next
-      one.** `getJiraProjectIssueTypesMetadata` confirms only Epic, Subtask and Story exist.
+- [x] ~~**The `SW` project has no `Bug` issue type.**~~ Fixed 2026-09-07: the type was added to the
+      project, SW-14 converted to it, and both workarounds removed — the `[BUG]` summary prefix and
+      the `defect` label went away with their cause. The convention is now recorded in
+      `docs/jira-tickets.md`: a defect is filed as a `Bug`, never a `Story`.
 
 - [ ] **Captured evidence is not shareable.** Screenshots, video and traces live at absolute paths
       under `test-results/` on the machine that ran the suite, so a bug report's "Evidence" section
