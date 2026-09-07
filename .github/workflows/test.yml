@@ -39,6 +39,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # A documented command that cannot run is a broken instruction, and nothing executes
+      # documentation — this is how /scaffold-page-object told three months of runs to invoke a
+      # binary that is not on PATH.
+      - name: Lint documented commands
+        run: npm run lint:docs
+
       # Formatting drifts silently without a gate: four files sat unformatted on main for
       # months because nothing checked. `.observations/` is excluded in .prettierignore —
       # it is machine-written, not source.

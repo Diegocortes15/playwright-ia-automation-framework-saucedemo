@@ -15,6 +15,7 @@
     "test:smoke": "playwright test --grep \"@smoke\"",
     "test:regression": "playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
+    "lint:docs": "node scripts/check-doc-commands.mjs",
     "test:instrumentation": "playwright test tests/_framework_validation --project=chromium-no-auth",
     "observations": "tsx src/observations/report.ts",
     "report": "playwright show-report",
