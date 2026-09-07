@@ -782,9 +782,27 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
 - [x] ~~**Backfill de `Enforced by:`**~~ — **ya estaba hecho**, lo cerró PR #45; los 26 ADRs
       tienen el campo. Este ítem sobrevivió al triaje por inercia y se verificó el 2026-09-07
-      recorriéndolos uno por uno. Lo que sí queda vivo, y es otra cosa, es auditar los que dicen
-      `Nothing — prose only` afirmando un invariante que una máquina _sí_ podría chequear — ADR-0012
-      es el candidato, porque su propio texto admite que "a lint could check a branch name".
+      recorriéndolos uno por uno.
+- [x] ~~**Auditar los `Nothing — prose only`**~~ — **hecho el 2026-09-07**, los 26 uno por uno.
+      Siete lo declaran: ADR-0006, 0007, 0009, 0010, 0012, 0020, 0022.
+
+      **Cinco están bien así.** ADR-0010, 0020 y 0022 gobiernan la conducta de un agente —
+      ninguna máquina puede verificar que un diagnóstico fue honesto o que una sección
+      `Obstacles` dice la verdad, y ADR-0022 ya lo argumenta en sus propias alternativas.
+      ADR-0006 y 0009 registran una elección sin invariante que chequear.
+
+      **Uno sí era chequeable y ya tiene gate: ADR-0007.** Decide algo sin ambigüedad — _"Do not
+      install a GitHub MCP server"_ — sobre un archivo, `.mcp.json`, que ningún linter lee.
+      Instalar un MCP es una acción de un comando, así que la decisión podía revertirse sin
+      dejar rastro. Lo cubre `scripts/check-adr-invariants.mjs` (`npm run lint:adr`, en CI).
+
+      **ADR-0012 se descartó, y conviene dejar escrito por qué** para no re-litigarlo: el chequeo
+      posible es la forma del nombre de rama, y las ramas humanas de este repo (`fix/…`,
+      `docs/…`, `chore/…`) lo violarían todas, así que el gate necesitaría exceptuar justo lo
+      que no puede distinguir. El ADR ya admite que la forma es chequeable y la fidelidad de la
+      normalización no; certificar la cáscara y no el contenido compra tranquilidad falsa, que
+      es peor que no tener gate.
+
 - **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
   `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
   de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.

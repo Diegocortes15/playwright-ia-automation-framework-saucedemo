@@ -45,6 +45,11 @@ jobs:
       - name: Lint documented commands
         run: npm run lint:docs
 
+      # Configuration files are read by no linter, so a decision recorded about one can be
+      # reversed by accident and leave no trace.
+      - name: Lint ADR invariants
+        run: npm run lint:adr
+
       # Formatting drifts silently without a gate: four files sat unformatted on main for
       # months because nothing checked. `.observations/` is excluded in .prettierignore —
       # it is machine-written, not source.
