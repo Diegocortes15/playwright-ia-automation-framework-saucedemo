@@ -42,7 +42,6 @@
       "thirdParty": false,
       "count": 1,
       "seenIn": [
-        "_e2e_probe",
         "login"
       ],
       "firstSeen": "2026-09-07",
@@ -51,7 +50,7 @@
       "sample": {
         "message": "Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
         "url": "https://www.saucedemo.com/",
-        "test": "locked_out_user sees a welcome banner on the login page",
+        "test": "locked_out_user with a wrong password still sees the lockout error",
         "project": "chromium-no-auth"
       }
     },
@@ -240,7 +239,6 @@
         "project": "chromium-no-auth"
       },
       "seenIn": [
-        "_e2e_probe",
         "_evidence_probe",
         "login",
         "logout"
@@ -263,7 +261,6 @@
         "project": "chromium-no-auth"
       },
       "seenIn": [
-        "_e2e_probe",
         "_evidence_probe",
         "login",
         "logout"

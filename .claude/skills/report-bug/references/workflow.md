@@ -22,6 +22,8 @@ node .claude/skills/report-bug/scripts/collect-failure.mjs [--grep "<substring>"
 
 Do **not** hunt for these facts by hand if the script fails — fix the run, then re-run the script. Reconstructing them by reading files is how a report ends up describing a different failure than the one that happened.
 
+**Its `evidence` block is raw run output, not something to paste into the draft.** Those are absolute paths inside hashed `test-results/` directories on one machine, which is exactly what `report-template.md` forbids in a report. They are there so Step 1.5 knows what to copy. Name the folder Step 1.5 prints instead.
+
 ### 1.5. Collect the evidence into one place
 
 ```bash
