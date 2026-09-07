@@ -43,6 +43,19 @@ export interface TestRecord {
   feature: string; // suite root, e.g. 'login'
   contextLabel: string; // e.g. 'no auth', 'problem_user'
   jira: JiraRef[]; // ticket(s) this test traces to — per-record so a feature file spans tickets
+  // Present only on a test marked `test.fail()` because the application, not the test, is
+  // wrong (ADR-0024). It is what lets the Playwright report explain the expected failure in
+  // words instead of showing a bare "expected" status, and it is the machine-readable half of
+  // ADR-0024's rule that the annotation must name the defect — an unattributed test.fail() is
+  // indistinguishable from a test somebody gave up on.
+  expectedFailure?: ExpectedFailure;
+}
+
+// The defect a `test.fail()` test is locked to.
+export interface ExpectedFailure {
+  key: string; // e.g. 'SW-14'
+  url: string;
+  reason: string; // one plain sentence: what the application does that it should not
 }
 
 export interface SyncMeta {
