@@ -37,6 +37,35 @@ Then "Epic sadface: Password is required" is shown
 
 Run `/refine-ticket SW-123` first — it scores the ticket against exactly these tips, fills the gaps with you (using what's already automated + app docs + anything you point it at), and writes the hardened acceptance criteria back to the ticket. Then run `/from-issue SW-123`. See [`refine-ticket.md`](refine-ticket.md).
 
+## What goes in a ticket, and what stays in the repo
+
+The skills write into tickets in two places — `/refine-ticket`'s acceptance-criteria block, and a
+bug-report draft a person files after a blocked run. Both are read by people who may have no
+access to this repository, so the line is about the reader, not about secrecy.
+
+**Name the tooling. Gloss it once.** A ticket should say which skill produced an artifact, because
+that changes how the reader weighs it: repro steps extracted from a test's own `test.step` names
+are not the same evidence as steps somebody performed by hand, and a reader who does not know
+which they are reading will mis-attribute a repro that fails. Write it so it explains itself —
+`drafted by the suite's bug-report tooling (/report-bug)`, not a bare `/report-bug`.
+
+**Never cite an ADR in a ticket.** `Per ADR-0024` means nothing to a developer without this repo,
+and it is internal governance rather than product information. When an ADR's consequence matters
+to the reader, state the consequence in product language and drop the citation. The one that
+comes up most often:
+
+> ~~Per ADR-0024, the blocked test lands annotated `test.fail()`.~~
+>
+> An automated regression test for this defect is already committed, currently marked as an
+> expected failure. **When you fix this, remove that mark in the same pull request.**
+
+That is a definition-of-done item the person fixing the defect genuinely needs; the ADR number is
+not.
+
+**The asymmetry is deliberate.** References from the repo _into_ a ticket are load-bearing — a
+spec's `// Source:` header, a `.tcms/records/` entry's `jira` array, a branch named key-first —
+because that traceability is the point. References from a ticket _out_ to an ADR pay nothing back.
+
 ## What happens next
 
 The skill generates tests on branch `SW-123-<feature>` (key-first, per [ADR-0012](adr/0012-from-issue-conventions.md)), opens a GitHub PR, and the GitHub-for-Jira app links the PR onto the ticket. The PR is the review gate. Re-running a ticket that already contributed to a spec refuses (see [ADR-0010](adr/0010-from-issue-augment-mode.md)); the skill augments the existing spec when a _new_ ticket extends a feature.

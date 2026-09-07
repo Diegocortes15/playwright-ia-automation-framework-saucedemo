@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// ⚠️  TEMPORARY — DELETE THIS ENTIRE DIRECTORY WHEN NO LONGER NEEDED  ⚠️
+// ⚠️  FRAMEWORK INSTRUMENTATION — NOT APPLICATION TESTS. DO NOT DELETE (see below)  ⚠️
 //
 // These tests do NOT test the application. They test the framework's own runtime
 // instrumentation: the `_observations` fixture from ADR-0021.
@@ -8,9 +8,11 @@
 // fired against a real run. `console-error`, `page-error` and `dialog` were shipped
 // unverified. These four tests are the proof they work.
 //
-// To remove: `rm -rf tests/_framework_validation` and delete
-// `.observations/_framework_validation.json`. Nothing else references them.
-// Tracked in `docs/jira-restore-checklist.md` under "Temporary validation tests".
+// NOT removable as of 2026-09-07: ADR-0021's `Enforced by:` field names this directory as
+// what exercises all four detectors including the failure path. Deleting it would falsify
+// that field, and an ADR is superseded rather than edited — so removal needs a new ADR that
+// downgrades the enforcement. The earlier note here claimed nothing else referenced these
+// tests; that was wrong. Tracked in `docs/jira-restore-checklist.md` under "validation tests".
 //
 // Deliberate exception to CLAUDE.md composition rule #4 ("tests know about Pages and
 // Data only"): tests 1 and 2 reach for `page` directly because a console error and an

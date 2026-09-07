@@ -14,7 +14,8 @@ larga, leer este archivo antes de tocar código.
 - **Framework**: Playwright + TypeScript + Claude Code Skills
 - **Tesis arquitectónica**: authoring con IA, runtime determinista
 - **Skills actuales** (`.claude/skills/`): /refine-ticket, /from-issue,
-  /scaffold-page-object, /playwright-cli
+  /scaffold-page-object, /report-bug, /playwright-cli — **cinco**, no cuatro;
+  /report-bug entró en el PR #43 y varias notas de abajo siguen diciendo "las 4 skills"
 - **Integraciones**: Atlassian MCP (Jira), GitHub CLI, Qase TCMS (con
   seam swappable en `src/tcms/qase-client.ts`)
 - **CI dual**: PRs corren solo specs cambiados + typecheck/lint gate;
@@ -570,9 +571,20 @@ mismo trabajo:
 
 ## Bloqueado por Jira (2026-09-05)
 
-Se perdió el acceso a la instancia gratis de Jira por inactividad, y ya se pidió de nuevo.
-Todo lo que necesite leer un ticket está frenado — incluida la validación end-to-end de las
-4 skills. El checklist para retomar cuando vuelva está en `docs/jira-restore-checklist.md`.
+~~Se perdió el acceso a la instancia gratis de Jira por inactividad, y ya se pidió de nuevo.~~
+**RESUELTO el 2026-09-06.** El MCP reconectó, el proyecto `SW` sobrevivió intacto, y `/from-issue`
+corrió end-to-end contra tickets reales de Jira en sus dos ramas críticas: camino feliz (SW-12 →
+PR #48, verde al primer intento) y contradicción app-vs-AC (SW-13 → bloqueado sin PR, después
+aterrizado como `test.fail()` contra SW-14 → PR #49).
+
+Lo que **sigue bloqueado** es `/refine-ticket` end-to-end, pero por otra causa: **Confluence no
+está accesible** en este site (404 en el endpoint, y el token declara solo `read/write:jira-work`).
+No se distingue desde la API si el producto no está provisionado o si el grant nunca pidió los
+scopes.
+
+El hallazgo más grande de correrlo no tuvo nada que ver con los ADR 0019–0022:
+**`/scaffold-page-object` abortaba en toda invocación desde el 2026-06-03** y nadie lo sabía porque
+nunca se había ejecutado (PR #47, ADR-0025). Estado detallado en `docs/jira-restore-checklist.md`.
 
 Vale decirlo sin adornos: los ADR 0019–0022 se diseñaron y mergearon **sin haber corrido
 `/from-issue` ni una vez** en esa sesión. Salieron de razonar sobre el código, no de ver el
