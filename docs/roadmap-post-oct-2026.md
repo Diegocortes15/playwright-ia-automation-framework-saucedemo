@@ -54,15 +54,51 @@ Preferir scripts sobre instrucciones dentro de skills.
 
 ### 4. Disciplina de ADRs
 
-ADRs SOLO cuando cambia una decisión arquitectónica.
+> **Revisado 2026-09-07 contra la práctica documentada.** Se contrastó con el
+> [Azure Well-Architected Framework][waf], [arc42 §9][arc42] y el
+> [post original de Nygard][nygard]. Dos mitades se confirmaron tal cual, dos
+> estaban flojas y se ajustaron. El detalle y las fuentes están en
+> `docs/adr/README.md`.
 
-Regla mental: "¿un nuevo dev en 6 meses necesitaría esto para
-entender por qué el código está así?"
+**La inmutabilidad se queda — no era el problema.** Es la guía de Microsoft
+palabra por palabra: _"The ADR serves as an append-only log. Don't go back and
+edit accepted records. If a decision changes, write a new record that supersedes
+the original and link the two together."_ Al revertir: NUEVO ADR + marcar el
+anterior `Superseded by ADR-XXXX`. NUNCA editar un ADR aceptado.
 
-Framework maduro tiene 10-20 ADRs en toda su vida, no cientos.
+**La vara de admisión sube a la de Microsoft**, que es más estricta que
+"cambió una decisión arquitectónica":
 
-Al revertir una decisión: NUEVO ADR + marcar el anterior como
-"Superseded by ADR-XXXX". NUNCA editar ADR existente.
+> _Only include choices that affect the system's **structure**, **key quality
+> attributes**, or are **difficult to reverse**._
+
+Si no pasa la vara, la decisión igual se escribe — en la reference o el doc que
+gobierna, donde va a estar parada la persona a la que le afecta. ADR-0025 es el
+ejemplo a medir: arregló un bug real, y por esta vara debió ser el arreglo más
+una nota.
+
+**Los ADRs NO son la guía de diseño.** Microsoft otra vez: _"Avoid making
+decision records design guides."_ Esta es la causa real del dolor de
+mantenimiento — si para saber cómo carga JSON hoy hay que leer 0005 **y** 0023,
+estás leyendo un log de auditoría para averiguar el presente. Dos capas:
+
+- **Presente (mutable):** `docs/architecture.md` y `docs/app/`. Se corrigen en el
+  lugar cuando cambian, con nota de qué decían antes. Es el §4 de arc42.
+- **Log (inmutable):** `docs/adr/`. Solo el _por qué_, nunca el _qué es hoy_.
+
+**El número: contá solo decisiones originales.** El 10-20 era una convención
+local sin fuente citada — ni Nygard ni arc42 ni Microsoft prescriben cantidad — y
+tomado literal contradice la regla de supersede, que fabrica registros
+mecánicamente. Al 2026-09-07: 26 registros, 8 de ellos exigidos por esa regla,
+**18 decisiones originales**. El conteo vive en `docs/adr/README.md` para que sea
+visible antes de escribir el siguiente, que es lo que nadie podía hacer antes.
+
+Regla mental que sobrevive intacta: _"¿un nuevo dev en 6 meses necesitaría esto
+para entender por qué el código está así?"_
+
+[waf]: https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record
+[arc42]: https://docs.arc42.org/section-9/
+[nygard]: https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
 
 ### 5. Antipatrones a NO caer
 
