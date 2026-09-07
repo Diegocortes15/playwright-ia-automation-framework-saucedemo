@@ -34,11 +34,16 @@ test.describe('product_detail — standard_user', { tag: '@standard' }, () => {
       await inventoryPage.openProductDetail(backpack.name);
 
       // saucedemo renders no badge at all for an empty cart, so getCartBadgeCount()
-      // reports 0 for "absent" (see CartBadge).
+      // reports 0 for "absent" (see CartBadge). A single read is right here: nothing has
+      // acted yet, and polling for 0 would pass just as vacuously against a page that had
+      // not finished rendering.
       expect(await productDetailPage.getCartBadgeCount()).toBe(0);
 
       await productDetailPage.clickAddToCart();
-      expect(await productDetailPage.getCartBadgeCount()).toBe(1);
+      // But this one follows an action, so it must retry — the badge is rendered by the
+      // client after the click, and a single read races it. Same reason the rest of the
+      // suite polls (see tests/cart/cart.spec.ts).
+      await expect.poll(() => productDetailPage.getCartBadgeCount()).toBe(1);
     });
 
     test('back to products returns to the inventory page with the full catalog', async ({

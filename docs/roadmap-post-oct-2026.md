@@ -472,14 +472,38 @@ repite, no los tres de una.
       como gate de CI. Un hook sería una segunda verificación más débil
     - Hook on file save de `.claude/skills/*/SKILL.md`: validar
       frontmatter (description no vacía, ≤1024 chars, parseable)
-14. **Probar Explore built-in subagent** con las preguntas del
-    pain point de Fox ANTES de construir `/find-tests` custom:
-    - "¿dónde están tests de X?"
-    - "¿qué tests usan problem_user?"
-    - "este flujo toca A y B, ¿dónde va el nuevo test?"
-    - Si Explore resuelve 60%+, `/find-tests` custom pierde
-      justificación o se reduce a subset específico (convenciones
-      del framework que Explore no conoce)
+14. ~~**Probar Explore built-in subagent** antes de construir `/find-tests`~~ —
+    **HECHO (2026-09-07). `/find-tests` DESCARTADO: Explore sacó 9/9.**
+
+    Un agente por pregunta, para que no se contaminaran, y la rúbrica se congeló **antes**
+    de leer las respuestas. El umbral del ítem era 60%.
+
+    | Pregunta                           | Puntos | Lo que resolvió                                                                                                                                |
+    | ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+    | ¿dónde están los tests de sorting? | 3/3    | Los dos bloques; que los de `@problem` son `test.fail()` contra SW-14 vía ADR-0024; descartó el hit de `_framework_validation` como no-sorting |
+    | ¿qué tests usan problem_user?      | 3/3    | Separó _correr como_ el usuario de _usar sus credenciales_ en `chromium-no-auth`; explicó el routing por `AUTH_USERS`                          |
+    | ¿dónde va el test nuevo?           | 3/3    | Augmentar (ADR-0010), buckets, `{ tag }` (ADR-0015), `@fixtures/test`, y la regla #4                                                           |
+
+    **No se reduce a "el subset de convenciones que Explore no conoce", porque no hubo tal
+    subset.** Citó números de ADR, reglas de eslint, que el fixture `_reportAnnotation` deriva
+    el feature con `basename(dirname(testInfo.file))`, y que hace falta el registro companion
+    en `.tcms/records/<feature>.json`. La premisa del ítem —que las convenciones del framework
+    serían el hueco— resultó falsa: es justo donde estuvo más fuerte.
+
+    **Encontró dos cosas que la verdad de referencia no tenía**, y una de ellas era un defecto:
+    - `product_detail.spec.ts` afirmaba el badge con `expect(await …)` justo después de
+      `clickAddToCart()` — una lectura única, sin reintento, contra un badge que el cliente
+      renderiza después del click. Corregido a `expect.poll`. La aserción del `0` inicial se
+      dejó como estaba **a propósito**, con el motivo escrito al lado: no sigue a ninguna
+      acción, y pollear un `0` pasa igual de vacuamente contra una página a medio renderizar.
+    - **`@all-users` no lo usa ningún test.** Está en el `grep` de `playwright.config.ts` y
+      documentado en la tabla de `CLAUDE.md`, pero cero specs lo llevan, así que hoy todo test
+      está clavado a un usuario. No es un bug —ADR-0014 hace crecer por demanda— pero la tabla
+      se lee como si estuviera en uso.
+
+    Lo que Explore **no** hace, y conviene no olvidar: no escribe, no decide, y arranca en frío
+    cada vez. Sirve para _encontrar_, no para _mantener_.
+
 15. ~~Crear subagent custom `pr-reviewer`~~ — **DESCARTADO (2026-09-07).**
     No era mala idea; **el terreno cambió debajo**. Se escribió antes de
     ADR-0022, antes de que el lint tuviera las reglas de ADR-0001/0003/0015/0023,
