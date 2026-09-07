@@ -10,13 +10,14 @@
       ],
       "firstSeen": "2026-09-07",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
         "url": "https://www.saucedemo.com/inventory.html",
         "test": "error_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
-      }
+      },
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
     },
     {
       "signature": "console-error:Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: Response to preflight r",
@@ -28,13 +29,14 @@
       ],
       "firstSeen": "2026-09-07",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
         "url": "https://www.saucedemo.com/inventory.html",
         "test": "back button after logout does not restore the session",
         "project": "chromium-no-auth"
-      }
+      },
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
     },
     {
       "signature": "console-error:Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the ",
@@ -46,13 +48,14 @@
       ],
       "firstSeen": "2026-09-07",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
         "url": "https://www.saucedemo.com/",
         "test": "locked_out_user with a wrong password still sees the lockout error",
         "project": "chromium-no-auth"
-      }
+      },
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
     },
     {
       "signature": "console-error:OBSERVATION_PROBE console failure",
@@ -61,7 +64,7 @@
       "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE console failure",
         "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
@@ -70,7 +73,8 @@
       },
       "seenIn": [
         "_framework_validation"
-      ]
+      ],
+      "note": "Deliberate. tests/_framework_validation/ fabricates this to prove the detector fires - it is what ADR-0021's Enforced by: line points at. Not an application finding. Whether the detector still works is gated by those tests asserting the observation was recorded, never by this entry's status, so muting it here costs no coverage."
     },
     {
       "signature": "console-error:OBSERVATION_PROBE from a failing test",
@@ -79,7 +83,7 @@
       "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE from a failing test",
         "url": "https://www.saucedemo.com/assets/index-XyuNVFOR.js",
@@ -88,7 +92,8 @@
       },
       "seenIn": [
         "_framework_validation"
-      ]
+      ],
+      "note": "Deliberate. tests/_framework_validation/ fabricates this to prove the detector fires - it is what ADR-0021's Enforced by: line points at. Not an application finding. Whether the detector still works is gated by those tests asserting the observation was recorded, never by this entry's status, so muting it here costs no coverage."
     },
     {
       "signature": "dialog:alert:Sorting is broken! This error has been reported to Backtrace.",
@@ -97,7 +102,7 @@
       "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "Sorting is broken! This error has been reported to Backtrace.",
         "url": "https://www.saucedemo.com/inventory.html",
@@ -107,13 +112,14 @@
       },
       "seenIn": [
         "_framework_validation"
-      ]
+      ],
+      "note": "error_user's intentional broken-sort alert, triggered on purpose by tests/_framework_validation/ to prove the dialog detector fires. The alert is saucedemo's documented behaviour for that user (docs/app/users.md), not a defect. Today this entry and the page-error probe are the only coverage either detector has - see the roadmap's debt section."
     },
     {
       "signature": "failed-request:GET:https://www.saucedemo.com/cart.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 3,
+      "count": 1,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-07",
       "status": "ignored",
@@ -156,7 +162,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-one.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 10,
+      "count": 1,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-07",
       "status": "ignored",
@@ -199,7 +205,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 47,
+      "count": 1,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-07",
       "status": "ignored",
@@ -229,20 +235,21 @@
       "count": 7,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
         "url": "https://events.backtrace.io/api/summed-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "standard_user logs out from the menu and returns to the login page",
+        "test": "problem_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
       },
       "seenIn": [
         "_evidence_probe",
         "login",
         "logout"
-      ]
+      ],
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
     },
     {
       "signature": "failed-request:POST:https://events.backtrace.io/api/unique-events/submit:401",
@@ -251,20 +258,21 @@
       "count": 7,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
         "url": "https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "standard_user logs out from the menu and returns to the login page",
+        "test": "problem_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
       },
       "seenIn": [
         "_evidence_probe",
         "login",
         "logout"
-      ]
+      ],
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
     },
     {
       "signature": "page-error:OBSERVATION_PROBE uncaught failure",
@@ -273,7 +281,7 @@
       "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
-      "status": "new",
+      "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE uncaught failure",
         "url": "https://www.saucedemo.com/",
@@ -282,7 +290,8 @@
       },
       "seenIn": [
         "_framework_validation"
-      ]
+      ],
+      "note": "Deliberate. tests/_framework_validation/ fabricates this to prove the detector fires - it is what ADR-0021's Enforced by: line points at. Not an application finding. Whether the detector still works is gated by those tests asserting the observation was recorded, never by this entry's status, so muting it here costs no coverage."
     }
   ]
 }
