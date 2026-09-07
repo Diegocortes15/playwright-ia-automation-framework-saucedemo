@@ -2,6 +2,7 @@ import { basename, dirname } from 'node:path';
 import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '@pages/LoginPage';
 import { InventoryPage } from '@pages/InventoryPage';
+import { ProductDetailPage } from '@pages/ProductDetailPage';
 import { CartPage } from '@pages/CartPage';
 import { CheckoutInfoPage } from '@pages/checkout/CheckoutInfoPage';
 import { CheckoutOverviewPage } from '@pages/checkout/CheckoutOverviewPage';
@@ -15,6 +16,7 @@ import { ATTACHMENT_NAME, MAX_EVENTS_PER_TEST, type ObservationEvent } from '../
 type Pages = {
   loginPage: LoginPage;
   inventoryPage: InventoryPage;
+  productDetailPage: ProductDetailPage;
   cartPage: CartPage;
   checkoutInfoPage: CheckoutInfoPage;
   checkoutOverviewPage: CheckoutOverviewPage;
@@ -158,6 +160,9 @@ export const test = base.extend<
   },
   inventoryPage: async ({ page }, use) => {
     await use(new InventoryPage(page));
+  },
+  productDetailPage: async ({ page }, use) => {
+    await use(new ProductDetailPage(page));
   },
   cartPage: async ({ page }, use) => {
     await use(new CartPage(page));
