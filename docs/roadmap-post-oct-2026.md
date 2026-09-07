@@ -149,6 +149,8 @@ original más abajo donde haya conflicto.
 5. **Bloque A steps 5-7 (skill-audit + pre-commit hook + gate en CI):
    DESCARTADOS.** Ver la anotación inline en el Bloque A para la evidencia.
    `skill-validator` queda como comando manual pre-handoff.
+   _(Revertido el 2026-09-07: se descartó también como comando manual — ver el ítem
+   tachado más abajo. El texto de arriba queda como estaba en su momento.)_
 6. **PR rojo: RESUELTO** (ADR-0020, 2026-09-04). `/from-issue` ya no abre
    PRs rojos. Loop de 3 intentos de arreglo durante el authoring, con
    diagnóstico previo obligatorio de si el error es del código generado o
@@ -376,6 +378,9 @@ paralelo cuando se apruebe explícitamente.
 > - **`skill-validator` (agent-ecosystem): se queda, pero como comando
 >   manual, no como gate.** Sí lee `references/`, valida links y frontmatter,
 >   detecta huérfanos y **contabiliza tokens**. Documentado en CLAUDE.md.
+>   _(Revertido el 2026-09-07: descartado también como comando manual, porque un `grep`
+>   de una línea encuentra lo mismo sin sus dos falsos positivos y sin `brew trust`. El
+>   conteo de tokens sigue siendo lo único que no se reemplaza — ver el ítem tachado.)_
 >
 > Un gate en CI para 4 archivos que cambian dos veces al año, en un repo de
 > un solo autor, es teatro de compliance. Para un cliente el valor está en
@@ -786,8 +791,29 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
 ### Necesitan tu entorno o tu decisión
 
-- **Instalar `skill-validator`** (pasos en README.md). Importa más que antes: varias skills
-  cambiaron su grafo de links sin pasar por el único chequeo que verifica ADR-0019.
+- [x] ~~**Instalar `skill-validator`**~~ — **DESCARTADO (2026-09-07).** El ítem afirmaba que
+      varias skills cambiaron su grafo de links sin pasar por el único chequeo que verifica ADR-0019.
+      La primera mitad era cierta; **la segunda era falsa**, y el propio ADR-0019 ya lo decía en sus
+      alternativas: los cuatro defectos que la herramienta encontró alguna vez eran _"all broken
+      links, **all findable with `grep`**"_.
+
+  Medido antes de decidir. Un `grep` de una línea, ahora en README.md, contra una violación
+  inyectada de **cada** modo de falla (escape del repo, y una skill apuntando al archivo de una
+  hermana): las encontró las dos, y sobre el árbol limpio devuelve **cero**. Un script propio
+  que resolvía rutas de verdad encontraba lo mismo pero con **3 falsos positivos**, y
+  `skill-validator` trae **2** que este repo tuvo que documentar. El comando más corto ganó.
+
+  La objeción **no fue de seguridad**: es un proyecto MIT sano de una org comunitaria
+  independiente, y su `check` corre entero en local, sin red ni API key. Fue que instalarlo pide
+  `brew trust` sobre un tap de terceros para reemplazar un `grep` que ya funciona mejor.
+
+  **Cuándo volver a mirarlo:** su conteo de tokens, que ADR-0019 llama _"the part that earns its
+  keep"_ y que ningún `grep` reemplaza — el día que haya que achicar una skill. Y el gate en CI
+  sigue rechazado por ADR-0019 mientras se cumpla la escala que ese ADR nombra (un autor, pocas
+  skills, cambiando algunas veces al año); lo que da vuelta la decisión no es que el framework
+  sea profesional, es que las skills **salgan del repo**, porque ahí nadie va a grepear antes de
+  un handoff del que no se enteró.
+
 - **Bloque A step 2** — correr `claude --debug` y leer errores silenciosos de carga de skills.
 - **Bloque A step 3** — auditar las `description` de las skills contra 3-4 fraseos reales.
 - **Correr `/skill-doctor`** para medir qué cuesta cada skill en contexto de verdad.

@@ -4,7 +4,7 @@
 **Status:** Accepted. Scoped by [ADR-0019](0019-skill-portability.md): the
 compact-`SKILL.md` + verbose-`references/` layout stands, but a skill directory
 is now the portability boundary — no markdown link may resolve outside it.
-**Enforced by:** **Partly.** `skill-validator` checks the layout (compact `SKILL.md`, referenced `references/`), but it is a manual pre-handoff check rather than a CI gate — see ADR-0019's alternatives for why.
+**Enforced by:** **Nothing — prose only**, since 2026-09-07. The layout claim (compact `SKILL.md`, verbose `references/`) was checked by `skill-validator`, which this project dropped; ADR-0019 kept the portability half as a `grep`, but no equivalent one-liner reads "is this `SKILL.md` compact", and inventing a token threshold to fail on would be a number with no source behind it.
 
 ## Context
 
