@@ -23,11 +23,15 @@ Scenario 1: ...
 
 ## What a file-sourced run does differently
 
-Exactly three things (workflow Step 2); everything else is identical:
+Two things (workflow Step 2); everything else through Step 10 is identical:
 
 1. The generated spec's `// Source:` line names this file, never a Jira URL.
-2. `.tcms/records` gets `"jira": []` — there is no ticket to link.
-3. The PR body says it came from a local file, and the GitHub-for-Jira link won't appear.
+2. **The run stops after the tests pass.** No branch, no commit, no PR, and no `.tcms/records`
+   entry — a file-sourced run is a rehearsal, not a delivery path (ADR-0026).
+
+So use a file to exercise the pipeline or to test a change to the skill. To actually ship the
+generated tests, run the ticket: a catalogue case that traces to no requirement is the thing
+the TCMS mirror exists to prevent.
 
 ## The fixtures here
 

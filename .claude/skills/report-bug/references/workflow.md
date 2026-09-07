@@ -49,6 +49,11 @@ genuinely settles it is a person who knows whether the behaviour is intended.
 
 Follow [`report-template.md`](report-template.md) exactly. Every section, in order.
 
+**If the script returned `missing` instead of `acceptanceCriterion`**, render its reason in
+**Expected** before falling back to the assertion — the table in `report-template.md` gives the
+wording. `no-matching-record` is the *expected* state after a run blocked by ADR-0020, which
+writes no records artifact: do not treat it as an error, and do not go hunting for the file.
+
 Repro steps come from the script's `reproSteps` — these are the `test.step` titles the Page Objects already wrap each action in, so they are prose, not code. Use them verbatim; do not paraphrase them into something prettier that no longer matches what ran.
 
 ### 4. Hand it over

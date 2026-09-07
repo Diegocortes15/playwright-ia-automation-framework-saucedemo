@@ -33,7 +33,7 @@ One object per generated test, from the Step 6 model:
 
 Set `jira` to the ticket(s) **this** test traces to (usually just the one you're
 working). Write/append with the Write tool and `git add` it alongside the spec.
-Skip under `dry-run`. The sync rejects any record missing a non-empty `jira` array.
+Skip under `dry-run` **and under `--from-file`** (see below). The sync rejects any record missing a non-empty `jira` array, and with those two skips in place such a record is never written in the first place.
 
 ## What the merge-time sync does (`src/tcms/suite-sync.ts`, run by CI)
 
@@ -45,7 +45,8 @@ Mapping lives in `src/tcms/case-mapper.ts` + `suite-sync.ts` — do not re-deriv
 
 ## Runs sourced from a local file
 
-When the run used `--from-file` (workflow Step 2), write `"jira": []` on every record. There
-is no ticket to link, and inventing a key would corrupt both the Qase mirror and the report
-annotations that `src/utils/report-annotations.ts` derives from this file — a test would be
-labelled with an issue that does not exist.
+**They write no records at all** (ADR-0026). A file-sourced run skips Step 11.5 along with the
+branch, commit and PR: there is no ticket, so there is no requirement for a catalogue case to
+trace to. An earlier version of this file told you to write `"jira": []` instead — that produced
+exactly the artifact the sync is coded to reject (`suite-sync.ts` throws on an empty `jira`
+array), so a file-sourced PR could not be merged without failing the build on `main`.

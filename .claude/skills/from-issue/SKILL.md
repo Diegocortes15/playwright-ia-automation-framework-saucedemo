@@ -24,7 +24,7 @@ Or read the ticket from a local file instead of Jira — same pipeline, no Atlas
 
 > Use the from-issue skill with --from-file tickets/SW-901-inventory-cart-badge.md
 
-Jira stays the real ticket source (ADR-0011); a file is for exercising the pipeline and for testing changes to this skill without burning a real ticket. A file-sourced run never claims a Jira URL it did not read — see `references/workflow.md` Step 2 and `tickets/README.md`.
+Jira stays the real ticket source (ADR-0011); a file is for exercising the pipeline and for testing changes to this skill without burning a real ticket. It is a **rehearsal, not a delivery path**: the run generates, typechecks and executes the tests, then stops — no branch, no commit, no PR and no TCMS records (ADR-0026). A file-sourced run never claims a Jira URL it did not read. See `references/workflow.md` Step 2 and `tickets/README.md`.
 
 If the ticket's feature already has a generated spec, the skill **augments** that file (adds the new tests, and adds/modifies the Page Object as needed) instead of creating a new file — see ADR-0010. Re-running any ticket that already contributed to the file refuses. To force a separate file instead of augmenting:
 
@@ -51,7 +51,7 @@ Each names the step that needs it, so a run loads what it uses rather than every
 - [`references/test-principles.md`](references/test-principles.md) — F.I.R.S.T. principles and the anti-pattern gallery. **Step 7**; the gallery is the part that is specific to this repo.
 - [`references/pr-description-template.md`](references/pr-description-template.md) — the PR body's structure and rules. **Step 12**, and skipped entirely on a `dry-run`.
 - [`references/fix-loop.md`](references/fix-loop.md) — the no-red-PR gate: diagnosis, retry budget, forbidden fixes. **Step 10.5 only — read nothing of it when a run is green.**
-- [`references/tcms-sync.md`](references/tcms-sync.md) — the records artifact's shape. **Step 11.5**, and skipped on a `dry-run`.
+- [`references/tcms-sync.md`](references/tcms-sync.md) — the records artifact's shape. **Step 11.5**, and skipped on a `dry-run` or a `--from-file` run.
 
 ## Scripts
 
