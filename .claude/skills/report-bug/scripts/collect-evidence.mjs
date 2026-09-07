@@ -77,6 +77,11 @@ for (const spec of eachSpec({ suites: report.suites ?? [] })) {
       }
 
       const message = stripAnsi(result.error?.message ?? '').trim();
+      // A test.fail() test that fails as expected is not a "failure" to Playwright, so
+      // `screenshot: 'only-on-failure'` and `video: 'retain-on-failure'` keep neither. The
+      // trace survives (`trace: 'on'`) and carries a screenshot per step, but a reader who
+      // expected a .png needs to be told why there isn't one rather than left guessing.
+      const expectedFailure = test.status === 'expected';
       writeFileSync(
         join(dir, 'README.txt'),
         [
@@ -100,6 +105,17 @@ for (const spec of eachSpec({ suites: report.suites ?? [] })) {
           '',
           'It opens in a browser and needs no setup beyond the repository.',
           '',
+          ...(expectedFailure
+            ? [
+                'Why there is no screenshot or video',
+                '-----------------------------------',
+                'This test is marked test.fail(): it is locked to a known defect and is',
+                'expected to fail, so Playwright does not treat the failure as one and its',
+                "'only-on-failure' screenshot and 'retain-on-failure' video are not kept.",
+                'The trace above is unaffected and contains a screenshot at every step.',
+                '',
+              ]
+            : []),
           'Everything here was copied from the run output; the originals are untouched.',
         ].join('\n'),
         'utf-8',
