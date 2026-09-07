@@ -9,7 +9,7 @@
 3. **Existing automation (ground truth)** — read the repo:
    - `src/pages/` — real Page Objects + their action methods (confirms locations + capabilities).
    - `tests/` — existing specs (feeds the rubric's coverage flag).
-   - `data/` — real users + named scenarios (confirms roles + data).
+   - `data/` — named scenarios and reference data (confirms data). In *this* repo it holds only `shared/products.json`; the users live in `docs/app/users.md` (source 4). Check both rather than assuming either.
    - `src/fixtures/`, `src/components/` — what's wired.
 4. **App domain knowledge** — `docs/app/` when present: `users.md` (the real users), `flows.md`, `overview.md`, `glossary.md`.
 5. **Framework judgment** — `CLAUDE.md`, `from-issue/references/bucket-classification.md`, `from-issue/references/smoke-policy.md`, `from-issue/references/qa-analysis.md`.

@@ -93,7 +93,7 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   | `@error`              | `error_user`              |
   | `@visual`             | `visual_user`             |
 
-  `@sort-functional` is a secondary routing tag — combine it via an array on the relevant context, e.g. `{ tag: ['@standard', '@sort-functional'] }` (label by the user: `'inventory — standard_user'`).
+  **Do not emit `@sort-functional`.** It appears in older design docs as a routing tag, but **no Playwright project greps it** — the only routing greps are `@no-auth` and `@all-users|@<user>`. A describe whose routing tag is `@sort-functional` runs in **zero projects**, and the run reports green having executed nothing. It was designed to select the users whose sort works, back when a five-project matrix was planned; ADR-0004 deferred cross-browser and ADR-0014 made projects demand-driven, so the job no longer exists. If a future ticket needs it, wire a project first.
 
 - **Multiple contexts in one file** — when a feature has tests for more than one user-context, emit **one sibling `test.describe` per context** in the same file, each with its own `{ tag }` and bucket children. Do NOT split into per-user files. `/from-issue` augment (workflow Step 8.5) finds-or-creates the context describe by its tag.
 
@@ -106,7 +106,7 @@ test.describe('<feature> — <context-label>', { tag: '<routing-tag>' }, () => {
   Do NOT put the routing tag on the test — it's already on the context describe (Playwright merges describe + test tags).
 
 - **Tag selection** — per CLAUDE.md "Tag conventions" table; applied via the `{ tag }` option:
-  - routing tag on the **describe**: `@no-auth` / `@all-users` / `@standard` / `@problem` / `@error` / `@performance_glitch` / `@visual` / `@sort-functional`
+  - routing tag on the **describe**: `@no-auth` / `@all-users` / `@standard` / `@problem` — plus `@error` / `@performance_glitch` / `@visual` **only once that user is wired into `AUTH_USERS`** (ADR-0014). Never `@sort-functional`: no project greps it, so it routes nowhere (see above).
   - `@smoke` on the individual **test** (per [`smoke-policy.md`](smoke-policy.md))
 
 - **Page fixture injection** — destructure the page fixture from the test args (e.g., `{ cartPage, page }`) — NEVER `new CartPage(page)` directly. The fixture is auto-injected from `src/fixtures/test.ts`.

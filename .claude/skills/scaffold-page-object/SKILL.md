@@ -1,7 +1,7 @@
 ---
 name: scaffold-page-object
 description: Generate a draft Page Object class from a live page snapshot, composing framework components when detected.
-allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(rm:*) Bash(.claude/skills/scaffold-page-object/scripts/check-component-signatures.sh:*) Read Glob Grep Write
+allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(rm:*) Bash(.claude/skills/scaffold-page-object/scripts/check-component-signatures.sh:*) Bash(.claude/skills/scaffold-page-object/scripts/typecheck-generated.sh:*) Read Glob Grep Write Edit
 ---
 
 # scaffold-page-object
@@ -31,6 +31,7 @@ The full 12-step procedural workflow is in [`references/workflow.md`](references
 ## Scripts
 
 - [`scripts/check-component-signatures.sh`](scripts/check-component-signatures.sh) — reconciles `src/components/*.ts` against the signature table in both directions, and prints the detection set. Used by workflow Step 4; see ADR-0025.
+- [`scripts/typecheck-generated.sh`](scripts/typecheck-generated.sh) — typechecks a generated Page Object against the project's own `tsconfig.json`, path aliases included, resolving `tsc` from `node_modules/.bin` only. Used by workflow Step 11.
 
 ## See also
 

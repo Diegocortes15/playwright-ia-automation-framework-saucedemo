@@ -10,7 +10,8 @@ const env = runEnvironment();
 // Clean-room config (e2e-jira-from-issues), data-driven from tests/users.ts
 // (Phase H / ADR-0014). Projects derive from AUTH_USERS, which /from-issue grows
 // one user at a time as tickets require authenticated pages. Cross-browser
-// (firefox/webkit-standard) + @sort-functional remain a separate ADR-0004 decision.
+// (firefox/webkit-standard) remains a separate ADR-0004 decision. @sort-functional is dormant:
+// nothing greps it, so it routes to no project — see docs/architecture.md before reviving it.
 
 export default defineConfig({
   testDir: './tests',

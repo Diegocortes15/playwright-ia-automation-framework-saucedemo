@@ -151,39 +151,33 @@ Use the `Write` tool. (Step 3 already confirmed the path didn't exist.)
 
 ### 11. Isolated typecheck of the generated file
 
-A bare `npx tsc --noEmit <path>` does NOT pick up the project's `tsconfig.json` — it falls back to TS defaults without `paths` aliases, so any file using `@components/*` or `@playwright/test` types would fail with "Cannot find module" errors that aren't real.
+Run the check — do NOT hand-roll a tsconfig, and never `npx tsc`:
 
-Use a one-shot tsconfig that extends the project's settings.
+```bash
+.claude/skills/scaffold-page-object/scripts/typecheck-generated.sh src/pages/<Name>.ts
+```
 
-1. **Write a throwaway tsconfig** via the `Write` tool (cross-platform; no shell heredoc) at `.tsconfig.scratch.json`:
+| Exit | Meaning |
+| ---- | ------- |
+| 0 | Clean → record the pass for Step 12 |
+| 64 | Bad usage — you passed no files |
+| 66 | No `tsconfig.json` at the repo root |
+| 69 | TypeScript not installed → tell the user to run `npm install`, and stop |
+| other | Type errors, printed verbatim → leave the file in place and capture them for Step 12 |
 
-   ```json
-   {
-     "extends": "./tsconfig.json",
-     "include": ["<path-to-generated-file>"],
-     "exclude": []
-   }
-   ```
+The script writes a throwaway tsconfig that extends the project's own (so `@components/*`
+resolves), typechecks through it, and always cleans up — including on failure or interrupt. It
+resolves `tsc` from `node_modules/.bin` and refuses to run otherwise.
 
-2. **Typecheck via the temp tsconfig** (Bash):
+**Why not `npx tsc`,** which this step prescribed until 2026-09-07: with `node_modules` absent
+or stale, `npx tsc` silently fetches `tsc@2.0.4` from the registry — a deprecated squatter
+package that is not the TypeScript compiler — and hands back a PASS the run never earned.
+`/from-issue` was hardened against this when its own script was extracted; this skill was not,
+and kept the hazard for months. Exit 69 is what replaces it: an environment problem, reported
+and stopped, never a silent success.
 
-   ```bash
-   npx tsc --noEmit -p .tsconfig.scratch.json
-   ```
-
-3. **Always clean up** (Bash; whether typecheck passed or failed):
-
-   ```bash
-   rm .tsconfig.scratch.json
-   ```
-
-This runs the project's strict TS settings (with `paths` aliases) against the single generated file, regardless of whether it landed in `src/pages/` (in `tsconfig.json` include) or `scratch/` (excluded from project-wide typecheck).
-
-- If typecheck **passes**, record the pass for step 12's report
-- If typecheck **fails**, leave the file in place and capture the errors verbatim for step 12
-- **Always remove `.tsconfig.scratch.json`** before reporting — it must not linger in the working tree
-
-The project-wide `npm run typecheck` is unaffected — `scratch/` stays excluded so half-baked AI files don't break the global build.
+The project-wide `npm run typecheck` is unaffected — `scratch/` stays excluded, so half-baked
+files never break the global build.
 
 ### 11.5. Register the page in `src/fixtures/test.ts`
 

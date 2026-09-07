@@ -445,7 +445,9 @@ If `gh pr create` fails (no remote, no permission), abort with the `gh` error ve
 
 ### 13. Report to user
 
-No Jira write-back is performed: the **GitHub-for-Jira app** auto-links the PR to ticket `<KEY>` from the key in the branch + PR title/body. _(If the link doesn't appear on the ticket, the app isn't connected to this repo's org — post a comment-back via the Atlassian MCP as a fallback.)_
+No Jira write-back is performed: the **GitHub-for-Jira app** auto-links the PR to ticket `<KEY>` from the key in the branch + PR title/body.
+
+_(If the link doesn't appear on the ticket, **say so and stop** — do not try to post a comment. This skill declares only the two Atlassian **read** tools, so it cannot write to Jira, and per ADR-0013 `/refine-ticket` is the only skill that does. An earlier version of this step told you to "post a comment-back via the Atlassian MCP as a fallback", which was never executable with the declared tools. Note also that whether the auto-link fired is **not checkable from the MCP**: the app writes Jira "development information", which `getJiraIssueRemoteIssueLinks` does not expose — it returns `[]` even for tickets whose PR merged long ago. Confirming it means looking at the ticket's Development panel.)_
 
 Report to the user:
 

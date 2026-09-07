@@ -77,26 +77,24 @@ playwright-ia-framework/
 │   ├── error.json
 │   └── visual.json
 │
-├── tests/
-│   ├── auth.setup.ts
-│   ├── login/
-│   │   └── login.spec.ts                 # @no-auth
-│   ├── inventory/
-│   │   ├── browse.spec.ts                # @all-users
-│   │   └── sort.spec.ts                  # @sort-functional
-│   ├── cart/
-│   │   └── add-remove.spec.ts            # @all-users
-│   ├── checkout/
-│   │   ├── happy-path.spec.ts            # @standard
-│   │   └── validation.spec.ts            # @standard
-│   └── visual/
-│       └── inventory-images.spec.ts      # @problem
+├── tests/                                # one directory per feature, one spec inside
+│   ├── auth.setup.ts                     # derives from tests/users.ts AUTH_USERS
+│   ├── users.ts                          # AUTH_USERS — single source of the project matrix
+│   ├── login/login.spec.ts               # @no-auth
+│   ├── logout/logout.spec.ts             # @no-auth
+│   ├── inventory/inventory.spec.ts       # @problem + @standard contexts
+│   ├── product_detail/product_detail.spec.ts   # @standard
+│   ├── cart/cart.spec.ts                 # @all-users
+│   ├── checkout/checkout.spec.ts         # @standard
+│   ├── footer/footer.spec.ts             # @standard
+│   ├── burger_menu/burger_menu.spec.ts   # @standard
+│   └── _framework_validation/            # instrumentation, not app coverage (ADR-0021)
 │
 └── docs/
     ├── architecture.md
     ├── runbook.md                        # placeholder (deferred from Phase B.1)
-    ├── app/                              # overview, users, flows, glossary (placeholder)
-    ├── adr/                              # 0000-template + 0001..0005
+    ├── app/                              # overview, users, flows, glossary
+    ├── adr/                              # 0000-template + 0001..0026
     └── superpowers/
         ├── specs/                        # design docs
         └── plans/                        # implementation plans
@@ -203,34 +201,47 @@ See [ADR-0003](adr/0003-data-hybrid-shared-scenarios.md) for the layout rational
 
 StorageState files are engine-portable for saucedemo's basic cookie-based session, so `auth/standard.json` is reused by all three browser engines (`chromium`, `firefox`, `webkit`) without a per-browser auth setup step.
 
-### Playwright projects (9 total)
+### Playwright projects
 
-`playwright.config.ts` defines nine projects:
+**The list is not fixed — it is derived.** `playwright.config.ts` reads `tests/users.ts`
+`AUTH_USERS` and emits a `setup-<user>` and a `chromium-<user>` per entry, plus one
+`chromium-no-auth`. A user's project appears the first time a ticket needs it (ADR-0014), so
+the set grows one user at a time and is never pre-populated.
 
-- **`setup`** — runs `tests/auth.setup.ts`; all authenticated projects depend on it
-- **`no-auth`** — chromium, no storageState; grep `@no-auth`; for login/logout tests
-- **`standard`** — chromium; grep `@all-users|@standard|@sort-functional`; depends on setup
-- **`problem`** — chromium; grep `@all-users|@problem`; depends on setup
-- **`performance_glitch`** — chromium; grep `@all-users|@performance_glitch|@sort-functional`; `navigationTimeout: 30_000` override (saucedemo deliberately delays this user ~10 s; the default 15 s leaves no headroom); depends on setup
-- **`error`** — chromium; grep `@all-users|@error`; depends on setup
-- **`visual`** — chromium; grep `@all-users|@visual|@sort-functional`; depends on setup
-- **`firefox-standard`** — Desktop Firefox; grep `@all-users|@standard|@sort-functional`; storageState `auth/standard.json`; depends on setup
-- **`webkit-standard`** — Desktop Safari; grep `@all-users|@standard|@sort-functional`; storageState `auth/standard.json`; depends on setup
+`AUTH_USERS` is currently `['standard', 'problem']`, so today there are **five** projects:
+
+- **`setup-standard`, `setup-problem`** — run `tests/auth.setup.ts` for that user; the matching chromium project depends on it
+- **`chromium-no-auth`** — chromium, no storageState; grep `@no-auth`; login / logout / route-guard tests
+- **`chromium-standard`** — chromium; grep `@all-users|@standard`; storageState `auth/standard.json`
+- **`chromium-problem`** — chromium; grep `@all-users|@problem`; storageState `auth/problem.json`
+
+> An earlier version of this section described nine projects — `standard`, `performance_glitch`,
+> `error`, `visual`, `firefox-standard`, `webkit-standard` — with a `navigationTimeout: 30_000`
+> override. **None of them exist.** Cross-browser was deferred by ADR-0004 and never built;
+> per-user projects became demand-driven under ADR-0014. Verify against `npx playwright test --list`
+> rather than against this file if the two ever disagree again.
 
 ### Tag conventions
 
-| Tag                   | Runs on project(s)                                                                | Purpose                                                                                           |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                       |
-| `@all-users`          | All 5 chromium user projects + firefox/webkit                                     | User-agnostic flows                                                                               |
-| `@standard`           | `standard`, `firefox-standard`, `webkit-standard`                                 | Tests where only standard user is meaningful                                                      |
-| `@problem`            | `problem`                                                                         | Tests that _expect_ the problem user's broken UI                                                  |
-| `@performance_glitch` | `performance_glitch`                                                              | Tests that handle slow loads                                                                      |
-| `@error`              | `error`                                                                           | Tests for the error user's random failures                                                        |
-| `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                             |
-| `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users) |
+CLAUDE.md's "Tag conventions" table is the source of truth; this restates it against the
+projects that exist today.
 
-`@sort-functional` exists because saucedemo intentionally breaks the sort dropdown for `problem_user` and `error_user`. Tagging sort tests with `@sort-functional` instead of `@all-users` automatically opts in the three users whose sort works (`standard`, `performance_glitch`, `visual`) plus the two cross-browser projects, while keeping `problem` and `error` out.
+| Tag                                          | Runs on                                 | Purpose                                       |
+| -------------------------------------------- | --------------------------------------- | --------------------------------------------- |
+| `@no-auth`                                   | `chromium-no-auth`                      | Login / logout / route-guard, no session      |
+| `@all-users`                                 | `chromium-standard`, `chromium-problem` | User-agnostic flows                           |
+| `@standard`                                  | `chromium-standard`                     | Only standard_user is meaningful              |
+| `@problem`                                   | `chromium-problem`                      | Tests that _expect_ problem_user's broken UI  |
+| `@error` / `@performance_glitch` / `@visual` | **nothing yet**                         | Route only once that user enters `AUTH_USERS` |
+| `@smoke`                                     | Cross-cutting, via `--grep`             | Build-verification set (`npm run test:smoke`) |
+
+**`@sort-functional` is dormant and must not be used as a routing tag.** No project greps it, so
+a describe routed by it alone would run in **zero projects** and the run would report green
+having executed nothing. It was designed to select the users whose sort works, for a
+five-project matrix that ADR-0004 deferred and ADR-0014 replaced with demand-driven growth. The
+behaviour it was meant to express — that `problem_user` and `error_user` cannot sort — is now
+covered directly by the `test.fail()` tests in `tests/inventory/inventory.spec.ts` against
+SW-14. Wire a project before reviving the tag.
 
 ### Cross-browser smoke pattern
 

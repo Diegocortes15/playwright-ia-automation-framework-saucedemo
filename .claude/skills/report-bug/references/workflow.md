@@ -49,6 +49,11 @@ genuinely settles it is a person who knows whether the behaviour is intended.
 
 Follow [`report-template.md`](report-template.md) exactly. Every section, in order.
 
+**If the script returned `staleRun` on a failure**, stop and say so before drafting anything.
+`test-results/results.json` outlives the spec that produced it, so the failure may describe a
+test that has since been renamed or deleted — the SW-15 run renamed one mid-session. Ask for a
+fresh run rather than filing a report about a test that no longer exists.
+
 **If the script returned `missing` instead of `acceptanceCriterion`**, render its reason in
 **Expected** before falling back to the assertion — the table in `report-template.md` gives the
 wording. `no-matching-record` is the *expected* state after a run blocked by ADR-0020, which

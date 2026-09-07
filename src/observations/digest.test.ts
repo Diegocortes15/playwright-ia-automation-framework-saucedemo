@@ -84,7 +84,9 @@ test('one fact seen across several features renders as one entry, naming them al
     '2026-09-05',
   );
   expect(digest).toContain('3 features (`cart`, `checkout`, `inventory`)');
-  expect(digest).toContain('Seen 6 times');
+  // `count` is per-run and `firstSeen` is cumulative, so they must not read as one total.
+  expect(digest).toContain('6 times');
+  expect(digest).not.toContain('Seen 6 times between');
   // One entry, not one per feature — that was the bug this shape fixes.
   expect(digest.split('#### ').length - 1).toBe(1);
 });

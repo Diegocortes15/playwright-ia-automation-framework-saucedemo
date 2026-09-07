@@ -99,8 +99,14 @@ function headline(observation: Observation): string {
 
 function renderOne(observation: Observation): string {
   const { count, firstSeen, lastSeen, sample, status, note, seenIn } = observation;
-  const times = count === 1 ? 'once' : `${count} times`;
-  const when = firstSeen === lastSeen ? `on ${firstSeen}` : `between ${firstSeen} and ${lastSeen}`;
+  const times = count === 1 ? 'Once' : `${count} times`;
+  // `count` refreshes per run while `firstSeen` survives (see reporter.ts) — so the two must
+  // not share a sentence. "Seen 3 times between 2026-09-04 and 2026-09-07" reads as a total
+  // and is not one: it was three times in the last run alone.
+  const when =
+    firstSeen === lastSeen
+      ? `in the run on ${lastSeen}`
+      : `in the most recent run that recorded it (${lastSeen}); first recorded ${firstSeen}`;
   const where =
     seenIn.length === 1
       ? `the \`${seenIn[0]}\` tests`
@@ -111,7 +117,7 @@ function renderOne(observation: Observation): string {
     '',
     describeObservation(observation),
     '',
-    `Seen ${times} ${when}, across ${where}. Example: _"${sample.test}"_ (${sample.project}).`,
+    `${times} ${when}. Seen across ${where}. Example: _"${sample.test}"_ (${sample.project}).`,
   ];
 
   if (status === 'new') {

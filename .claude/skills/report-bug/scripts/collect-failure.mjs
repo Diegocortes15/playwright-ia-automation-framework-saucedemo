@@ -84,10 +84,23 @@ function main() {
         const byName = Object.fromEntries((result.attachments ?? []).map((a) => [a.name, a]));
         const feature = spec.file.split('/')[0];
 
+        // results.json outlives the spec that produced it, so a stale run can describe a
+        // test that has since been renamed or deleted. Say so rather than letting a reader
+        // chase a file that is not there.
+        const specPath = join('tests', spec.file);
+        const staleRun = !existsSync(specPath);
+
         failures.push({
           title: spec.title,
           file: spec.file,
           line: spec.line,
+          ...(staleRun
+            ? {
+                staleRun:
+                  `${specPath} no longer exists — these results are from an earlier run. ` +
+                  'Re-run the suite before filing anything from them.',
+              }
+            : {}),
           project: test.projectName ?? 'unknown',
           feature,
           status: result.status,
