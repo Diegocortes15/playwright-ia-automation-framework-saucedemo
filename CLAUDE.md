@@ -7,7 +7,7 @@ This file is loaded into context for every Claude Code session in this project. 
 Playwright + TypeScript test framework for [saucedemo](https://www.saucedemo.com). AI-assisted extension is a first-class workflow.
 
 - Framework architecture: [`docs/architecture.md`](docs/architecture.md)
-- App behavior (the 6 saucedemo users, flows): [`docs/app/`](docs/app/)
+- App behavior (the 6 saucedemo users, flows): [`docs/app/`](docs/app/) — it is _reference_, so every behavioural claim carries **`Verified by:`** naming the test that proves it, or says plainly that nothing does. Add the field when you add a claim; `Verified by: nothing` is a valid answer and a useful one.
 - Test case management philosophy (why no TCMS, where reports live): [`docs/test-case-management.md`](docs/test-case-management.md)
 - Decision rationale: [`docs/adr/`](docs/adr/)
 - Design specs and plans (don't auto-load — read on demand): [`docs/superpowers/`](docs/superpowers/)
