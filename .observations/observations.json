@@ -1,12 +1,48 @@
 {
   "observations": [
     {
+      "signature": "console-error:Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allo",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "seenIn": [
+        "logout"
+      ],
+      "firstSeen": "2026-09-07",
+      "lastSeen": "2026-09-07",
+      "status": "new",
+      "sample": {
+        "message": "Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "test": "error_user logs out from the menu and returns to the login page",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
+      "signature": "console-error:Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: Response to preflight r",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "seenIn": [
+        "logout"
+      ],
+      "firstSeen": "2026-09-07",
+      "lastSeen": "2026-09-07",
+      "status": "new",
+      "sample": {
+        "message": "Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "url": "https://www.saucedemo.com/inventory.html",
+        "test": "back button after logout does not restore the session",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
       "signature": "console-error:OBSERVATION_PROBE console failure",
       "kind": "console-error",
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE console failure",
@@ -24,7 +60,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE from a failing test",
@@ -42,7 +78,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "Sorting is broken! This error has been reported to Backtrace.",
@@ -59,17 +95,17 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/cart.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 2,
+      "count": 3,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/cart.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "Reset App State clears the cart badge, reverts buttons, and empties the cart",
-        "project": "chromium-standard"
+        "test": "direct access to /cart.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
@@ -83,7 +119,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -102,17 +138,17 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-one.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 9,
+      "count": 10,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/checkout-step-one.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "mandatory fields show their placeholder text",
-        "project": "chromium-standard"
+        "test": "direct access to /checkout-step-one.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
@@ -126,7 +162,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -145,7 +181,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 14,
+      "count": 47,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-07",
       "status": "ignored",
@@ -154,8 +190,8 @@
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "all six product titles render exactly and in catalog order",
-        "project": "chromium-standard"
+        "test": "direct access to /inventory.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
@@ -164,7 +200,8 @@
         "checkout",
         "footer",
         "inventory",
-        "logout"
+        "logout",
+        "product_detail"
       ]
     },
     {
@@ -173,7 +210,7 @@
       "thirdParty": true,
       "count": 7,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "401 Unauthorized",
@@ -192,9 +229,9 @@
       "signature": "failed-request:POST:https://events.backtrace.io/api/unique-events/submit:401",
       "kind": "failed-request",
       "thirdParty": true,
-      "count": 7,
+      "count": 5,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "401 Unauthorized",
@@ -215,7 +252,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-06",
+      "lastSeen": "2026-09-07",
       "status": "new",
       "sample": {
         "message": "OBSERVATION_PROBE uncaught failure",
