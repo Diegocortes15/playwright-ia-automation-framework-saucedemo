@@ -205,7 +205,7 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 1,
+      "count": 3,
       "firstSeen": "2026-09-04",
       "lastSeen": "2026-09-07",
       "status": "ignored",
@@ -214,8 +214,8 @@
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "direct access to /inventory.html while logged out is blocked with an error",
-        "project": "chromium-no-auth"
+        "test": "product detail page shows the selected product name, description and price",
+        "project": "chromium-standard"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
