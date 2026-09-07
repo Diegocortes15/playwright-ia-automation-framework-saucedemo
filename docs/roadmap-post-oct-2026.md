@@ -871,6 +871,25 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
       normalización no; certificar la cáscara y no el contenido compra tranquilidad falsa, que
       es peor que no tener gate.
 
+- **Reescribir el walkthrough sobre una corrida real.** PR #35 se **cerró el 2026-09-07**, no
+  porque la idea estuviera mal sino porque el pipeline que documentaba ya no existe: escrito el
+  2026-07-02, no menciona ninguna vez ADR-0020 (nunca abre un PR rojo, con loop de 3 intentos),
+  ADR-0024 (`test.fail()`), ADR-0010 (augment), ADR-0022 (Obstacles) ni ADR-0021
+  (observaciones) — todo decidido después. Y camina un ticket **ficticio**, `SW-42`, en un repo
+  que hoy tiene tres corridas reales con la cadena de artefactos completa.
+
+  **Lo que se reusa es la forma**, que era buena: el modelo mental, la tabla de cadena de
+  artefactos y el "explicalo en una oración". Lo que cambia es que deje de ser hipotético.
+
+  Columna vertebral **SW-15** (#53, camino feliz de punta a punta) y **SW-13** (#49) como la
+  rama que importa: la app contradice un AC, **no se abre PR**, y el test aterriza como
+  `test.fail()` clavado a SW-14. Esa rama es lo que hace a este framework distinto de un repo
+  Playwright normal, y es exactamente lo que un documento de julio no podía contar.
+
+  Una cosa que el PR cerrado **sí tenía bien** y conviene no perder al reescribir: la nota de
+  elección de herramientas era correcta —_"tickets come from Jira via the Atlassian MCP (never
+  `gh issue`)"_, citando ADR-0007—. Verificado, no asumido.
+
 - **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
   `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
   de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
