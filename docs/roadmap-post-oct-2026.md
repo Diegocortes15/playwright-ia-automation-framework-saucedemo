@@ -419,8 +419,17 @@ paralelo cuando se apruebe explícitamente.
    keyword es pista para Positive-vs-Negative y nunca argumento para
    reclasificar (caso real: SW-15 AC 3). Sin ADR nuevo: el roadmap ya había
    tomado la decisión, esto la implementa.
-10. Formalizar Given/When/Then como estructura obligatoria en el
-    template de specs Playwright que usa `/from-issue`
+10. ~~Formalizar Given/When/Then como estructura obligatoria en el
+    template de specs Playwright que usa `/from-issue`~~ — **DESCARTADO
+    (2026-09-07).** EARS ya cubre lo que este step buscaba —trigger explícito y
+    una sola aserción por criterio— **en el ticket, que es donde el AC nace**
+    (step 9). Y los specs ya tienen estructura real y verificable:
+    `describe(feature — contexto)` → `describe(bucket)` → `test(prosa)`, con los
+    pasos nombrados saliendo de los `test.step` de los Page Objects, que sí
+    aparecen en el reporte. Comentarios `// Given / // When / // Then`
+    obligatorios encima de eso serían estructura que **ningún lint verifica y
+    ningún reporte muestra** — decoración que se pudre igual que se pudrió
+    `architecture.md`. Es el "teatro burocrático" del principio #5.
 11. Consolidar `AGENTS.md` como constitución del proyecto:
     - Stack: Node 22, TS 5.9 strict, Playwright 1.59
     - Convenciones: Page Object strict, fixtures, role-tag routing
@@ -625,11 +634,89 @@ scopes.
 
 El hallazgo más grande de correrlo no tuvo nada que ver con los ADR 0019–0022:
 **`/scaffold-page-object` abortaba en toda invocación desde el 2026-06-03** y nadie lo sabía porque
-nunca se había ejecutado (PR #47, ADR-0025). Estado detallado en `docs/jira-restore-checklist.md`.
+nunca se había ejecutado (PR #47, ADR-0025). El registro completo de qué se verificó y cómo quedó en `docs/jira-restore-checklist.md`, **ya cerrado**; lo que sigue abierto está más abajo, en "Deuda conocida y decisiones abiertas".
 
 Vale decirlo sin adornos: los ADR 0019–0022 se diseñaron y mergearon **sin haber corrido
 `/from-issue` ni una vez** en esa sesión. Salieron de razonar sobre el código, no de ver el
 pipeline funcionando. El checklist es cómo se paga esa deuda.
+
+## Deuda conocida y decisiones abiertas (2026-09-07)
+
+Heredado de `docs/jira-restore-checklist.md`, **que quedó cerrado** — ver ahí qué probó. Esto
+es la lista viva; aquel archivo es el registro histórico. Los ítems están separados por lo que
+realmente hace falta para cerrarlos, porque mezclarlos fue parte del problema: un defecto de
+diez minutos y una decisión de diseño no se leen igual.
+
+### Defectos abiertos — arreglables ya
+
+- **`playwright-cli` no está en PATH.** El Step 5 del scaffold dice `playwright-cli open`, que
+  falla con `command not found`; el binario está en `node_modules/.bin/`. Los comandos `click` y
+  `select` además **exigen un `ref` de snapshot** y fallan con texto libre, cosa que el workflow
+  no dice. (El Step 11 ya se arregló en #56; este quedó.)
+- **El duplicate-guard del Step 8.5 es file-scoped y su inserción es context-scoped.** Compara
+  títulos "already in the file" pero inserta "within the resolved context describe". En un
+  archivo multi-contexto, el mismo comportamiento para otro usuario es un test legítimamente
+  distinto. En la corrida de SW-13 **se esquivó solo por elección de título**.
+- **Un run bloqueado en AUGMENT deja dos archivos commiteados sucios** (el spec y
+  `.observations/observations.json`), lo que bloquea el run siguiente. Ojo: el camino de
+  ADR-0024 **no necesita limpieza** — esos archivos pasan a ser el commit de aterrizaje. La
+  pregunta abierta es solo la otra rama, cuando se concluye que el ticket estaba mal.
+
+### Decisiones abiertas a propósito
+
+- **Nada en el proyecto puede presentar un defecto**, y ADR-0024 exige un identificador
+  presentado antes de que un test aterrice como `test.fail()`. ADR-0026 evaluó que
+  `/report-bug` presentara con aprobación y **lo rechazó por ahora**: _"files nothing"_ es la
+  formulación más nítida del principio #2, y se presentó exactamente un defecto a mano.
+  **Revisar cuando la fricción se sienta más de una vez.**
+- **Los 401 de `events.backtrace.io`** siguen sin triar. La telemetría de errores de la propia
+  app está siendo rechazada, más un error de CORS de `submit.backtrace.io`. Inofensivo en un
+  demo; en una app cliente significaría que el reporte de errores en producción está muerto y
+  nadie se entera, porque la UI se ve bien igual. **Decidir y registrar el `status`.**
+
+### Verificaciones que esperan un disparador natural
+
+No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
+
+- **Exit 69 de `typecheck-spec.sh`** nunca disparó. Es el que existe para evitar un PASS no
+  ganado, así que es el que más vale ver.
+- **La sección Obstacles nunca salió `None.`** — ninguna corrida fue libre de fricción. El
+  riesgo vivo ahora parece el inverso: son largas y alguien puede empezar a saltearlas.
+- **El primer ticket que necesite `error_user`** debería cablearlo en `AUTH_USERS` (ADR-0014) y
+  darle al detector de diálogos su primera cobertura e2e — hoy solo tiene unit tests.
+- **Si los `test.fail()` de SW-13 graban observaciones.** Único caso que las sondas de
+  `tests/_framework_validation/` cubren en exclusiva; si los reales lo cubren, esa sonda pasa a
+  ser redundante.
+- **Si el auto-link de GitHub-for-Jira funciona.** El chequeo disponible **no puede responderlo**:
+  `getJiraIssueRemoteIssueLinks` devuelve `[]` hasta para tickets cuyo PR se mergeó hace meses,
+  porque la app escribe "development information", que ese MCP no expone. Se confirma mirando el
+  panel Development en el browser.
+
+### Necesitan tu entorno o tu decisión
+
+- **Instalar `skill-validator`** (pasos en README.md). Importa más que antes: varias skills
+  cambiaron su grafo de links sin pasar por el único chequeo que verifica ADR-0019.
+- **Bloque A step 2** — correr `claude --debug` y leer errores silenciosos de carga de skills.
+- **Bloque A step 3** — auditar las `description` de las skills contra 3-4 fraseos reales.
+- **Correr `/skill-doctor`** para medir qué cuesta cada skill en contexto de verdad.
+- **La evidencia no es compartible.** Screenshots, videos y traces viven en rutas absolutas de
+  la máquina que corrió la suite, así que la sección Evidence de un bug report **no la puede
+  abrir nadie más**. Es lo único pendiente que importaría de verdad en un engagement real, y es
+  trabajo concreto: adjuntar al ticket o linkear el artifact de CI. El MCP de Atlassian no
+  expone tool de adjuntos, así que necesita otra vía.
+
+### Sigue en pie del plan original
+
+- **Backfill de `Enforced by:`** en los ADRs que lo tengan flojo. Ojo con la vara nueva: no se
+  editan registros aceptados, así que esto es auditar y, donde falte el chequeo, **escribirlo**.
+- **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
+  `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
+  de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
+- **Bloque B11 — `AGENTS.md`.** Vale cuestionarlo antes de hacerlo: `CLAUDE.md` está en 142
+  líneas y ya es la constitución de facto.
+- **Bloque C** — hooks, probar el subagente Explore antes de construir `/find-tests`, el
+  subagente `pr-reviewer`.
+- **Bloque E** — presentación y portfolio, en paralelo cuando quieras.
 
 ## Guardarraíles para Claude Code al ejecutar este plan
 

@@ -226,7 +226,7 @@ the highest-risk change of the four: it is the one that decides whether a PR exi
       that visibly hit friction.~~ **Did not happen** in four runs. The section did real work —
       it is where every finding below was first written down. The **inverse** risk now looks like
       the live one: the sections are long, and a reader may start skimming them. Worth watching.
-- [ ] Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.
+- [x] ~~Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.~~ Done 2026-09-07 on SW-15. Obstacles went to the terminal only; the ticket received the refined AC block and a one-line audit comment, nothing else.
 
 ### ADR-0021 — Observations
 
@@ -300,7 +300,7 @@ None of these came from reading code. They are ordered by how much damage they w
       **Avoided in the SW-13 run only by title choice** — a run that had reused the `@standard`
       describe's phrasing would have been wrongly skipped as a duplicate.
 
-- [ ] **`/from-issue` Step 13's Jira fallback is not executable.** It says to "post a comment-back
+- [x] ~~**`/from-issue` Step 13's Jira fallback is not executable.**~~ Fixed in #56 — the fallback is gone, and the step now records that the auto-link is not checkable from the MCP either. Original text: It says to "post a comment-back
       via the Atlassian MCP" if the GitHub-for-Jira link does not appear, but the skill's
       `allowed-tools` declares only the two read tools. Either declare a write tool or drop the
       fallback; today it reads as a capability that is not there.
@@ -311,7 +311,7 @@ None of these came from reading code. They are ordered by how much damage they w
       information", which this MCP does not appear to expose). **The available check cannot answer
       the question**; confirming it needs a look at the Development panel in the browser.
 
-- [ ] **`/scaffold-page-object` Step 11 still says `npx tsc`.** That is exactly the command
+- [x] ~~**`/scaffold-page-object` Step 11 still says `npx tsc`.**~~ Fixed in #56 — the skill got its own hardened `scripts/typecheck-generated.sh`. Original text: That is exactly the command
       `from-issue/scripts/typecheck-spec.sh` was written to replace: with `node_modules` absent,
       `npx tsc` fetches `tsc@2.0.4`, a deprecated squatter that is not the compiler, and the skill
       would record a PASS it never earned. `/from-issue` got the hardened script; the scaffold never
@@ -322,7 +322,7 @@ None of these came from reading code. They are ordered by how much damage they w
       `node_modules/.bin/playwright-cli`. Two related gaps in the same steps: `click` and `select`
       **require a snapshot `ref`** and fail on free text, which the workflow never says.
 
-- [ ] **`scaffold-page-object`'s `allowed-tools` does not declare `Edit`**, yet its Step 11.5
+- [x] ~~**`scaffold-page-object`'s `allowed-tools` does not declare `Edit`**~~ Fixed in #56. Original text:, yet its Step 11.5
       instructs "apply three edits" to `src/fixtures/test.ts`. Only `Write` is declared, which would
       mean rewriting the whole fixture file. Left unwidened deliberately: the roadmap's revised
       Bloque A step 4 says review case by case and do not widen by default.
@@ -336,7 +336,7 @@ None of these came from reading code. They are ordered by how much damage they w
       than a specification. It also cited `tests/visual/inventory-images.spec.ts`, which does not
       exist.
 
-- [ ] **`@sort-functional` routes to no project.** `test-template.md:109` offers it to the generator
+- [x] ~~**`@sort-functional` routes to no project.**~~ Fixed in #56 — removed from the routing-tag list the generator reads, and documented as dormant. Pulling that thread also exposed the fictional nine-project matrix in `architecture.md`. Original text: `test-template.md:109` offers it to the generator
       inside the list of routing tags, but `playwright.config.ts` only greps `@no-auth` and
       `@all-users|@<user>`. As a _secondary_ tag alongside `@standard` it is harmless; **as a sole
       routing tag those tests would run in zero projects and the run would report green having
