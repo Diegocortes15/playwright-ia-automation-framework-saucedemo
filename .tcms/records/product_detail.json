@@ -1,0 +1,34 @@
+{
+  "records": [
+    {
+      "title": "product detail page shows the selected product name, description and price",
+      "acText": "Given standard_user is on the inventory page, when they click the product name \"Sauce Labs Backpack\", then the product detail page shows that product's name, its description and its price.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "product_detail",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-12", "url": "https://diegocortes15.atlassian.net/browse/SW-12" }]
+    },
+    {
+      "title": "adding to cart from the product detail page updates the header cart badge",
+      "acText": "Given standard_user is on the \"Sauce Labs Backpack\" detail page, when they click \"Add to cart\", then the header cart badge shows \"1\".",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "product_detail",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-12", "url": "https://diegocortes15.atlassian.net/browse/SW-12" }]
+    },
+    {
+      "title": "back to products returns to the inventory page with the full catalog",
+      "acText": "Given standard_user is on a product detail page, when they click \"Back to products\", then they land back on the inventory page with all 6 products listed.",
+      "user": "standard_user",
+      "tags": ["@standard"],
+      "bucket": "Positive",
+      "feature": "product_detail",
+      "contextLabel": "standard_user",
+      "jira": [{ "key": "SW-12", "url": "https://diegocortes15.atlassian.net/browse/SW-12" }]
+    }
+  ]
+}

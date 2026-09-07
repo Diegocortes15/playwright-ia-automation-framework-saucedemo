@@ -99,6 +99,18 @@ export class InventoryPage {
     });
   }
 
+  // Composed action — open a product's detail page by clicking its title.
+  // The title text sits inside the card's anchor, so the click bubbles to it and
+  // navigates to /inventory-item.html?id=<n> — verified live rather than assumed,
+  // since the anchor's href is "#" and the routing is client-side (SW-12).
+  // Per ADR-0001 rule #3 this returns void: the test navigates explicitly and
+  // then uses the injected productDetailPage fixture.
+  async openProductDetail(productName: string): Promise<void> {
+    await test.step(`Open the "${productName}" product detail page`, async () => {
+      await this.productTitle(productName).click();
+    });
+  }
+
   // Composed action — selects a sort option by its <option> value
   // (az | za | lohi | hilo). Native <select>, so selectOption sets it directly.
   async sortBy(optionValue: string): Promise<void> {
