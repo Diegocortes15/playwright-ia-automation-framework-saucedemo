@@ -97,8 +97,9 @@ function headline(observation: Observation): string {
   return `#### ${icon} ${observation.kind.replace('-', ' ')}${tag}${muted}`;
 }
 
-function renderOne(observation: Observation): string {
-  const { count, firstSeen, lastSeen, sample, status, note, seenIn } = observation;
+/** The facts about one observation: what happened, how often, and where. No verdict. */
+function renderFact(observation: Observation): string {
+  const { count, firstSeen, lastSeen, sample, seenIn } = observation;
   const times = count === 1 ? 'Once' : `${count} times`;
   // `count` refreshes per run while `firstSeen` survives (see reporter.ts) — so the two must
   // not share a sentence. "Seen 3 times between 2026-09-04 and 2026-09-07" reads as a total
@@ -112,19 +113,83 @@ function renderOne(observation: Observation): string {
       ? `the \`${seenIn[0]}\` tests`
       : `${seenIn.length} features (\`${seenIn.join('`, `')}\`)`;
 
-  const lines = [
+  return [
     headline(observation),
     '',
     describeObservation(observation),
     '',
     `${times} ${when}. Seen across ${where}. Example: _"${sample.test}"_ (${sample.project}).`,
-  ];
+  ].join('\n');
+}
 
-  if (status === 'new') {
-    lines.push('', '**Not yet reviewed.**');
-  } else {
-    lines.push('', `**Reviewed — marked \`${status}\`.**${note ? ` ${note}` : ''}`);
+/** What a person decided about those facts. */
+function renderVerdict(status: string, note?: string): string {
+  if (status === 'new') return '**Not yet reviewed.**';
+  return `**Reviewed — marked \`${status}\`.**${note ? ` ${note}` : ''}`;
+}
+
+/** Observations a person gave the same answer to. */
+export interface VerdictGroup {
+  observations: Observation[];
+  status: string;
+  note?: string;
+}
+
+/**
+ * Fold entries whose triage says exactly the same thing into one block.
+ *
+ * The index deliberately stores one entry per *fact*, each carrying its own complete note:
+ * a note has to stand on its own when you grep a single signature out of the file, so
+ * self-containment there is correct and worth keeping. Rendered as a document, though, that
+ * same property turns into repetition — five `backtrace.io` entries share one root cause, so
+ * emptying the triage queue printed one long explanation five times over. Measured on this
+ * repository's own index, 32% of the rendered document was duplicated text. Long, repeated
+ * blocks are exactly what stops a report being read.
+ *
+ * The fix belongs here rather than in the JSON, because only the rendering has the problem.
+ *
+ * Grouping keys on `status` AND `note`, not the note alone: the same explanation filed under
+ * two different statuses is two verdicts that happen to share reasoning, and collapsing them
+ * would hide the disagreement. An absent note never groups either — "nobody explained this"
+ * is not a shared explanation, and pooling unreviewed entries under one heading would invent
+ * a judgment nobody made.
+ *
+ * Order is the first appearance of each group, so the queue's ordering survives.
+ */
+export function groupByVerdict(observations: Observation[]): VerdictGroup[] {
+  const groups: VerdictGroup[] = [];
+  const byKey = new Map<string, VerdictGroup>();
+
+  for (const observation of observations) {
+    const key = observation.note ? `${observation.status}\u0000${observation.note}` : undefined;
+    const existing = key === undefined ? undefined : byKey.get(key);
+    if (existing) {
+      existing.observations.push(observation);
+      continue;
+    }
+    const group: VerdictGroup = {
+      observations: [observation],
+      status: observation.status,
+      note: observation.note,
+    };
+    groups.push(group);
+    if (key !== undefined) byKey.set(key, group);
   }
+
+  return groups;
+}
+
+function renderGroup(group: VerdictGroup): string {
+  const { observations, status, note } = group;
+  const lines: string[] = [];
+
+  // Only a real group announces itself. A group of one renders exactly as it always did.
+  if (observations.length > 1) {
+    lines.push(`### ${observations.length} observations, one verdict`, '');
+  }
+  lines.push(observations.map(renderFact).join('\n\n'));
+  lines.push('', renderVerdict(status, note));
+
   return lines.join('\n');
 }
 
@@ -160,7 +225,7 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
   ] as const) {
     if (group.length === 0) continue;
     out.push('', title);
-    for (const observation of group) out.push('', renderOne(observation));
+    for (const verdictGroup of groupByVerdict(group)) out.push('', renderGroup(verdictGroup));
   }
 
   return `${out.join('\n')}\n`;
