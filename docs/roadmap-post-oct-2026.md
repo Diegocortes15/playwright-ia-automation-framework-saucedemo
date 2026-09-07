@@ -705,10 +705,38 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 - **La sección Obstacles nunca salió `None.`** — ninguna corrida fue libre de fricción. El
   riesgo vivo ahora parece el inverso: son largas y alguien puede empezar a saltearlas.
 - **El primer ticket que necesite `error_user`** debería cablearlo en `AUTH_USERS` (ADR-0014) y
-  darle al detector de diálogos su primera cobertura e2e — hoy solo tiene unit tests.
-- **Si los `test.fail()` de SW-13 graban observaciones.** Único caso que las sondas de
-  `tests/_framework_validation/` cubren en exclusiva; si los reales lo cubren, esa sonda pasa a
-  ser redundante.
+  darle al detector de diálogos su primera cobertura e2e. **Ahora tiene un premio concreto
+  medido:** es uno de los dos detectores que hoy solo cubre la sonda (ver arriba), así que
+  cablearlo es lo que empieza a destrabar el borrado de `tests/_framework_validation/`.
+- [x] ~~**Si los `test.fail()` de SW-13 graban observaciones.**~~ **Sí, verificado el
+      2026-09-07** corriendo solo esos dos tests en aislamiento: el índice registró el 404 con
+      `count: 2` y el sample nombrando `problem_user sorts products by name descending`. El fixture
+      corre y sus datos llegan al reporter aunque la falla sea esperada.
+
+  **Pero eso NO vuelve borrables las sondas, y ahora se sabe exactamente por qué.** Contando qué
+  detector ejercita cada entrada del índice:
+
+  | Detector         | Solo sonda | Tests reales |
+  | ---------------- | ---------- | ------------ |
+  | `console-error`  | 2          | **3**        |
+  | `failed-request` | 0          | **7**        |
+  | **`dialog`**     | 1          | **0**        |
+  | **`page-error`** | 1          | **0**        |
+
+  Dos de los cuatro detectores **no tienen otra cobertura**, así que borrar
+  `tests/_framework_validation/` seguiría falsificando el `Enforced by:` de ADR-0021, que
+  afirma que ahí se ejercitan los cuatro. Y cada uno está bloqueado por algo distinto:
+  - **`dialog`** — solo el `alert()` de `error_user` al ordenar lo produce, y ese usuario no está
+    en `AUTH_USERS` (ADR-0014, crecimiento por demanda). Se destraba con el primer ticket que lo
+    necesite; hasta entonces ningún test real puede dispararlo.
+  - **`page-error`** — una excepción no capturada en la página. Saucedemo no lanza ninguna en sus
+    flujos normales, así que **puede no tener nunca un disparador natural**. La sonda la fabrica
+    a propósito desde un timer.
+
+  Esto convierte un ítem difuso ("mantenerlas hasta que `/from-issue` corra una vez") en una
+  condición concreta: **son borrables cuando `dialog` y `page-error` tengan cobertura real, y no
+  antes.**
+
 - **Si el auto-link de GitHub-for-Jira funciona.** El chequeo disponible **no puede responderlo**:
   `getJiraIssueRemoteIssueLinks` devuelve `[]` hasta para tickets cuyo PR se mergeó hace meses,
   porque la app escribe "development information", que ese MCP no expone. Se confirma mirando el
