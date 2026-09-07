@@ -49,7 +49,7 @@ Record a side-effect note for the PR (Step 12 / `pr-description-template.md`):
 ## Guardrail (ADR-0004)
 
 - **Never** pre-create users no test targets.
-- **Never** add `<browser>-<non-standard>` projects (`firefox-problem`, `webkit-error`, …). Cross-browser is standard-only smoke and stays **out** of `/from-issue`'s growth — it's a separate ADR-0004 decision. Same for the `@sort-functional` grep nuance.
+- **Never** add `<browser>-<non-standard>` projects (`firefox-problem`, `webkit-error`, …). Cross-browser is standard-only smoke and stays **out** of `/from-issue`'s growth — it's a separate ADR-0004 decision. `@sort-functional` is **not** a routing tag and must never be emitted as one: no project greps it, so those tests would run in zero projects and the run would report green having executed nothing.
 
 ## Staging
 

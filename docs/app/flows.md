@@ -93,9 +93,11 @@ For framework-level page object structure see [`../architecture.md`](../architec
 | Price (low to high) | `lohi` | Sauce Labs Onesie                 | Sauce Labs Fleece Jacket          |
 | Price (high to low) | `hilo` | Sauce Labs Fleece Jacket          | Sauce Labs Onesie                 |
 
-**Per-user notes:** `problem_user` and `error_user` ignore the sort dropdown — selections register on the UI but the inventory stays in default A→Z order. This is why the `@sort-functional` tag exists: sort tests run only on `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard`.
+**Per-user notes:** `problem_user` and `error_user` ignore the sort dropdown. The selection does **not** register: the `<select>`'s own value reverts to `az`, so neither the active label nor the order ever changes — measured 2026-09-07, and filed as SW-14. An earlier version of this line said selections "register on the UI", which is wrong and matters: a test asserting only the resulting order would pass through the wrong mechanism.
 
-**Tests:** `tests/inventory/sort.spec.ts` (4 parameterized tests, tagged `@sort-functional`).
+The `@sort-functional` tag was designed to route around this, but **no project greps it** and it must not be used — see `docs/architecture.md`.
+
+**Tests:** `tests/inventory/inventory.spec.ts` — four parameterized sort tests in the `@standard` context, plus two `test.fail()` tests in the `@problem` context that lock in the defect against SW-14. There is no `sort.spec.ts`; an earlier version of this line named one.
 
 ---
 

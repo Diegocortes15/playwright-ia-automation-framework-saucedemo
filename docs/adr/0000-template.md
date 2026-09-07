@@ -2,6 +2,8 @@
 
 **Date:** YYYY-MM-DD
 **Status:** Proposed | Accepted | Deprecated | Superseded by ADR-NNNN
+**Confidence:** High | Medium | Low — <one line: what would change your mind>
+**Review by:** YYYY-MM-DD | — <a date only when the decision has a shelf life; otherwise a dash>
 **Enforced by:** <the lint rule, test, or config that makes this true> | Nothing — prose only
 
 ## Context
@@ -21,6 +23,34 @@ What happens because of this decision? Both positive and negative. Bullet list.
 What other options were evaluated? Why were they rejected? Bullet list with brief rationale per alternative.
 
 ---
+
+## Before you write one: does this belong here?
+
+The bar is [Azure Well-Architected's](https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record), adopted verbatim because it is tighter than "an architectural decision changed" and tighter is the point:
+
+> Only include choices that **affect the system's structure**, **key quality attributes**, or **are difficult to reverse**.
+
+Three questions, and a `no` to all three means this is not an ADR:
+
+1. Would a different answer change the shape of the system, not just one file?
+2. Does it trade off a quality attribute — portability, determinism, reviewability?
+3. Would reversing it in six months be expensive?
+
+If it fails the bar, the decision still gets written down — in the reference or doc it governs, where the person affected by it will actually be standing. Not every decision deserves a record; a decision log nobody can read is worth less than a shorter one that they can.
+
+**A worked negative:** ADR-0025 (component signatures reconcile both ways) fixed a real bug and added a real check, and by this bar it should probably have been the fix plus a note in `component-detection.md`. It changed one step of one skill and was cheap to reverse. It is kept, not rewritten — that is the immutability rule — but it is the example to measure against.
+
+## On the `Confidence:` line
+
+Azure Well-Architected asks for it directly:
+
+> Record the confidence level of the decision. Sometimes an architecturally significant decision is made with relatively low confidence. Documenting that low confidence status could prove useful for future reconsideration.
+
+Say what would change your mind. `Low — one consumer so far; revisit if a second needs it` is worth more than the word "Low" alone, and it is the sentence a future reader needs to decide whether to reopen.
+
+## On the `Review by:` line
+
+Most decisions have no shelf life; write `—` for those and move on. Use a date when the decision rests on something that will predictably change: a deferred piece of scope, a vendor, a scale assumption, an external service. The date is a prompt to re-read, **not** an expiry — a review can perfectly well conclude "still right" and leave the record alone.
 
 ## On the `Enforced by:` line
 

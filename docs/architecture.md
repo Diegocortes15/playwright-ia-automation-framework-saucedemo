@@ -1,5 +1,19 @@
 # Architecture
 
+> **This is the present layer. It is mutable, and keeping it true is the job.**
+>
+> It answers _what is true now_. `docs/adr/` answers _why it became this way_ and is append-only —
+> see [`docs/adr/README.md`](adr/README.md) for the split and its sources. Cite an ADR here for
+> rationale; never make a reader chain through supersession to learn the current shape.
+>
+> **When something changes, correct this file in place** and note what it said before, so a reader
+> who remembers the old text knows it moved rather than wondering which is right. On 2026-09-07 an
+> audit found this file describing nine Playwright projects, a cross-browser matrix, and a tree of
+> spec files that had never existed — it had drifted since May while being linked from `CLAUDE.md`
+> as _the_ architecture reference. Every factual claim below was re-checked against the repository
+> on that date. **If this file and `npx playwright test --list` ever disagree again, the command
+> is right.**
+
 ## Overview
 
 This is a Playwright + TypeScript test framework targeting [saucedemo.com](https://www.saucedemo.com). It covers the six user personas that saucedemo exposes (`standard`, `problem`, `performance_glitch`, `error`, `visual`, and `locked_out`), exercises every major UI flow (login, inventory browsing, sorting, cart, checkout), and enforces strict typing, Playwright-aware lint rules, and consistent code style.
@@ -12,13 +26,13 @@ Phase C+ will layer on the `/from-jira` orchestrator, a code-review skill, and s
 
 ## Tech Stack
 
-- **Node.js 22.x** — runtime; required for native ESM import attributes (`with { type: 'json' }`)
+- **Node.js 22.x** — runtime; pinned by `.nvmrc`, `engines` and `engine-strict=true`. (An earlier version said it was "required for native ESM import attributes" — that was ADR-0005's rationale, which ADR-0023 superseded. JSON now loads through a typed `fs` loader.)
 - **TypeScript 5.9** (`strict: true`, `noUnusedLocals`, `noUnusedParameters`) — language; strict mode keeps AI-generated code correct over time
-- **Playwright 1.59.x** (chromium + firefox + webkit) — test runner and browser automation engine
+- **Playwright 1.59.x** — test runner and browser automation engine. **Chromium only**: firefox and webkit are installed with the package but no project uses them (ADR-0004 deferred cross-browser and it was never built).
 - **ESLint v9 flat config + `eslint-plugin-playwright`** — lint with Playwright-specific safety rules (`no-wait-for-timeout`, `prefer-web-first-assertions`, etc.) that Biome does not yet provide
 - **Prettier 3** (with `endOfLine: 'auto'` for cross-platform CRLF/LF compatibility) — formatter
 - **dotenv** — local env var loading (`.env` → `src/utils/env.ts` single read point)
-- **GitHub Actions on `ubuntu-latest`** — CI; single job running the full 9-project matrix
+- **GitHub Actions on `ubuntu-latest`** — CI; one job, `Playwright matrix`, running the five projects that exist. A second workflow, `regression.yml`, runs on a schedule.
 
 ---
 
@@ -63,11 +77,7 @@ playwright-ia-framework/
 │   ├── shared/
 │   │   └── products.json
 │   └── scenarios/
-│       ├── checkout/
-│       │   ├── valid-checkout.json
-│       │   └── invalid-postalcode.json
-│       └── sort/
-│           └── sort-orders.json
+│       └── (empty — no dataset has hit an externalize trigger yet)
 │
 ├── auth/
 │   ├── .gitkeep
@@ -77,26 +87,24 @@ playwright-ia-framework/
 │   ├── error.json
 │   └── visual.json
 │
-├── tests/
-│   ├── auth.setup.ts
-│   ├── login/
-│   │   └── login.spec.ts                 # @no-auth
-│   ├── inventory/
-│   │   ├── browse.spec.ts                # @all-users
-│   │   └── sort.spec.ts                  # @sort-functional
-│   ├── cart/
-│   │   └── add-remove.spec.ts            # @all-users
-│   ├── checkout/
-│   │   ├── happy-path.spec.ts            # @standard
-│   │   └── validation.spec.ts            # @standard
-│   └── visual/
-│       └── inventory-images.spec.ts      # @problem
+├── tests/                                # one directory per feature, one spec inside
+│   ├── auth.setup.ts                     # derives from tests/users.ts AUTH_USERS
+│   ├── users.ts                          # AUTH_USERS — single source of the project matrix
+│   ├── login/login.spec.ts               # @no-auth
+│   ├── logout/logout.spec.ts             # @no-auth
+│   ├── inventory/inventory.spec.ts       # @problem + @standard contexts
+│   ├── product_detail/product_detail.spec.ts   # @standard
+│   ├── cart/cart.spec.ts                 # @all-users
+│   ├── checkout/checkout.spec.ts         # @standard
+│   ├── footer/footer.spec.ts             # @standard
+│   ├── burger_menu/burger_menu.spec.ts   # @standard
+│   └── _framework_validation/            # instrumentation, not app coverage (ADR-0021)
 │
 └── docs/
     ├── architecture.md
     ├── runbook.md                        # placeholder (deferred from Phase B.1)
-    ├── app/                              # overview, users, flows, glossary (placeholder)
-    ├── adr/                              # 0000-template + 0001..0005
+    ├── app/                              # overview, users, flows, glossary
+    ├── adr/                              # 0000-template + 0001..0026
     └── superpowers/
         ├── specs/                        # design docs
         └── plans/                        # implementation plans
@@ -114,15 +122,15 @@ playwright-ia-framework/
 
 **`data/types.ts`** — TypeScript interfaces for all test data shapes: `Product`, `CheckoutScenario`, and `SortOption`. These are the single source of truth for data structure across the entire codebase.
 
-**`data/fixtures.ts`** — Typed loader functions that import JSON via ESM import attributes; one loader per JSON source following the `load<Subject>(): <Subject>[]` naming convention. Also contains the `getProductById(id)` helper.
+**`data/fixtures.ts`** — Typed named exports, one per dataset, reading JSON through `fs` (ADR-0023 — import attributes are lint-banned). Today it exports exactly one: `products`.
 
 **`data/shared/`** — Reference data shared across multiple feature areas (e.g., `products.json` used by both inventory and checkout tests).
 
-**`data/scenarios/<feature>/`** — Parameterized test scenarios scoped to a specific feature: `checkout/valid-checkout.json`, `checkout/invalid-postalcode.json`, `sort/sort-orders.json`.
+**`data/scenarios/<feature>/`** — The documented home for named per-feature payloads. **It does not exist yet**; create it when a dataset actually hits an externalize trigger.
 
-**`tests/auth.setup.ts`** — Logs in each of the five supported users at the start of every test run and saves `storageState` to `auth/<user>.json`.
+**`tests/auth.setup.ts`** — Logs in each user listed in `tests/users.ts` `AUTH_USERS` (currently `standard` and `problem`) and saves `storageState` to `auth/<user>.json`. It is not a fixed set of five — the array drives it (ADR-0014).
 
-**`tests/<feature>/*.spec.ts`** — Spec files organized by feature area: `login/`, `inventory/`, `cart/`, `checkout/`, `visual/`.
+**`tests/<feature>/<feature>.spec.ts`** — One spec per feature: `login/`, `logout/`, `inventory/`, `product_detail/`, `cart/`, `checkout/`, `footer/`, `burger_menu/`. There is no `visual/`.
 
 **`auth/`** — Generated storageState files (git-ignored; `.gitkeep` is tracked so the folder exists on a clean clone).
 
@@ -181,17 +189,54 @@ For the historical decision behind this pattern, see [ADR-0001](adr/0001-pom-by-
 
 ## Data Layer
 
-Test data is split between two directories under `data/`: reference data shared across features (`data/shared/`) and parameterized scenario data scoped to a single feature (`data/scenarios/<feature>/`). For example, `data/shared/products.json` is the canonical product catalog used by both inventory and checkout tests, while `data/scenarios/checkout/valid-checkout.json` lists only the checkout-specific scenario inputs.
+Externalized test data lives under `data/`, and **the default is not to externalize at all** —
+small, test-local parameterization belongs inline in the spec. Externalize only on a concrete
+trigger: the data is reused across features, large enough to drown the test logic, owned by
+someone who does not edit test code, environment-specific, or a named business scenario.
 
-**`data/types.ts`** is the single source of truth for data structure. The three interfaces — `Product`, `CheckoutScenario`, and `SortOption` — define exactly what shape each JSON file must conform to. Adding a field to the JSON without updating the interface produces a TypeScript error at the load site, not a silent runtime failure.
+**What exists today** is deliberately small:
 
-Loaders in **`data/fixtures.ts`** follow the convention `load<Subject>(): <Subject>[]` — one loader per JSON source. Examples: `loadProducts()`, `loadValidCheckouts()`, `loadSortOrders()`. AI agents extending the framework match this pattern when adding new scenario files. Tests import loaders via the `@data/*` path alias (`import { loadSortOrders } from '@data/fixtures'`).
+```
+data/
+├── shared/products.json   # the canonical 6-product catalog: name, description, price
+├── types.ts               # one interface — Product
+└── fixtures.ts            # one export — `products`
+```
 
-The **`getProductById(id: string): Product`** helper in `data/fixtures.ts` throws a descriptive error when the requested id is absent. Checkout tests use this helper to resolve a product by id without scattering find-and-throw logic across test bodies.
+`data/shared/` holds reference data used across features. `data/scenarios/<feature>/` is the
+documented home for named per-feature payloads **and does not exist yet** — nothing has hit an
+externalize trigger. Create it when something does; do not pre-create it.
 
-JSON imports use **ESM import attributes** (`import x from './x.json' with { type: 'json' }`). This replaced the earlier `createRequire` workaround that was a CommonJS escape hatch in an ESM file — a convention-drift trap for AI agents extending `data/fixtures.ts`. The import-attributes form is natively supported in Node 22.x + TypeScript 5.9 and is the pattern all new loaders must follow.
+**Loaders read JSON through `fs`, not through an import.**
 
-See [ADR-0003](adr/0003-data-hybrid-shared-scenarios.md) for the layout rationale and [ADR-0005](adr/0005-esm-import-attributes-for-json.md) for the JSON-import decision.
+```ts
+const dataDir = dirname(fileURLToPath(import.meta.url));
+function load<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(join(dataDir, relativePath), 'utf-8')) as T;
+}
+export const products: readonly Product[] = load<Product[]>('shared/products.json');
+```
+
+Each dataset is a typed named export. Specs import from `@data/fixtures`, never reading JSON
+directly. Adding one is a JSON file, a type in `data/types.ts`, and one `load(...)` line.
+
+> **Corrected 2026-09-07 — this section was wrong in a way that mattered.** It described three
+> interfaces (`Product`, `CheckoutScenario`, `SortOption`), a `load<Subject>()` naming convention
+> with `loadProducts()` / `loadValidCheckouts()` / `loadSortOrders()`, a `getProductById()` helper,
+> and scenario files under `data/scenarios/checkout/` and `data/scenarios/sort/`. **None of them
+> exist.** It also instructed that JSON imports use ESM import attributes
+> (`with { type: 'json' }`) — the approach [ADR-0005](adr/0005-esm-import-attributes-for-json.md)
+> chose and [ADR-0023](adr/0023-json-via-typed-fs-loader.md) **superseded** after it proved brittle
+> through Playwright's ESM loader.
+>
+> ADR-0023 predicted this exact failure: _"a reader following the ADRs today would conclude
+> `data/fixtures.ts` is in violation and 'fix' it back into the shape that was already rejected."_
+> It was already happening here. The supersession landed in the log and never reached the present
+> layer — which is why the two layers are now named explicitly at the top of this file.
+
+See [ADR-0003](adr/0003-data-hybrid-shared-scenarios.md) for the layout rationale and
+[ADR-0023](adr/0023-json-via-typed-fs-loader.md) for how JSON loads. Import attributes are
+**banned by lint**, so the rejected shape cannot come back silently.
 
 ---
 
@@ -203,52 +248,67 @@ See [ADR-0003](adr/0003-data-hybrid-shared-scenarios.md) for the layout rational
 
 StorageState files are engine-portable for saucedemo's basic cookie-based session, so `auth/standard.json` is reused by all three browser engines (`chromium`, `firefox`, `webkit`) without a per-browser auth setup step.
 
-### Playwright projects (9 total)
+### Playwright projects
 
-`playwright.config.ts` defines nine projects:
+**The list is not fixed — it is derived.** `playwright.config.ts` reads `tests/users.ts`
+`AUTH_USERS` and emits a `setup-<user>` and a `chromium-<user>` per entry, plus one
+`chromium-no-auth`. A user's project appears the first time a ticket needs it (ADR-0014), so
+the set grows one user at a time and is never pre-populated.
 
-- **`setup`** — runs `tests/auth.setup.ts`; all authenticated projects depend on it
-- **`no-auth`** — chromium, no storageState; grep `@no-auth`; for login/logout tests
-- **`standard`** — chromium; grep `@all-users|@standard|@sort-functional`; depends on setup
-- **`problem`** — chromium; grep `@all-users|@problem`; depends on setup
-- **`performance_glitch`** — chromium; grep `@all-users|@performance_glitch|@sort-functional`; `navigationTimeout: 30_000` override (saucedemo deliberately delays this user ~10 s; the default 15 s leaves no headroom); depends on setup
-- **`error`** — chromium; grep `@all-users|@error`; depends on setup
-- **`visual`** — chromium; grep `@all-users|@visual|@sort-functional`; depends on setup
-- **`firefox-standard`** — Desktop Firefox; grep `@all-users|@standard|@sort-functional`; storageState `auth/standard.json`; depends on setup
-- **`webkit-standard`** — Desktop Safari; grep `@all-users|@standard|@sort-functional`; storageState `auth/standard.json`; depends on setup
+`AUTH_USERS` is currently `['standard', 'problem']`, so today there are **five** projects:
+
+- **`setup-standard`, `setup-problem`** — run `tests/auth.setup.ts` for that user; the matching chromium project depends on it
+- **`chromium-no-auth`** — chromium, no storageState; grep `@no-auth`; login / logout / route-guard tests
+- **`chromium-standard`** — chromium; grep `@all-users|@standard`; storageState `auth/standard.json`
+- **`chromium-problem`** — chromium; grep `@all-users|@problem`; storageState `auth/problem.json`
+
+> An earlier version of this section described nine projects — `standard`, `performance_glitch`,
+> `error`, `visual`, `firefox-standard`, `webkit-standard` — with a `navigationTimeout: 30_000`
+> override. **None of them exist.** Cross-browser was deferred by ADR-0004 and never built;
+> per-user projects became demand-driven under ADR-0014. Verify against `npx playwright test --list`
+> rather than against this file if the two ever disagree again.
 
 ### Tag conventions
 
-| Tag                   | Runs on project(s)                                                                | Purpose                                                                                           |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `@no-auth`            | `no-auth`                                                                         | Login/logout tests, no pre-existing session                                                       |
-| `@all-users`          | All 5 chromium user projects + firefox/webkit                                     | User-agnostic flows                                                                               |
-| `@standard`           | `standard`, `firefox-standard`, `webkit-standard`                                 | Tests where only standard user is meaningful                                                      |
-| `@problem`            | `problem`                                                                         | Tests that _expect_ the problem user's broken UI                                                  |
-| `@performance_glitch` | `performance_glitch`                                                              | Tests that handle slow loads                                                                      |
-| `@error`              | `error`                                                                           | Tests for the error user's random failures                                                        |
-| `@visual`             | `visual`                                                                          | Visual regression for the visual user                                                             |
-| `@sort-functional`    | `standard`, `performance_glitch`, `visual`, `firefox-standard`, `webkit-standard` | Sort tests (excluded from `problem`/`error` — saucedemo breaks the sort dropdown for those users) |
+CLAUDE.md's "Tag conventions" table is the source of truth; this restates it against the
+projects that exist today.
 
-`@sort-functional` exists because saucedemo intentionally breaks the sort dropdown for `problem_user` and `error_user`. Tagging sort tests with `@sort-functional` instead of `@all-users` automatically opts in the three users whose sort works (`standard`, `performance_glitch`, `visual`) plus the two cross-browser projects, while keeping `problem` and `error` out.
+| Tag                                          | Runs on                                 | Purpose                                       |
+| -------------------------------------------- | --------------------------------------- | --------------------------------------------- |
+| `@no-auth`                                   | `chromium-no-auth`                      | Login / logout / route-guard, no session      |
+| `@all-users`                                 | `chromium-standard`, `chromium-problem` | User-agnostic flows                           |
+| `@standard`                                  | `chromium-standard`                     | Only standard_user is meaningful              |
+| `@problem`                                   | `chromium-problem`                      | Tests that _expect_ problem_user's broken UI  |
+| `@error` / `@performance_glitch` / `@visual` | **nothing yet**                         | Route only once that user enters `AUTH_USERS` |
+| `@smoke`                                     | Cross-cutting, via `--grep`             | Build-verification set (`npm run test:smoke`) |
 
-### Cross-browser smoke pattern
+**`@sort-functional` is dormant and must not be used as a routing tag.** No project greps it, so
+a describe routed by it alone would run in **zero projects** and the run would report green
+having executed nothing. It was designed to select the users whose sort works, for a
+five-project matrix that ADR-0004 deferred and ADR-0014 replaced with demand-driven growth. The
+behaviour it was meant to express — that `problem_user` and `error_user` cannot sort — is now
+covered directly by the `test.fail()` tests in `tests/inventory/inventory.spec.ts` against
+SW-14. Wire a project before reviving the tag.
 
-Chromium runs the full 5-user matrix. Firefox and webkit run only the standard user. This catches real browser rendering and locator regressions without re-running saucedemo's intentional per-user bugs three times. The result is 62 test instances total rather than ~120 for a full per-user-per-browser matrix.
+### Cross-browser — deferred, and not built
 
-See [ADR-0002](adr/0002-multi-user-via-projects-storage-state.md) for the multi-user pattern rationale and [ADR-0004](adr/0004-cross-browser-smoke-pattern.md) for the cross-browser smoke decision.
+**There is no cross-browser matrix.** [ADR-0004](adr/0004-cross-browser-smoke-pattern.md) deferred it, and nothing since has implemented it: every project is chromium.
+
+An earlier version of this section described firefox and webkit running the standard user and put the suite at "62 test instances". Neither the projects nor that number existed — it was describing the intended design as though it had shipped. **The suite is currently 83 tests across 10 files** (`npx playwright test --list`).
+
+The shape ADR-0004 chose, if it is ever built, is chromium across the wired users plus firefox/webkit on `standard` only — enough to catch rendering and locator regressions without re-running saucedemo's intentional per-user bugs in three engines. See [ADR-0002](adr/0002-multi-user-via-projects-storage-state.md) for the multi-user pattern.
 
 ---
 
 ## CI Workflow Overview
 
-The workflow lives at `.github/workflows/test.yml`. It runs a single job named `Playwright matrix` on `ubuntu-latest` with a `timeout-minutes: 15` cap.
+Two workflows live in `.github/workflows/`. `test.yml` runs a single job named `Playwright matrix` on `ubuntu-latest` with a `timeout-minutes: 15` cap; `regression.yml` runs the suite on a schedule.
 
-**Triggers:** `push` to `main` and `pull_request` targeting `main`. A `concurrency` block keyed on `${{ github.workflow }}-${{ github.ref }}` cancels any queued or running job for the same workflow+ref when a new run starts, preventing stacked runs from wasting minutes.
+**Triggers:** `push` and `pull_request` on `[main, e2e-jira-from-issues]`. **A PR targeting any other branch runs no CI at all** — which is how a stacked PR once merged without ever being checked. A `concurrency` block keyed on `${{ github.workflow }}-${{ github.ref }}` cancels any queued or running job for the same workflow+ref when a new run starts, preventing stacked runs from wasting minutes.
 
 **Dependency installation:**
 
-1. `actions/setup-node@v4` with `cache: 'npm'` installs Node 22 and restores the npm cache keyed on `package-lock.json`.
+1. `actions/setup-node@v6` with `cache: 'npm'` installs Node 22 and restores the npm cache keyed on `package-lock.json`. (Checkout is `actions/checkout@v7`, the browser cache `actions/cache@v6`.)
 2. `npm ci` installs exact dependency versions from the lockfile.
 3. `actions/cache@v4` restores the Playwright browser cache at `~/.cache/ms-playwright` keyed on `package-lock.json` hash. On a cache miss the next step downloads all three engines.
 4. `npx playwright install --with-deps chromium firefox webkit` installs all three browser engines plus their Linux system dependencies. The `--with-deps` flag handles system packages (e.g., `libglib2.0`, `libnss3`) that Playwright requires on Ubuntu.
