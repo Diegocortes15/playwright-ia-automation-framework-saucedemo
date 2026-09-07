@@ -37,6 +37,24 @@
       }
     },
     {
+      "signature": "console-error:Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the ",
+      "kind": "console-error",
+      "thirdParty": false,
+      "count": 1,
+      "seenIn": [
+        "login"
+      ],
+      "firstSeen": "2026-09-07",
+      "lastSeen": "2026-09-07",
+      "status": "new",
+      "sample": {
+        "message": "Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "url": "https://www.saucedemo.com/",
+        "test": "locked_out_user with a wrong password still sees the lockout error",
+        "project": "chromium-no-auth"
+      }
+    },
+    {
       "signature": "console-error:OBSERVATION_PROBE console failure",
       "kind": "console-error",
       "thirdParty": false,
@@ -208,7 +226,7 @@
       "signature": "failed-request:POST:https://events.backtrace.io/api/summed-events/submit:401",
       "kind": "failed-request",
       "thirdParty": true,
-      "count": 7,
+      "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
       "status": "new",
@@ -217,7 +235,7 @@
         "url": "https://events.backtrace.io/api/summed-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "standard_user logs out from the menu and returns to the login page",
+        "test": "performance_glitch_user logs in successfully and lands on inventory",
         "project": "chromium-no-auth"
       },
       "seenIn": [
@@ -229,7 +247,7 @@
       "signature": "failed-request:POST:https://events.backtrace.io/api/unique-events/submit:401",
       "kind": "failed-request",
       "thirdParty": true,
-      "count": 5,
+      "count": 1,
       "firstSeen": "2026-09-05",
       "lastSeen": "2026-09-07",
       "status": "new",
@@ -238,7 +256,7 @@
         "url": "https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "standard_user logs out from the menu and returns to the login page",
+        "test": "performance_glitch_user logs in successfully and lands on inventory",
         "project": "chromium-no-auth"
       },
       "seenIn": [

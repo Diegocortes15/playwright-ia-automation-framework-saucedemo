@@ -8,7 +8,12 @@
       "bucket": "Positive",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "problem_user logs in successfully and lands on inventory",
@@ -18,7 +23,12 @@
       "bucket": "Positive",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "performance_glitch_user logs in successfully and lands on inventory",
@@ -28,7 +38,12 @@
       "bucket": "Positive",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "error_user logs in successfully and lands on inventory",
@@ -38,7 +53,12 @@
       "bucket": "Positive",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "visual_user logs in successfully and lands on inventory",
@@ -48,7 +68,12 @@
       "bucket": "Positive",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "no credentials shows the required-field error",
@@ -58,7 +83,12 @@
       "bucket": "Negative",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "missing password shows the required-field error",
@@ -68,7 +98,12 @@
       "bucket": "Negative",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "missing username shows the required-field error",
@@ -78,7 +113,12 @@
       "bucket": "Negative",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
     },
     {
       "title": "invalid credentials are rejected",
@@ -88,7 +128,42 @@
       "bucket": "Negative",
       "feature": "login",
       "contextLabel": "no auth",
-      "jira": [{ "key": "SW-1", "url": "https://diegocortes15.atlassian.net/browse/SW-1" }]
+      "jira": [
+        {
+          "key": "SW-1",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-1"
+        }
+      ]
+    },
+    {
+      "title": "locked_out_user is rejected with the lockout error",
+      "acText": "locked_out_user submitting the correct password (secret_sauce) on the login page is not authenticated \u2014 the browser stays on the login page and never reaches /inventory.html \u2014 and sees the error banner with the exact text \"Epic sadface: Sorry, this user has been locked out.\"",
+      "user": "no-auth",
+      "tags": ["@no-auth", "@smoke"],
+      "bucket": "Negative",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [
+        {
+          "key": "SW-15",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-15"
+        }
+      ]
+    },
+    {
+      "title": "locked_out_user with a wrong password sees the credentials error, not the lockout error",
+      "acText": "locked_out_user submitting an incorrect password on the login page sees the invalid-credentials error \u2014 \"Epic sadface: Username and password do not match any user in this service\" \u2014 and not the lockout error. The credential check takes precedence over the account's locked state, so the lockout is never revealed to someone who does not hold the password.",
+      "user": "no-auth",
+      "tags": ["@no-auth"],
+      "bucket": "Edge",
+      "feature": "login",
+      "contextLabel": "no auth",
+      "jira": [
+        {
+          "key": "SW-15",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-15"
+        }
+      ]
     }
   ]
 }
