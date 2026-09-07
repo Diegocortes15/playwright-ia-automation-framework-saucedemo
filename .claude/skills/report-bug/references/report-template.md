@@ -16,11 +16,11 @@ reports should find the same thing in the same place every time.
 2. <reproSteps[1]>
    …
 
-## Expected
+## Expected Result
 
 <the acceptance criterion verbatim when one is available; otherwise the test's assertion in plain words, preceded by the one-line reason it could not be resolved>
 
-## Actual
+## Actual Result
 
 <what happened — `received` when the script parsed one, otherwise the first line of the error>
 
@@ -48,6 +48,10 @@ it with the command that step prints.
 
 - **`Which is wrong?` is never omitted, and never resolved unilaterally — not even by documentation.** Cite `docs/app/` when it covers the behaviour, and say which kind of record it is: a **specification** ("the system shall do X" — then not doing X is a defect) or a **defect log** ("X is broken for this user" — which proves the bug is *known*, not that it is *correct*). Both readings still stand afterwards. A file describing something as "broken" is the strongest possible evidence that someone considered it a bug.
 - **Steps are the `test.step` titles verbatim.** They describe what actually ran. Rewriting them into prettier prose breaks the guarantee that following the steps reproduces the failure.
+- **Expected Result and Actual Result are always two headings, never one.** They are different kinds of claim: Expected is a **requirement somebody agreed to**, Actual is an **observation of what happened**. Merging them into "Expected vs actual" reads tidier and costs the distinction the whole report turns on — the `Which is wrong?` section exists precisely because either one can be the thing that is wrong, and SW-15 is the case where it was the Expected. Two headings also mean each can be cited on its own: "the Expected in SW-14 is wrong" is a sentence someone needs to be able to say.
+
+- **A control comparison belongs under Actual Result, not between the two.** A table contrasting the broken case with a working one (a second user, a previous version, another browser) is **evidence that the observed behaviour is real and correctly attributed** — it is not a comparison of expected against actual. Filing it under a merged heading mislabels what it is.
+
 - **Expected prefers the acceptance criterion over the assertion.** The AC is what a person agreed the system should do; the assertion is one engineer's encoding of it. When the script found no AC it returns a `missing` reason instead — **render that reason**, then fall back to the assertion. Never fall back silently: restating the assertion that just failed is circular, and a reader has no way to tell an oversight from a structural absence.
 
   | `missing` | What to write |
