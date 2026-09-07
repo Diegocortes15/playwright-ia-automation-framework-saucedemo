@@ -78,10 +78,13 @@ for (const spec of eachSpec({ suites: report.suites ?? [] })) {
 
       const message = stripAnsi(result.error?.message ?? '').trim();
       // A test.fail() test that fails as expected is not a "failure" to Playwright, so
-      // `screenshot: 'only-on-failure'` and `video: 'retain-on-failure'` keep neither. The
-      // trace survives (`trace: 'on'`) and carries a screenshot per step, but a reader who
-      // expected a .png needs to be told why there isn't one rather than left guessing.
-      const expectedFailure = test.status === 'expected';
+      // `screenshot: 'only-on-failure'` and `video: 'retain-on-failure'` keep neither unless the
+      // spec file forces them on. Only say so when they are actually missing — and say how to
+      // fix it, because the trace is not a substitute: reading one needs a checkout, which puts
+      // an engineer between a non-engineer and the bug.
+      const visualsMissing =
+        test.status === 'expected' &&
+        !files.some((f) => f.startsWith('screenshot') || f.startsWith('video'));
       writeFileSync(
         join(dir, 'README.txt'),
         [
@@ -105,14 +108,21 @@ for (const spec of eachSpec({ suites: report.suites ?? [] })) {
           '',
           'It opens in a browser and needs no setup beyond the repository.',
           '',
-          ...(expectedFailure
+          ...(visualsMissing
             ? [
-                'Why there is no screenshot or video',
-                '-----------------------------------',
-                'This test is marked test.fail(): it is locked to a known defect and is',
-                'expected to fail, so Playwright does not treat the failure as one and its',
-                "'only-on-failure' screenshot and 'retain-on-failure' video are not kept.",
-                'The trace above is unaffected and contains a screenshot at every step.',
+                'No screenshot or video — and that is fixable',
+                '-------------------------------------------',
+                'This test is marked test.fail(), so Playwright does not treat its failure as',
+                "a failure and neither 'only-on-failure' screenshot nor 'retain-on-failure'",
+                'video is kept. That is backwards: a test locked to a known defect is exactly',
+                'the one whose evidence someone without the repository needs to see.',
+                '',
+                'Fix it by forcing capture at the top of the spec file (it cannot be scoped to',
+                'a describe — video forces a new worker):',
+                '',
+                "    test.use({ screenshot: 'on', video: 'on' });",
+                '',
+                'The trace below still works, but it needs a checkout to read.',
                 '',
               ]
             : []),

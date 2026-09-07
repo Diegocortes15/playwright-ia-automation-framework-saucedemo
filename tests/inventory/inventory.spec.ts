@@ -8,6 +8,16 @@
 import { test, expect } from '@fixtures/test';
 import { products } from '@data/fixtures';
 
+// This file holds tests marked test.fail() against a filed defect (SW-14, per ADR-0024), and
+// Playwright does not treat an expected failure as a failure — so 'only-on-failure' screenshot
+// and 'retain-on-failure' video capture nothing for exactly the tests whose evidence someone
+// outside the repository most needs. A trace is not a substitute: reading one requires
+// `npx playwright show-trace` and a checkout, which puts an engineer between a BA and the bug.
+//
+// Forced on for this file only. Measured cost: +12% run time and +12 MB of artifacts. It has to
+// be file-level — `video` cannot be scoped to a describe, because it forces a new worker.
+test.use({ screenshot: 'on', video: 'on' });
+
 // problem_user is one of saucedemo's intentionally-broken accounts: the inventory
 // page serves the same placeholder image (sl-404) for every product instead of a
 // distinct image per product. This characterization test locks that defect in.

@@ -53,6 +53,24 @@ no records at all (ADR-0020), and it is not the agent's call whether a test land
 (ADR-0024). The field is added by hand at the moment a person approves the landing, alongside
 the `test.fail()` marker itself.
 
+**The spec file must also force artifact capture.** Add this at the top of the file, next to the
+imports:
+
+```ts
+test.use({ screenshot: 'on', video: 'on' });
+```
+
+Playwright does not treat an expected failure as a failure, so the project's
+`screenshot: 'only-on-failure'` and `video: 'retain-on-failure'` capture **nothing** for exactly
+the tests whose evidence matters most. The trace still records, but reading one needs
+`npx playwright show-trace` and a checkout — which puts an engineer between a BA, a product owner
+or a support agent and the bug they are being asked to judge. A defect-locked test that produces
+no screenshot and no video is a defect report nobody outside the repository can see.
+
+It has to be **file-level**: `video` cannot be scoped to a `describe`, because it forces a new
+worker. Measured cost on `inventory.spec.ts`: **+12% run time and +12 MB of artifacts** for that
+file. Do not turn it on globally to avoid the thought — every passing test would pay it.
+
 It does two jobs. The Playwright report reads it through `src/utils/report-annotations.ts` and
 explains the expected failure in words — otherwise the test shows a bare "expected" status that
 tells a reader nothing about why. And it is the machine-readable half of ADR-0024's rule that
