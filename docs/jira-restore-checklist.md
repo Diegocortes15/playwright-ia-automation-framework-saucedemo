@@ -4,9 +4,17 @@ Access to the free Jira instance was lost to inactivity on 2026-09-05 and re-req
 Everything below is blocked on it. Nothing here is speculative: each item exists because a
 change was shipped without ever being observed running.
 
-**The honest state:** four ADRs (0019–0022) were designed and merged without `/from-issue`
-being executed once this session. They were reasoned from the code, not from watching the
-pipeline work. This checklist is how that debt gets paid.
+**The honest state, updated 2026-09-07:** four ADRs (0019–0022) were designed and merged without
+`/from-issue` being executed once. They were reasoned from the code, not from watching the pipeline
+work. This checklist is how that debt gets paid — and **most of it now is.** Both critical branches
+of the ADR-0020 gate have run against real Jira tickets: the happy path (SW-12 → PR #48, green on
+the first attempt) and the app-versus-AC diagnosis (SW-13 → blocked, no PR, then landed as
+`test.fail()` against SW-14 → PR #49).
+
+The single biggest thing running it found had nothing to do with those ADRs:
+**`/scaffold-page-object` had been aborting on every invocation since 2026-06-03** and nobody knew,
+because it was never executed. Fixed in PR #47 with ADR-0025. That is the whole argument for this
+checklist in one line.
 
 ---
 
@@ -18,22 +26,34 @@ pipeline work. This checklist is how that debt gets paid.
 > so authorizing in one window does not retrofit into an already-running one. If Claude reports
 > no `mcp__atlassian__*` tools, restart rather than re-authorizing.
 
-- [ ] Run `/mcp` in an **interactive** Claude Code session and complete the Atlassian OAuth.
-      A non-interactive session cannot run the flow.
-- [ ] Confirm the MCP answers: ask for `mcp__atlassian__getAccessibleAtlassianResources`,
-      then read any ticket with `mcp__atlassian__getJiraIssue`.
-- [ ] Confirm the `SW` project and its tickets survived the lapse. If they did not, recreate
-      2–3 from `docs/jira-tickets.md` before going further — several items below need a real,
-      unrefined ticket to be meaningful.
+- [x] ~~Run `/mcp` in an **interactive** Claude Code session and complete the Atlassian OAuth.~~
+      Done 2026-09-06. A fresh session was indeed what it took.
+- [x] ~~Confirm the MCP answers.~~ Done 2026-09-06 — and confirmed twice over: through a direct
+      call, and through `/from-issue`'s own pre-authorized `allowed-tools` path (no prompt per run).
+- [x] ~~**Confluence.**~~ **Not available**, established 2026-09-06: `getConfluenceSpaces` returns
+      `404` on `/ex/confluence/<cloudId>/wiki/api/v2/spaces`, and the accessible-resource record
+      declares only `read:jira-work` / `write:jira-work`. Whether the product is unprovisioned or
+      the OAuth grant simply never requested the Confluence scopes is **not distinguishable from
+      the API** — it needs a look at the Atlassian admin console. Either way `/refine-ticket`
+      end-to-end stays blocked, now for a reason unrelated to Jira.
+- [x] ~~Confirm the `SW` project and its tickets survived the lapse.~~ Done 2026-09-06: `SW-1`
+      through `SW-11` all present, all `Done`. **But all eleven were already contributors** to a
+      generated spec, so re-running any of them refuses (ADR-0010) and section 1 had no clean
+      ticket to use. Three were created to unblock it: - **SW-12** — `product_detail`, a surface with no prior automation. Deliberately chosen to
+      force CREATE-NEW _and_ the `/scaffold-page-object` composition. - **SW-13** — asserts `problem_user` can sort, which the app does not do. Labelled
+      `validation-fixture`; the label is invisible to the skill (Step 2 captures only key,
+      summary and description) and visible to a person. - **SW-14** — the defect SW-13's run found, filed on approval so the `test.fail()`
+      annotation had an identifier to name (ADR-0024).
 
 ## 0.5 You can start before Jira returns
 
 `--from-file` reads a ticket from disk, so everything downstream of the ticket read can be
 exercised now. Two fixtures ship in `tickets/`:
 
-- [ ] `/from-issue --from-file tickets/SW-901-inventory-cart-badge.md` — the happy path.
-      Expect a green PR, `"jira": []` in the TCMS record, and a `// Source:` line naming the
-      file rather than a browse URL.
+- [x] ~~`/from-issue --from-file tickets/SW-901-inventory-cart-badge.md` — the happy path.~~
+      Ran green and produced **PR #46**, which was then **closed unmerged on 2026-09-06** — see
+      "The `--from-file` TCMS contradiction" below. It could not be merged without breaking the
+      merge build, which is a finding rather than a failure of the run.
 - [ ] `/from-issue --from-file tickets/SW-902-problem-user-sort.md` — **the branch that has
       never fired.** Its AC asserts `problem_user` can sort, which `docs/app/users.md`
       documents as broken. A correct run stops and reports an app-versus-AC contradiction.
@@ -56,44 +76,99 @@ Both surfaced running `--from-file`, not by reading the code. Neither is fixed.
       only after a human decides — never by the agent. Recorded honestly that the
       human-approval half is unenforceable, and that a `test.fail()` test passes for _any_
       failure, not only the original one, which is why the annotation must name the bug.
-- [ ] **A blocked run in AUGMENT mode leaves a committed spec dirty**, which blocks the next run
-      (Step 1.5 requires a clean tree). Fine for CREATE-NEW — an untracked new file. Unspecified
-      cleanup for AUGMENT.
+- [ ] **A blocked run in AUGMENT mode leaves committed files dirty**, which blocks the next run
+      (Step 1.5 requires a clean tree). **Observed 2026-09-06** by the blocked `/from-issue SW-13`
+      run, and the item was understated in two ways: - It is **two** files, not one: the spec _and_ `.observations/observations.json`. The second
+      is the more delicate, because its content does not belong to the ticket. - **The ADR-0024 path needs no cleanup at all** — when the test lands as `test.fail()`, those
+      dirty files simply become the landing commit. The open question is narrower than written:
+      it only applies to the _other_ branch, where a person concludes the ticket was wrong and
+      the generated tests are discarded.
+
+### The `--from-file` TCMS contradiction (new, 2026-09-06)
+
+- [ ] **`tcms-sync.md` gives two instructions that cannot both hold**, and the conflict makes every
+      file-sourced run unmergeable by construction: - line 36 — _"The sync rejects any record missing a non-empty `jira` array."_ - lines 46–51 — _"When the run used `--from-file`, write `"jira": []` on every record."_
+
+      `src/tcms/suite-sync.ts:86-87` throws on an empty `jira` array; `main()` reaches that
+      validation because `qaseConfig()` resolves (both `QASE_API_TOKEN` and `QASE_PROJECT_CODE`
+      are set on the repo); and the `Sync test cases to Qase (merge only)` step runs on
+      `github.event_name == 'push'` with no `continue-on-error`. So the failure lands on `main`
+      *after* the merge, not on the PR. PR #46 followed both instructions faithfully and produced
+      exactly that artifact.
+
+      `--from-file` (#42) was added after ADR-0016/0017 and nobody noticed, because no file-sourced
+      run had ever been merged. **Needs a decision and an ADR:** either the sync skips records with
+      an empty `jira` array, or `--from-file` writes no records at all. The wider question worth
+      settling first is whether a file-sourced run should be mergeable *at all*.
 
 ## 1. Verify what was built blind
 
 ### ADR-0020 — the no-red-PR gate
 
-The gate has never fired. It is the highest-risk change of the four: it is the one that
-decides whether a PR exists at all.
+~~The gate has never fired.~~ **It has now, on both critical branches** (2026-09-06). It remains
+the highest-risk change of the four: it is the one that decides whether a PR exists at all.
 
-- [ ] **Happy path.** Run `/from-issue <KEY>` on a clean ticket. Expect a green PR, and a
-      `Fix attempts` line absent (first run green).
+- [x] ~~**Happy path.**~~ Done 2026-09-06 — `/from-issue SW-12` (`product_detail`), **PR #48**:
+      3 tests, green on the first attempt, no `Fix attempts` line. Deliberately aimed at the one
+      saucedemo surface with no Page Object, so it exercised CREATE-NEW _and_ the
+      `/scaffold-page-object` composition rather than the easier AUGMENT path.
 - [ ] **Forced failure.** Point a ticket at an element that does not exist, or temporarily
       break a Page Object method the ticket needs. Expect: 3 diagnosed attempts, then **no
       branch, no commit, no push, no PR**, and a report naming every file left on disk.
       _If a PR appears, the gate is broken and that is the top priority._
-- [ ] **App-vs-code diagnosis.** Write a ticket whose AC contradicts real app behavior (e.g.
-      assert the sort dropdown works for `problem_user` — it does not). Expect the run to
-      **stop and report an app/AC contradiction**, not to weaken the test until it passes.
-      This is the branch that protects real bug findings; it has never executed.
+- [x] ~~**App-vs-code diagnosis.**~~ Done 2026-09-06 — `/from-issue SW-13`. The run **stopped and
+      reported an app-versus-AC contradiction** with **0 fix attempts**: the loop was never entered,
+      because `fix-loop.md`'s first question answered itself. No branch, no commit, no PR, no TCMS
+      artifact. Verified afterwards that none of those existed.
+
+      What made the diagnosis solid was that it did not rest on the agent's reading of the ticket:
+      the failing assertion used `getActiveSortLabel()` and `sortBy()`, **pre-existing** methods
+      that the four `standard_user` sort tests in the same file exercise and pass; and a live
+      control run with identical steps showed `problem_user` leaving `select.value` at `az` where
+      `standard_user` reaches `lohi` and reorders.
+
+      > **Caveat on the evidence.** The same session wrote SW-13 and had read `docs/app/users.md`,
+      > so it already knew the AC was false. The mechanical steps are proven; the part that matters
+      > most — whether the agent *chooses* to stop rather than weaken the test — was tested by an
+      > agent that could not un-know the answer. Re-running SW-13-shaped work from a cold session
+      > is the stronger experiment, and is still worth doing.
+
+      It then closed the ADR-0024 loop end to end: `/report-bug` drafted the report, SW-14 was
+      filed on approval, and the tests landed `test.fail()` naming it — **16 passed, 0 failed**,
+      with the two annotated tests showing `✘` in the list output. CI green while the defect lives,
+      exactly as designed (**PR #49**, CI pass).
+
 - [ ] Confirm the `typecheck-spec.sh` exit codes behave in a real run — especially 69, which
-      should tell the user to `npm install` and stop, never consume a fix attempt.
+      should tell the user to `npm install` and stop, never consume a fix attempt. **Partly done:**
+      exit 0 is confirmed across four real runs. **69 has still never fired** and is the one worth
+      forcing, since it is the exit that exists to prevent a PASS the run never earned.
 
 ### ADR-0022 — Obstacles encountered
 
-- [ ] Confirm the section renders in the PR body **and** the terminal report, and that a
-      clean run renders exactly `None.` rather than omitting it.
-- [ ] Confirm it does **not** restate the assumptions block or the fix log.
-- [ ] Watch for the failure mode the ADR admits: a section that comes back `None.` on a run
-      that visibly hit friction. If that happens, the convention is not working as written —
-      record it and reconsider rather than tightening the prose again.
+- [x] ~~Confirm the section renders in the PR body **and** the terminal report.~~ Done 2026-09-06
+      across four runs (SW-3 dry-run, SW-12, SW-13, and the scaffold fix). It rendered every time.
+- [ ] Confirm a run with nothing to report renders exactly `None.` rather than omitting it.
+      **Not observed — no run this session was obstacle-free.** Every single one surfaced real
+      friction, which is either a good sign for the convention or a sign the toolchain has more
+      rough edges than anyone assumed. Probably both.
+- [x] ~~Confirm it does **not** restate the assumptions block or the fix log.~~ Done 2026-09-06:
+      ticket inferences stayed in `⚠️ Assumptions & open questions`, and SW-13's zero fix attempts
+      were reported in Verification, not duplicated here.
+- [x] ~~Watch for the failure mode the ADR admits: a section that comes back `None.` on a run
+      that visibly hit friction.~~ **Did not happen** in four runs. The section did real work —
+      it is where every finding below was first written down. The **inverse** risk now looks like
+      the live one: the sections are long, and a reader may start skimming them. Worth watching.
 - [ ] Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.
 
 ### ADR-0021 — Observations
 
-- [ ] Confirm `/from-issue` stages `.observations/<feature>.json` and that new entries show
-      up in the PR diff.
+- [x] ~~Confirm `/from-issue` stages the observations index and that new entries show up in the
+      PR diff.~~ Done 2026-09-06 in PRs #48 and #49. Two notes: - The path in this item was wrong: the committed artifact is the single signature-keyed
+      `.observations/observations.json`, not one file per feature. - **New defect in the prose renderer.** `count`, `lastSeen` and `sample` _refresh_ per run
+      while `firstSeen` survives — that is the documented contract (`reporter.ts:96-99`) and it
+      is correct. But `npm run observations` renders "Seen 3 times between 2026-09-04 and
+      2026-09-07", pairing a per-run count with a cross-run date range, so the sentence reads as
+      cumulative when it is not. The data is right; the sentence is misleading.
 - [ ] Triage the standing entries in `.observations/observations.json`. The 404s are already
       marked `ignored` (GitHub Pages `spa-github-pages` shim). Still open: the
       **`events.backtrace.io` 401s** — the app's own error-reporting telemetry is being
@@ -105,8 +180,125 @@ decides whether a PR exists at all.
 
 ### ADR-0019 — Portability
 
-- [ ] Run `skill-validator check .claude/skills/<name>` on all four and confirm still green
-      after whatever the above changes.
+- [ ] Run `skill-validator check .claude/skills/<name>` and confirm still green after the above.
+      **Could not run:** `skill-validator` is not installed (`skill-validator not found`); install
+      steps are in README.md under "Optional: validating the skills". This matters more than it did
+      before — PR #47 edited `scaffold-page-object`'s `references/` and `SKILL.md` and added a
+      `scripts/` directory, so its link graph changed without the one check that verifies ADR-0019.
+      Also note there are now **five** skills, not four (`/report-bug` shipped in #43).
+
+## 1.5 Found by running it, 2026-09-06/07
+
+None of these came from reading code. They are ordered by how much damage they were doing.
+
+- [x] ~~**`/scaffold-page-object` aborted on every invocation, and had since 2026-06-03.**~~ Fixed in
+      **PR #47** with **ADR-0025**. Step 4 reconciles `src/components/*.ts` against the signature
+      table and aborts when a file has no row; `BurgerMenu.ts` landed in `1ca64a9` (SW-11) and never
+      got one. Step 4 runs _before_ the page is opened, so the abort was page-independent — the
+      skill was unusable against any URL for three months. `component-detection.md` was even edited
+      inside that window (`83ede0c`, the ADR-0019 refactor) and the gap still went unseen.
+
+      Two further defects, same root cause: the `ProductCard` and `SortDropdown` rows outlived their
+      deleted files (removed 2026-05-24), because the reconciliation was one-directional — and the
+      doc's own prose cited `ProductCard` as real, which would have made a run compose an import
+      that does not resolve. Underneath both, **the rule contradicted the architecture**: nested
+      components (composed by a parent, never detected standalone) had no way to declare themselves,
+      so `CartBadge` passed only by luck and `BurgerMenu` read as an omission. Nested rows now say
+      so, and `scripts/check-component-signatures.sh` reconciles both directions — with both of its
+      failure modes verified against injected mismatches rather than assumed.
+
+- [ ] **`/report-bug` cannot resolve an acceptance criterion for the case it exists to serve.**
+      `collect-failure.mjs` reads the AC from `.tcms/records/<feature>.json` and matches on test
+      title, but ADR-0020 specifies that a blocked run writes **no TCMS artifact**. So for a run
+      blocked by an app-versus-AC contradiction, `acceptanceCriterion` is structurally always
+      `undefined`. Confirmed 2026-09-06. The AC was supplied from the Jira read instead. Needs a
+      design decision, not a doc edit.
+
+- [ ] **ADR-0024 requires a filed defect identifier, and nothing in this project can file one.**
+      The ADR says the annotation "always carries the defect's identifier", but `/report-bug`'s
+      Scope excludes tracker writes by design ("needs… its own ADR"), `/from-issue` declares
+      read-only Jira tools, and only `/refine-ticket` writes (the AC block, ADR-0013). SW-14 was
+      filed as a deliberate one-off on explicit instruction, not by a skill. **The mandatory manual
+      step between _diagnosed_ and _annotated_ is named by no document.**
+
+- [ ] **ADR-0024 says nothing about the TCMS artifact.** A blocked run writes none (ADR-0020), but
+      a test that later lands on approval needs one or it carries no report annotation. Records were
+      written by hand for SW-13's tests, referencing **both** keys — SW-13 (the AC's origin) and
+      SW-14 (the defect). The ADR should say that is the expectation.
+
+- [ ] **Step 8.5's duplicate guard is file-scoped while its insertion is context-scoped.** It
+      compares titles "already in the file" but inserts "within the resolved context describe". In a
+      multi-context file the same behaviour for a different user is a legitimately different test.
+      **Avoided in the SW-13 run only by title choice** — a run that had reused the `@standard`
+      describe's phrasing would have been wrongly skipped as a duplicate.
+
+- [ ] **`/from-issue` Step 13's Jira fallback is not executable.** It says to "post a comment-back
+      via the Atlassian MCP" if the GitHub-for-Jira link does not appear, but the skill's
+      `allowed-tools` declares only the two read tools. Either declare a write tool or drop the
+      fallback; today it reads as a capability that is not there.
+
+- [ ] **Whether the GitHub-for-Jira auto-link works is still unverified.**
+      `getJiraIssueRemoteIssueLinks` returns `[]` for SW-12 _and_ for SW-11, whose PR was merged
+      long ago — so remote issue links are simply not the mechanism (the app writes "development
+      information", which this MCP does not appear to expose). **The available check cannot answer
+      the question**; confirming it needs a look at the Development panel in the browser.
+
+- [ ] **`/scaffold-page-object` Step 11 still says `npx tsc`.** That is exactly the command
+      `from-issue/scripts/typecheck-spec.sh` was written to replace: with `node_modules` absent,
+      `npx tsc` fetches `tsc@2.0.4`, a deprecated squatter that is not the compiler, and the skill
+      would record a PASS it never earned. `/from-issue` got the hardened script; the scaffold never
+      did. A concrete candidate for roadmap item **B12b**.
+
+- [ ] **`playwright-cli` is not on `PATH`.** The scaffold's Step 5 says to run `playwright-cli open`,
+      which fails with `command not found`; the binary ships as a local devDependency at
+      `node_modules/.bin/playwright-cli`. Two related gaps in the same steps: `click` and `select`
+      **require a snapshot `ref`** and fail on free text, which the workflow never says.
+
+- [ ] **`scaffold-page-object`'s `allowed-tools` does not declare `Edit`**, yet its Step 11.5
+      instructs "apply three edits" to `src/fixtures/test.ts`. Only `Write` is declared, which would
+      mean rewriting the whole fixture file. Left unwidened deliberately: the roadmap's revised
+      Bloque A step 4 says review case by case and do not widen by default.
+
+- [x] ~~**`docs/app/users.md` described the `problem_user` sort defect wrongly.**~~ Corrected
+      2026-09-06 (PR #49). It said the dropdown "accepts the click but does not re-order", implying
+      the control registers the selection. It does not — `select.value` reverts to `az`. **The
+      distinction is load-bearing: a test asserting only the resulting order would have passed
+      through the wrong mechanism**, and this was caught only because the control assertion and the
+      ordering assertion were kept separate. The entry now also labels itself a defect log rather
+      than a specification. It also cited `tests/visual/inventory-images.spec.ts`, which does not
+      exist.
+
+- [ ] **`@sort-functional` routes to no project.** `test-template.md:109` offers it to the generator
+      inside the list of routing tags, but `playwright.config.ts` only greps `@no-auth` and
+      `@all-users|@<user>`. As a _secondary_ tag alongside `@standard` it is harmless; **as a sole
+      routing tag those tests would run in zero projects and the run would report green having
+      executed nothing.** It is also absent from CLAUDE.md's tag table, and cited in
+      `docs/architecture.md`.
+
+## 1.7 Client-readiness — raised 2026-09-07
+
+Prompted by the right question: _is this professional for an automation framework, assuming a real
+client?_ The prose in the tickets was close to fine. These two are not about prose.
+
+- [ ] **The `SW` project has no `Bug` issue type**, so SW-14 was filed as a `Story` with a `defect`
+      label and a `[BUG]` summary prefix. That is a workaround, and in a client engagement it is the
+      thing a PM notices within a week: a tracker where defects are Stories breaks filters,
+      dashboards, defect-density reporting and any SLA. **Fix the project before filing the next
+      one.** `getJiraProjectIssueTypesMetadata` confirms only Epic, Subtask and Story exist.
+
+- [ ] **Captured evidence is not shareable.** Screenshots, video and traces live at absolute paths
+      under `test-results/` on the machine that ran the suite, so a bug report's "Evidence" section
+      is dead on arrival for everyone else. A report whose evidence nobody can open has, in
+      practice, no evidence. Real work, not a doc edit: attach to the ticket, or link the CI
+      artifact. The Atlassian MCP exposes no attachment tool, so this needs another route. SW-14
+      currently says so explicitly rather than pretending otherwise.
+
+- [x] ~~**Ticket prose carried internal vocabulary.**~~ Settled 2026-09-07 and recorded as a
+      convention in `docs/jira-tickets.md`: **name the tooling, gloss it once, never cite an ADR.**
+      Skill names earn their place because they tell the reader that repro steps were _extracted_
+      from `test.step` names rather than performed by hand, which changes how a failed repro is
+      attributed. ADR citations pay nothing back to a reader without the repo. SW-14 was rewritten
+      accordingly.
 
 ## 2. Finish Bloque A
 
@@ -155,8 +347,14 @@ Run them with `npm run test:instrumentation`. The script deliberately passes **n
 `ObservationsReporter`, so the run would write no `.observations/` file at all. Results land in `.observations/observations.json`;
 read them with `npm run observations`.
 
-Keep them until `/from-issue` has run end-to-end at least once; the observation pipeline has
-no other coverage.
+~~Keep them until `/from-issue` has run end-to-end at least once; the observation pipeline has
+no other coverage.~~ **That condition is now met** (2026-09-06): `/from-issue` ran end-to-end on
+SW-12 and SW-13, and both runs exercised the observation pipeline through the real reporter. So
+these are now deletable — the four steps above are unblocked. The one thing they still cover that
+the real runs do not is the **`test.fail()` failure path** ("an observation raised before a failing
+assertion survives into the file"), which is worth a thought now that SW-13's landed tests are
+`test.fail()` in earnest: check whether the real annotated tests record observations before deleting
+the probe that proved they could.
 
 ## Not blocked on Jira — can be done any time
 
