@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-04
 **Status:** Accepted. Scopes [ADR-0008](0008-custom-skills-pattern.md): the compact-`SKILL.md` + verbose-`references/` layout stands, but a skill directory must now be **self-contained** — no markdown link may resolve outside it.
-**Enforced by:** **Partly.** `skill-validator` detects a link escaping its skill directory, but it is a manual check rather than a CI gate — deliberately, see this ADR's alternatives. Install steps are in README.md under "Optional: validating the skills"; without it nothing in the toolchain verifies this decision at all.
+**Enforced by:** **Partly.** One `grep`, in README.md under "Optional: validating the skills", finds every link escaping a skill directory — verified against an injected instance of each failure mode, and clean with no false positives on the current tree. Deliberately manual rather than a CI gate; see this ADR's alternatives. This line named `skill-validator` until 2026-09-07, when it was dropped: nobody had installed it, and the `grep` this ADR's own alternatives already pointed at turned out to be strictly better.
 
 ## Context
 

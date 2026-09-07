@@ -242,22 +242,17 @@ npm test                      # full suite, green in ~under a minute
 
 ### Optional: validating the skills
 
-Only needed if you're **editing a skill**. [`skill-validator`](https://github.com/agent-ecosystem/skill-validator) is what checks that a skill directory stays self-contained — no markdown link resolving outside it — which is the invariant [ADR-0019](docs/adr/0019-skill-portability.md) rests on. Nothing else in the toolchain checks it, and it is deliberately a manual check rather than a CI gate (ADR-0019 records why).
+Only needed if you're **editing a skill**. [ADR-0019](docs/adr/0019-skill-portability.md) rests on one invariant — no markdown link inside a skill resolves outside it — and this is the whole check:
 
 ```bash
-brew tap agent-ecosystem/tap
-brew trust --formula agent-ecosystem/tap/skill-validator   # Homebrew requires this for third-party taps
-brew install skill-validator
-
-skill-validator check .claude/skills/<name>
+grep -rn "](\.\./\|](/\|](docs/\|](src/\|](tests/\|](data/" .claude/skills/
 ```
 
-Prefer not to trust a tap? The formula only downloads a GoReleaser tarball, so fetching the release directly and verifying its checksum is equivalent — see the formula for the current version and SHA.
+**No output means clean.** It catches both failure modes: a link escaping the repo, and a skill pointing at a sibling skill's file. Verified by injecting one of each — and on the current tree it returns nothing, with no false positives to explain away.
 
-**Two known false positives in this repo**, both documented rather than worked around:
+Run it before handing a skill to anyone. It is deliberately manual rather than a CI gate; ADR-0019's alternatives record why, and name the scale at which that would change.
 
-- **`total reference files: N tokens`.** Anthropic's own guidance says the opposite — _"a skill's body loads only when it's used, so long reference material costs almost nothing until you need it."_ The per-file warning is worth acting on; this one measures a sum that is not paid. See `docs/jira-restore-checklist.md`.
-- **HTTP link checks against saucedemo.** It is a SPA on GitHub Pages, so every deep link returns 404 on a direct fetch while working fine in a browser.
+**`skill-validator` was evaluated and dropped (2026-09-07).** [It](https://github.com/agent-ecosystem/skill-validator) is a healthy MIT project from an independent community org, and its `check` runs fully locally — the objection was not safety. It is that installing it wants `brew trust` on a third-party tap, and it ships two false positives this repo had to document, while the one-line `grep` above finds the same defects with none. ADR-0019 had already reached that conclusion in prose (_"all findable with `grep`"_); this only stopped pointing at a tool nobody had installed. Its token accounting is the part worth coming back for, if a skill ever needs to be shrunk.
 
 For which skills actually get used and what they cost in context, Claude Code ships [`/skill-doctor`](https://code.claude.com/docs/en/skills) (v2.1.252+). It measures observed usage — a different question from whether a skill is well-formed, and the two do not overlap.
 
