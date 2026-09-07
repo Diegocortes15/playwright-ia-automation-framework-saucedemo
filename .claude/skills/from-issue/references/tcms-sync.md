@@ -35,6 +35,32 @@ Set `jira` to the ticket(s) **this** test traces to (usually just the one you're
 working). Write/append with the Write tool and `git add` it alongside the spec.
 Skip under `dry-run` **and under `--from-file`** (see below). The sync rejects any record missing a non-empty `jira` array, and with those two skips in place such a record is never written in the first place.
 
+## `expectedFailure` — for a test that lands as `test.fail()`
+
+A record gains one optional field when its test is marked `test.fail()` because the
+**application**, not the test, is wrong (ADR-0024):
+
+```json
+"expectedFailure": {
+  "key": "SW-14",
+  "url": "https://…/browse/SW-14",
+  "reason": "one plain sentence: what the application does that it should not"
+}
+```
+
+**A `/from-issue` run never writes it.** A run blocked by an app-versus-AC contradiction writes
+no records at all (ADR-0020), and it is not the agent's call whether a test lands annotated
+(ADR-0024). The field is added by hand at the moment a person approves the landing, alongside
+the `test.fail()` marker itself.
+
+It does two jobs. The Playwright report reads it through `src/utils/report-annotations.ts` and
+explains the expected failure in words — otherwise the test shows a bare "expected" status that
+tells a reader nothing about why. And it is the machine-readable half of ADR-0024's rule that
+the annotation must name the defect: a `test.fail()` test whose record has no `expectedFailure`
+is flagged in the report as an **unattributed expected failure**, which is the thing ADR-0024
+warns is "indistinguishable from a test somebody gave up on". Detection, not prevention — it
+never fails a run.
+
 ## What the merge-time sync does (`src/tcms/suite-sync.ts`, run by CI)
 
 - Reads **all** `.tcms/records/*.json` + the full `test-results/results.json`.
