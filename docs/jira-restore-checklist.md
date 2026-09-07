@@ -331,7 +331,7 @@ client?_ The prose in the tickets was close to fine. These two are not about pro
 
 ## 3. Then, and only then, Bloque B
 
-- [ ] **Step 9 — EARS in `/refine-ticket`.** The roadmap's own highest-ROI/lowest-effort
+- [x] ~~**Step 9 — EARS in `/refine-ticket`.**~~ **Done 2026-09-07**, and done in the order this item asked for: written against a pipeline that had been observed on both skills the same day, not an imagined one. Rubric item 10. The `WHEN`→Positive / `IF…THEN`→Negative mapping was validated against four real ACs from this session and **found to break on one** (SW-15 AC 3, `IF…THEN` by EARS but correctly `Edge`), so the limit is documented rather than the mapping oversold. Original text: The roadmap's own highest-ROI/lowest-effort
       item: acceptance criteria as `WHEN <condition> THE SYSTEM SHALL <behavior>`, which map
       near 1:1 onto `test('...')`. Do this _after_ section 1, so it is written against an
       observed pipeline rather than an imagined one.

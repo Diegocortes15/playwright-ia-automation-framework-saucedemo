@@ -15,6 +15,32 @@ Score the **whole ticket** (Feature + every AC). Treat each AC independently for
 7. **Bucket coverage** — Positive / Negative / Edge considered for the feature; call out missing buckets (per `from-issue/references/bucket-classification.md`). Gap → propose the missing negative/edge AC for the user to accept or decline.
 8. **Automatable** — flag manual-only ACs (visual aesthetics, subjective copy) per `from-issue/references/qa-analysis.md`. Gap → recommend marking the AC out of automation scope.
 9. **Coverage (lightweight flag)** — does the AC overlap something already automated? Heuristic match of the AC's behavior against existing test titles + `tests/<feature>/` files. This is a **flag, not a blocker** ("AC2 looks already covered by `tests/login/login.spec.ts` — drop or confirm"). Degrades gracefully: nothing automated → never fires. (`/from-issue` still dedupes at generation time per ADR-0010; this surfaces it earlier, to the human.)
+10. **EARS shape** — each AC is written in EARS form: an explicit trigger, one system, one response. See the section below for the patterns and the phrasing rule. Gap → rewrite the AC in the pattern that fits. This is not decoration: the trigger keyword is what forces a precondition to be stated, and the single `shall` is what makes item 2 checkable rather than a matter of taste.
+
+## EARS — the shape an AC takes
+
+[EARS](https://alistairmavin.com/ears/) (Easy Approach to Requirements Syntax, Mavin et al., Rolls-Royce, 2009) constrains a requirement to a trigger, a system, and one response. Five patterns; the first two carry almost all the traffic here.
+
+| Pattern            | Form                                                       | Use it for                                  |
+| ------------------ | ---------------------------------------------------------- | ------------------------------------------- |
+| Event-driven       | **WHEN** \<trigger\>, the \<system\> **shall** \<response\>       | A user does the expected thing              |
+| Unwanted behaviour | **IF** \<trigger\>, **THEN** the \<system\> **shall** \<response\> | Invalid input, rejection, error handling    |
+| State-driven       | **WHILE** \<state\>, the \<system\> **shall** \<response\>        | A behaviour that holds during a mode        |
+| Ubiquitous         | The \<system\> **shall** \<response\>                         | An invariant with no trigger                |
+| Optional feature   | **WHERE** \<feature\>, the \<system\> **shall** \<response\>      | Behaviour that exists only in some configs  |
+
+**Name the real system, not "the system".** EARS's `<system>` slot is meant to hold the actual thing — *"the login page shall…"*, *"the cart badge shall…"*. Writing the literal words "THE SYSTEM SHALL" produces stilted prose in a ticket a person has to read, and buys nothing. The keyword that matters is the trigger and the `shall`.
+
+**One `shall` per AC.** If an AC needs a second `shall`, it is two ACs — that is item 2, made mechanical instead of a judgment call.
+
+### Why it is worth the constraint here
+
+The trigger keyword pre-classifies the test's bucket, which `/from-issue` otherwise decides from scratch at generation time:
+
+- **WHEN** → the expected path → **Positive**
+- **IF … THEN** → EARS calls this category "unwanted behaviours", which is what `bucket-classification.md` calls **Negative**
+
+**The mapping stops there, and saying so matters more than the mapping.** `Edge` — boundary conditions, unusual-but-valid input, performance, precedence between two error paths — has no EARS counterpart, and an AC's keyword must never be used to argue a test out of `Edge`. A real case: SW-15's AC 3 (a locked account submitting a *wrong* password) is `IF … THEN` by EARS and was classified `Edge` by judgment, correctly. Treat the keyword as a hint for Positive-vs-Negative and nothing more; `bucket-classification.md` remains the authority.
 
 ## Worked example
 
@@ -26,7 +52,11 @@ Score the **whole ticket** (Feature + every AC). Treat each AC independently for
 | 4    | "it works" has no signal → what proves success? |
 | 5    | No location → which page confirms login?        |
 
-**After resolution:** "AC: `standard_user` logging in with `secret_sauce` lands on the inventory page (URL `/inventory.html`)." — items 3/4/5 now satisfied; gap count for this AC → 0.
+**After resolution, items 3/4/5 satisfied:** "`standard_user` logging in with `secret_sauce` lands on the inventory page (URL `/inventory.html`)."
+
+**In EARS form, item 10 satisfied too:** "**WHEN** `standard_user` submits `secret_sauce` on the login page, the application **shall** navigate to the inventory page (URL `/inventory.html`)."
+
+The second version is not merely tidier. The trigger is now separable from the response, which is what makes it drop into a test almost unchanged — the WHEN clause is the arrange-and-act, the shall clause is the assert — and `WHEN` marks it Positive without anyone deciding.
 
 ## What is NOT in the rubric (YAGNI)
 

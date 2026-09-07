@@ -60,6 +60,24 @@ Tests that verify boundary conditions, unusual but valid inputs, performance ass
   → Test: `@standard cart handles 100 items without degradation`
   → **Edge** — boundary condition; stress test of normal flow.
 
+## When the AC is written in EARS form
+
+A ticket refined by `/refine-ticket` carries its acceptance criteria in EARS notation, and the
+trigger keyword is a **hint** worth reading before classifying:
+
+- **WHEN** \<trigger\> — the expected path → usually **Positive**
+- **IF** \<trigger\> **THEN** — EARS calls this category "unwanted behaviours" → usually **Negative**
+
+It is a hint and not a rule, and the limit is the important part: **`Edge` has no EARS
+counterpart.** Boundary conditions, unusual-but-valid input, performance assertions and
+precedence between two error paths are all `IF … THEN` in EARS and can still be `Edge` here.
+SW-15's AC 3 — a locked account submitting a *wrong* password, to establish which rejection
+wins — is exactly that case, and `Edge` was right for it.
+
+Never use the keyword to argue a test out of `Edge`. The definitions above and the ambiguity
+rules below remain the authority; the keyword only saves you re-deriving Positive-vs-Negative
+when the author already made that distinction explicit.
+
 ## Ambiguity rules
 
 When a test could plausibly fit multiple buckets, apply these tiebreakers in order:

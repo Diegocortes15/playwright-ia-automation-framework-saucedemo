@@ -4,7 +4,7 @@
 
 ## What it does
 
-It reads the ticket (Atlassian MCP), scores it against a [rubric](../.claude/skills/refine-ticket/references/rubric.md) (real user? explicit pass/fail signal? concrete data? one behavior per AC? already covered?), and **loops** — closing each gap from what's already automated, from app docs, or by asking you — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket (the reporter's original text is preserved) and posts an audit comment. See [ADR-0013](adr/0013-refine-ticket-jira-writeback.md).
+It reads the ticket (Atlassian MCP), scores it against a [rubric](../.claude/skills/refine-ticket/references/rubric.md) (real user? explicit pass/fail signal? concrete data? one behavior per AC? written in EARS form? already covered?), and **loops** — closing each gap from what's already automated, from app docs, or by asking you — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket (the reporter's original text is preserved) and posts an audit comment. See [ADR-0013](adr/0013-refine-ticket-jira-writeback.md).
 
 ## Why it exists
 
@@ -18,14 +18,24 @@ It grounds refinements in **what exists** — `src/pages/`, `tests/`, `data/`, `
 
 **Raw ticket SW-7** — Summary: "Login". Description: "User can log in and it should work."
 
-The skill scores it and finds gaps: no Feature line, no user role, no success signal, no location. It auto-resolves what it can (`LoginPage` exists → location = login page; `data/` has the six users), then asks: _"Which user(s), and what proves success?"_ You answer: "standard_user; lands on inventory." It re-scores → zero gaps and presents:
+The skill scores it and finds gaps: no Feature line, no user role, no success signal, no location. It auto-resolves what it can (`LoginPage` exists → location = login page; `docs/app/users.md` names the six users — `data/` holds only product reference data), then asks: _"Which user(s), and what proves success?"_ You answer: "standard_user; lands on inventory." It re-scores → zero gaps and presents:
 
 ```
 Feature: login
-- AC 1: standard_user logging in with secret_sauce lands on the inventory page (/inventory.html).
+- AC 1: WHEN standard_user submits secret_sauce on the login page, the application shall
+  navigate to the inventory page (/inventory.html).
 ```
 
 You approve; it writes the block to SW-7 and suggests `/from-issue SW-7`.
+
+### Why the AC reads like that
+
+Acceptance criteria come out in [EARS](https://alistairmavin.com/ears/) form — an explicit trigger, the real system named, and **one** `shall`. Two things fall out of the constraint:
+
+- **The AC separates into a test almost unchanged.** The `WHEN` clause is the arrange-and-act; the `shall` clause is the assert.
+- **The trigger keyword marks the bucket.** `WHEN` is the expected path (Positive); `IF … THEN` is what EARS calls an unwanted behaviour, which is this framework's Negative. `Edge` has no EARS counterpart and stays a judgment call — the keyword is a hint, never an argument for reclassifying.
+
+Note it says "the application shall", not "THE SYSTEM SHALL". EARS's system slot is meant to hold the real thing; the literal words buy nothing in a ticket a person has to read.
 
 ## Dry-run
 

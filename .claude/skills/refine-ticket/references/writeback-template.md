@@ -17,9 +17,17 @@ _Refined by /refine-ticket on YYYY-MM-DD — managed section; the reporter's ori
 
 Feature: <feature>
 
-- AC 1: <one behavior, real user, explicit signal, location, concrete data>
-- AC 2: ...
+- AC 1: WHEN <trigger>, the <system> shall <response>
+- AC 2: IF <trigger>, THEN the <system> shall <response>
+- AC 3: ...
 ```
+
+Acceptance criteria are written in EARS form (rubric item 10): an explicit trigger, the real
+system named, and **one** `shall`. Use the pattern that fits — `WHEN` for the expected path,
+`IF … THEN` for rejection and error handling, `WHILE` for a behaviour that holds during a mode,
+no keyword for an invariant. Name the actual surface (*"the login page shall…"*), never the
+literal words "the system": a ticket is read by people, and the keyword doing the work is the
+trigger, not the noun.
 
 Keep the byline **plain** — no backticks / inline-code inside the italic; the Markdown→ADF round-trip mangles italic that wraps a code span.
 
