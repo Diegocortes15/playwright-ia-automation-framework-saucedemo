@@ -30,8 +30,13 @@ Saucedemo provides 6 user accounts. The password is the same for all (`secret_sa
 ### `problem_user`
 
 - **Behavior:** Two known intentional bugs:
-  1. **Wrong product images** — every product on the inventory page renders the same broken-image asset, regardless of which product it is. Captured by `tests/visual/inventory-images.spec.ts`.
-  2. **Broken sort dropdown** — selecting any sort option (Z→A, low→high, high→low) leaves the inventory in default A→Z order. The sort dropdown UI accepts the click but does not re-order. This is why `@sort-functional` excludes `problem_user`.
+  1. **Wrong product images** — every product on the inventory page renders the same broken-image asset, regardless of which product it is. Captured by `tests/inventory/inventory.spec.ts` (the `@problem` context's Edge bucket).
+  2. **Broken sort dropdown** — the control **discards the selection entirely**: after selecting any option, the `<select>`'s own `value` reverts to `az`, the active-option label stays "Name (A to Z)", and the order never changes. Measured live 2026-09-07 against `standard_user` as a control, which returns `value: "lohi"` and reorders correctly on identical steps.
+
+     This corrects an earlier description here — "accepts the click but does not re-order" — which implied the control registered the selection. It does not. The distinction matters: a test that asserts only the resulting order would pass through the wrong mechanism.
+
+     Filed as **SW-14**, and covered by the `test.fail()`-annotated tests in the `@problem` context of `tests/inventory/inventory.spec.ts` (ADR-0024). **This entry is a defect log, not a specification** — it records that the bug is known, not that the behaviour is correct.
+
 - **Used by:** `problem` chromium project.
 
 ### `performance_glitch_user`
