@@ -465,8 +465,11 @@ repite, no los tres de una.
 13. Evaluar hooks — 3 candidatos:
     - Hook on file save de tests/Page Objects: lint + typecheck
       automático
-    - Hook on tool call de `git commit` o `gh pr create`: bloquear
-      console.log, .only(), .skip() sin razón, selectores xpath
+    - ~~Hook on tool call de `git commit` o `gh pr create`: bloquear
+      console.log, .only(), .skip() sin razón, selectores xpath~~ —
+      **ya innecesario (2026-09-07)**: el lint bloquea xpath, `.only()`
+      (`no-focused-test`, verificado inyectando uno) y `.skip()`, y corre
+      como gate de CI. Un hook sería una segunda verificación más débil
     - Hook on file save de `.claude/skills/*/SKILL.md`: validar
       frontmatter (description no vacía, ≤1024 chars, parseable)
 14. **Probar Explore built-in subagent** con las preguntas del
@@ -477,20 +480,39 @@ repite, no los tres de una.
     - Si Explore resuelve 60%+, `/find-tests` custom pierde
       justificación o se reduce a subset específico (convenciones
       del framework que Explore no conoce)
-15. Crear subagent custom `pr-reviewer` en
-    `.claude/agents/pr-reviewer.md`:
-    - Tools: Bash/Glob/Grep/Read (SIN Edit/Write)
-    - Description con "proactively" + "when invoking this agent,
-      tell it precisely which PR number or branch to review"
-    - Skills declaradas: from-issue (y /find-tests si termina existiendo)
-    - Output estructurado en 7 secciones:
-      1. Summary
-      2. Blockers (violaciones a reglas duras)
-      3. Coverage Gaps (ACs no cubiertos)
-      4. Warnings (assumptions no flageadas, selectores frágiles)
-      5. Suggestions (mejoras opcionales)
-      6. Approval Status: READY_TO_MERGE / NEEDS_CHANGES / BLOCKED
-      7. Obstacles Encountered
+15. ~~Crear subagent custom `pr-reviewer`~~ — **DESCARTADO (2026-09-07).**
+    No era mala idea; **el terreno cambió debajo**. Se escribió antes de
+    ADR-0022, antes de que el lint tuviera las reglas de ADR-0001/0003/0015/0023,
+    y sin contar con `/code-review`, que ya existe como skill de primera parte.
+    Mapeadas sus 7 secciones contra lo que hay hoy:
+
+    | Sección                                        | Estado                                                       |
+    | ---------------------------------------------- | ------------------------------------------------------------ |
+    | 1. Summary                                     | Cubierta por `/code-review`                                  |
+    | **2. Blockers**                                | **Cubierta por el lint, y mejor**                            |
+    | 3. Coverage Gaps                               | El único hueco real — ver abajo                              |
+    | 4. Warnings (selectores frágiles, assumptions) | Cubierta por ADR-0022                                        |
+    | 5. Suggestions                                 | Cubierta por `/code-review`                                  |
+    | 6. Approval Status                             | Decisión humana; un agente diciendo READY_TO_MERGE es teatro |
+    | 7. Obstacles Encountered                       | Proceso del propio reviewer                                  |
+
+    **La sección 2 es la que lo mata.** `eslint.config.js` ya falla el build por
+    ADR-0001 reglas #3/#4/#8, ADR-0003, ADR-0015 (dos reglas), ADR-0023, XPath,
+    `waitForTimeout`, `.only()`, `.skip()`, `expect-expect` y
+    `prefer-web-first-assertions` — todas deterministas, todas como gate, con
+    `--max-warnings 0`. **Un subagente re-chequeando eso sería más débil, no más
+    fuerte**: puede pasar por alto lo que una regla no puede. Choca con el
+    principio #3 (la IA autoriza, el runtime es determinista).
+
+    La 4 ya la resolvió ADR-0022 de una forma que el propio roadmap defendió como
+    mejor: las degradaciones de selector se registran **en el momento de
+    elegirlas**, no reconstruidas después por alguien mirando el diff.
+
+    **El residuo honesto:** nadie verifica de forma independiente la tabla de AC
+    coverage que `/from-issue` escribe sobre sí mismo. Es autodeclarada. Pero
+    construir un subagente entero para eso viola el principio #1 (sin segundo
+    consumidor real) y el #5 advierte contra orquestación multi-agente a esta
+    escala. Si algún día duele, el arreglo es un chequeo chico, no un agente.
 
 ### Bloque D — Skills nuevas candidatas
 
@@ -683,10 +705,38 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 - **La sección Obstacles nunca salió `None.`** — ninguna corrida fue libre de fricción. El
   riesgo vivo ahora parece el inverso: son largas y alguien puede empezar a saltearlas.
 - **El primer ticket que necesite `error_user`** debería cablearlo en `AUTH_USERS` (ADR-0014) y
-  darle al detector de diálogos su primera cobertura e2e — hoy solo tiene unit tests.
-- **Si los `test.fail()` de SW-13 graban observaciones.** Único caso que las sondas de
-  `tests/_framework_validation/` cubren en exclusiva; si los reales lo cubren, esa sonda pasa a
-  ser redundante.
+  darle al detector de diálogos su primera cobertura e2e. **Ahora tiene un premio concreto
+  medido:** es uno de los dos detectores que hoy solo cubre la sonda (ver arriba), así que
+  cablearlo es lo que empieza a destrabar el borrado de `tests/_framework_validation/`.
+- [x] ~~**Si los `test.fail()` de SW-13 graban observaciones.**~~ **Sí, verificado el
+      2026-09-07** corriendo solo esos dos tests en aislamiento: el índice registró el 404 con
+      `count: 2` y el sample nombrando `problem_user sorts products by name descending`. El fixture
+      corre y sus datos llegan al reporter aunque la falla sea esperada.
+
+  **Pero eso NO vuelve borrables las sondas, y ahora se sabe exactamente por qué.** Contando qué
+  detector ejercita cada entrada del índice:
+
+  | Detector         | Solo sonda | Tests reales |
+  | ---------------- | ---------- | ------------ |
+  | `console-error`  | 2          | **3**        |
+  | `failed-request` | 0          | **7**        |
+  | **`dialog`**     | 1          | **0**        |
+  | **`page-error`** | 1          | **0**        |
+
+  Dos de los cuatro detectores **no tienen otra cobertura**, así que borrar
+  `tests/_framework_validation/` seguiría falsificando el `Enforced by:` de ADR-0021, que
+  afirma que ahí se ejercitan los cuatro. Y cada uno está bloqueado por algo distinto:
+  - **`dialog`** — solo el `alert()` de `error_user` al ordenar lo produce, y ese usuario no está
+    en `AUTH_USERS` (ADR-0014, crecimiento por demanda). Se destraba con el primer ticket que lo
+    necesite; hasta entonces ningún test real puede dispararlo.
+  - **`page-error`** — una excepción no capturada en la página. Saucedemo no lanza ninguna en sus
+    flujos normales, así que **puede no tener nunca un disparador natural**. La sonda la fabrica
+    a propósito desde un timer.
+
+  Esto convierte un ítem difuso ("mantenerlas hasta que `/from-issue` corra una vez") en una
+  condición concreta: **son borrables cuando `dialog` y `page-error` tengan cobertura real, y no
+  antes.**
+
 - **Si el auto-link de GitHub-for-Jira funciona.** El chequeo disponible **no puede responderlo**:
   `getJiraIssueRemoteIssueLinks` devuelve `[]` hasta para tickets cuyo PR se mergeó hace meses,
   porque la app escribe "development information", que ese MCP no expone. Se confirma mirando el
@@ -730,8 +780,11 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
 ### Sigue en pie del plan original
 
-- **Backfill de `Enforced by:`** en los ADRs que lo tengan flojo. Ojo con la vara nueva: no se
-  editan registros aceptados, así que esto es auditar y, donde falte el chequeo, **escribirlo**.
+- [x] ~~**Backfill de `Enforced by:`**~~ — **ya estaba hecho**, lo cerró PR #45; los 26 ADRs
+      tienen el campo. Este ítem sobrevivió al triaje por inercia y se verificó el 2026-09-07
+      recorriéndolos uno por uno. Lo que sí queda vivo, y es otra cosa, es auditar los que dicen
+      `Nothing — prose only` afirmando un invariante que una máquina _sí_ podría chequear — ADR-0012
+      es el candidato, porque su propio texto admite que "a lint could check a branch name".
 - **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
   `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
   de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
