@@ -1,20 +1,67 @@
 # Checklist — first session after Jira access is back
 
-Access to the free Jira instance was lost to inactivity on 2026-09-05 and re-requested.
-Everything below is blocked on it. Nothing here is speculative: each item exists because a
-change was shipped without ever being observed running.
+> # ✅ CLOSED — 2026-09-07
+>
+> **This file has done its job and is kept as a record, not as a to-do list.** Everything below
+> the divider is the historical account of what was verified and how; it is preserved rather than
+> deleted, for the same reason an ADR is superseded rather than edited. **Open work moved to
+> `docs/roadmap-post-oct-2026.md`** under "Deuda conocida y decisiones abiertas" — one
+> forward-looking document, which is what the roadmap was always meant to be.
+>
+> It existed to pay one debt: **four ADRs (0019–0022) were designed and merged without
+> `/from-issue` being executed once.** They were reasoned from the code rather than from watching
+> the pipeline work.
 
-**The honest state, updated 2026-09-07:** four ADRs (0019–0022) were designed and merged without
-`/from-issue` being executed once. They were reasoned from the code, not from watching the pipeline
-work. This checklist is how that debt gets paid — and **most of it now is.** Both critical branches
-of the ADR-0020 gate have run against real Jira tickets: the happy path (SW-12 → PR #48, green on
-the first attempt) and the app-versus-AC diagnosis (SW-13 → blocked, no PR, then landed as
-`test.fail()` against SW-14 → PR #49).
+## What it proved
 
-The single biggest thing running it found had nothing to do with those ADRs:
-**`/scaffold-page-object` had been aborting on every invocation since 2026-06-03** and nobody knew,
-because it was never executed. Fixed in PR #47 with ADR-0025. That is the whole argument for this
-checklist in one line.
+The debt is paid, and paying it found more than it was written to check.
+
+**All five skills ran end-to-end** — `/from-issue`, `/scaffold-page-object`, `/report-bug`,
+`/refine-ticket` and `/playwright-cli`. Before this, four of them had never been executed.
+
+**Both critical branches of the ADR-0020 gate fired against real Jira tickets:**
+
+- **Happy path** — SW-12 (`product_detail`), green on the first attempt, composing
+  `/scaffold-page-object` for a surface with no Page Object.
+- **App-versus-AC** — SW-13 stopped with **0 fix attempts** and opened nothing, then landed as
+  `test.fail()` against the defect it found (SW-14) once a person decided. The whole ADR-0024
+  loop, walked once.
+
+**The full chain ran** — `/refine-ticket SW-15` → `/from-issue SW-15` — and proved itself: the
+generated PR's Assumptions block came out **empty**, which is what a good refinement is for. It
+also caught a bad acceptance criterion **the refinement itself had proposed**.
+
+### What running it found that nothing else would have
+
+| Found                                                                                                                       | Cost had it stayed hidden                                                           |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **`/scaffold-page-object` had aborted on every invocation since 2026-06-03**                                                | The skill was unusable for three months and nobody knew, because nobody ran it      |
+| `docs/app/users.md` carried **four false claims** — including a `locked_out_user` login test that never existed             | Refinement and generation both read that file as ground truth                       |
+| `docs/architecture.md` described **nine Playwright projects, a cross-browser matrix and a tree of specs that do not exist** | It is the file `CLAUDE.md` points at as _the_ architecture reference                |
+| It also still taught the JSON-loading approach **ADR-0023 had superseded**                                                  | ADR-0023 predicted exactly this and it was already happening                        |
+| `@sort-functional` **routed to no project**                                                                                 | A test routed by it runs in zero projects and reports green having executed nothing |
+| `--from-file` wrote a TCMS artifact **the sync is coded to reject**                                                         | The failure lands on `main` after the merge, not on the PR                          |
+| `locked_out_user` had **no test anywhere**                                                                                  | An auth-rejection path with no coverage, while the docs claimed otherwise           |
+
+Eight further defects were swept in #56, and the ADR practice itself was checked against
+[the documented standard](adr/README.md) after the never-edit rule started to feel like a tax —
+the rule was confirmed correct, and the way the records were being _used_ was not.
+
+### The honest caveat, kept
+
+SW-13's diagnosis is weaker evidence than it looks: the session that ran it had written the
+ticket and read `docs/app/users.md`, so it already knew the AC was false. The mechanical steps
+are proven; the part that matters most — whether the agent _chooses_ to stop rather than weaken
+a test — was tested by an agent that could not un-know the answer. SW-15's AC 3 is the honest
+version: nobody knew the outcome, the gate fired anyway, and the acceptance criterion was the
+thing that turned out to be wrong.
+
+---
+
+# Historical record
+
+Everything below is preserved as written, including items still marked open. **The live list is
+in the roadmap** — do not work from this section.
 
 ---
 
@@ -179,7 +226,7 @@ the highest-risk change of the four: it is the one that decides whether a PR exi
       that visibly hit friction.~~ **Did not happen** in four runs. The section did real work —
       it is where every finding below was first written down. The **inverse** risk now looks like
       the live one: the sections are long, and a reader may start skimming them. Worth watching.
-- [ ] Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.
+- [x] ~~Run `/refine-ticket` and confirm obstacles reach the terminal and **never** the ticket.~~ Done 2026-09-07 on SW-15. Obstacles went to the terminal only; the ticket received the refined AC block and a one-line audit comment, nothing else.
 
 ### ADR-0021 — Observations
 
@@ -253,7 +300,7 @@ None of these came from reading code. They are ordered by how much damage they w
       **Avoided in the SW-13 run only by title choice** — a run that had reused the `@standard`
       describe's phrasing would have been wrongly skipped as a duplicate.
 
-- [ ] **`/from-issue` Step 13's Jira fallback is not executable.** It says to "post a comment-back
+- [x] ~~**`/from-issue` Step 13's Jira fallback is not executable.**~~ Fixed in #56 — the fallback is gone, and the step now records that the auto-link is not checkable from the MCP either. Original text: It says to "post a comment-back
       via the Atlassian MCP" if the GitHub-for-Jira link does not appear, but the skill's
       `allowed-tools` declares only the two read tools. Either declare a write tool or drop the
       fallback; today it reads as a capability that is not there.
@@ -264,7 +311,7 @@ None of these came from reading code. They are ordered by how much damage they w
       information", which this MCP does not appear to expose). **The available check cannot answer
       the question**; confirming it needs a look at the Development panel in the browser.
 
-- [ ] **`/scaffold-page-object` Step 11 still says `npx tsc`.** That is exactly the command
+- [x] ~~**`/scaffold-page-object` Step 11 still says `npx tsc`.**~~ Fixed in #56 — the skill got its own hardened `scripts/typecheck-generated.sh`. Original text: That is exactly the command
       `from-issue/scripts/typecheck-spec.sh` was written to replace: with `node_modules` absent,
       `npx tsc` fetches `tsc@2.0.4`, a deprecated squatter that is not the compiler, and the skill
       would record a PASS it never earned. `/from-issue` got the hardened script; the scaffold never
@@ -275,7 +322,7 @@ None of these came from reading code. They are ordered by how much damage they w
       `node_modules/.bin/playwright-cli`. Two related gaps in the same steps: `click` and `select`
       **require a snapshot `ref`** and fail on free text, which the workflow never says.
 
-- [ ] **`scaffold-page-object`'s `allowed-tools` does not declare `Edit`**, yet its Step 11.5
+- [x] ~~**`scaffold-page-object`'s `allowed-tools` does not declare `Edit`**~~ Fixed in #56. Original text:, yet its Step 11.5
       instructs "apply three edits" to `src/fixtures/test.ts`. Only `Write` is declared, which would
       mean rewriting the whole fixture file. Left unwidened deliberately: the roadmap's revised
       Bloque A step 4 says review case by case and do not widen by default.
@@ -289,7 +336,7 @@ None of these came from reading code. They are ordered by how much damage they w
       than a specification. It also cited `tests/visual/inventory-images.spec.ts`, which does not
       exist.
 
-- [ ] **`@sort-functional` routes to no project.** `test-template.md:109` offers it to the generator
+- [x] ~~**`@sort-functional` routes to no project.**~~ Fixed in #56 — removed from the routing-tag list the generator reads, and documented as dormant. Pulling that thread also exposed the fictional nine-project matrix in `architecture.md`. Original text: `test-template.md:109` offers it to the generator
       inside the list of routing tags, but `playwright.config.ts` only greps `@no-auth` and
       `@all-users|@<user>`. As a _secondary_ tag alongside `@standard` it is harmless; **as a sole
       routing tag those tests would run in zero projects and the run would report green having
