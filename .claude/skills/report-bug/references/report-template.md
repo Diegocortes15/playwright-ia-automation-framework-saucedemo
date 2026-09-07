@@ -50,6 +50,15 @@ it with the command that step prints.
 - **Steps are the `test.step` titles verbatim.** They describe what actually ran. Rewriting them into prettier prose breaks the guarantee that following the steps reproduces the failure.
 - **Expected Result and Actual Result are always two headings, never one.** They are different kinds of claim: Expected is a **requirement somebody agreed to**, Actual is an **observation of what happened**. Merging them into "Expected vs actual" reads tidier and costs the distinction the whole report turns on — the `Which is wrong?` section exists precisely because either one can be the thing that is wrong, and SW-15 is the case where it was the Expected. Two headings also mean each can be cited on its own: "the Expected in SW-14 is wrong" is a sentence someone needs to be able to say.
 
+- **Colour the two headings, do not box them.** Where the tracker supports it, tint `Expected Result` green and `Actual Result` red, with a `✓` and a `✗` in front. In Jira that is a `textColor` mark on the heading's text (`#216e4e` and `#ae2e24`) — readable dark tones, not the bright ones.
+
+  Two rules come with it, and both are the reason it works:
+
+  - **Never wrap them in coloured panels.** A report already uses panels for the summary, the unresolved question and the fix instruction. Turning two more sections into boxes means most of the page is a coloured box, and the red summary panel at the top stops standing out — it currently pops precisely because it is the only red thing above the fold. If everything shouts, nothing does.
+  - **Colour must always be redundant.** Red and green are the worst possible pair for the ~8% of men with a red-green deficiency, so the words `Expected Result` / `Actual Result` and the `✓` / `✗` carry the meaning on their own. The colour is reinforcement for everyone else, never the signal itself. The same applies to a status lozenge: `UNCHANGED` in red still reads as `UNCHANGED` in greyscale.
+
+  Green here borrows the diff metaphor — expected on the green side, observed on the red — rather than meaning "success". An Expected Result that did not happen is not a success, and the wording should never imply it was.
+
 - **A control comparison belongs under Actual Result, not between the two.** A table contrasting the broken case with a working one (a second user, a previous version, another browser) is **evidence that the observed behaviour is real and correctly attributed** — it is not a comparison of expected against actual. Filing it under a merged heading mislabels what it is.
 
 - **Expected prefers the acceptance criterion over the assertion.** The AC is what a person agreed the system should do; the assertion is one engineer's encoding of it. When the script found no AC it returns a `missing` reason instead — **render that reason**, then fall back to the assertion. Never fall back silently: restating the assertion that just failed is circular, and a reader has no way to tell an oversight from a structural absence.
