@@ -197,7 +197,12 @@
           "key": "SW-14",
           "url": "https://diegocortes15.atlassian.net/browse/SW-14"
         }
-      ]
+      ],
+      "expectedFailure": {
+        "key": "SW-14",
+        "url": "https://diegocortes15.atlassian.net/browse/SW-14",
+        "reason": "the inventory sort dropdown discards the selection for problem_user: the <select>'s own value reverts to az, so neither the active label nor the product order ever changes."
+      }
     },
     {
       "title": "problem_user sorts products by price ascending",
@@ -216,7 +221,12 @@
           "key": "SW-14",
           "url": "https://diegocortes15.atlassian.net/browse/SW-14"
         }
-      ]
+      ],
+      "expectedFailure": {
+        "key": "SW-14",
+        "url": "https://diegocortes15.atlassian.net/browse/SW-14",
+        "reason": "the inventory sort dropdown discards the selection for problem_user: the <select>'s own value reverts to az, so neither the active label nor the product order ever changes."
+      }
     }
   ]
 }

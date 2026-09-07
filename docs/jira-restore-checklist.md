@@ -242,7 +242,7 @@ None of these came from reading code. They are ordered by how much damage they w
       filed as a deliberate one-off on explicit instruction, not by a skill. **The mandatory manual
       step between _diagnosed_ and _annotated_ is named by no document.**
 
-- [ ] **ADR-0024 says nothing about the TCMS artifact.** A blocked run writes none (ADR-0020), but
+- [x] ~~**ADR-0024 says nothing about the TCMS artifact.**~~ **Closed 2026-09-07.** The record now carries an optional `expectedFailure` ({key, url, reason}), documented in `from-issue/references/tcms-sync.md` and added by hand when a person approves the landing — never by a run. It earns its place twice: the Playwright report reads it and **explains the expected failure in words** instead of showing a bare "expected" status, and a `test.fail()` test whose record lacks it is flagged as an _unattributed expected failure_, which is the machine-readable half of ADR-0024's own rule. No new ADR: by the admission bar this is an implementation detail of an existing decision, so it belongs in the present layer. Original text: A blocked run writes none (ADR-0020), but
       a test that later lands on approval needs one or it carries no report annotation. Records were
       written by hand for SW-13's tests, referencing **both** keys — SW-13 (the AC's origin) and
       SW-14 (the defect). The ADR should say that is the expectation.

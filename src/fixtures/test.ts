@@ -33,7 +33,13 @@ export const test = base.extend<
   _reportAnnotation: [
     async ({}, use, testInfo) => {
       const feature = basename(dirname(testInfo.file));
-      testInfo.annotations.push(...reportAnnotations(feature, testInfo.title));
+      // `expectedStatus` is 'failed' for a test declared with test.fail() — the deterministic
+      // signal, rather than parsing the spec for the marker.
+      testInfo.annotations.push(
+        ...reportAnnotations(feature, testInfo.title, {
+          expectedToFail: testInfo.expectedStatus === 'failed',
+        }),
+      );
       await use();
     },
     { auto: true },
