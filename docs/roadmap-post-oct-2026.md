@@ -699,11 +699,19 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 - **Bloque A step 2** — correr `claude --debug` y leer errores silenciosos de carga de skills.
 - **Bloque A step 3** — auditar las `description` de las skills contra 3-4 fraseos reales.
 - **Correr `/skill-doctor`** para medir qué cuesta cada skill en contexto de verdad.
-- **La evidencia no es compartible.** Screenshots, videos y traces viven en rutas absolutas de
-  la máquina que corrió la suite, así que la sección Evidence de un bug report **no la puede
-  abrir nadie más**. Es lo único pendiente que importaría de verdad en un engagement real, y es
-  trabajo concreto: adjuntar al ticket o linkear el artifact de CI. El MCP de Atlassian no
-  expone tool de adjuntos, así que necesita otra vía.
+- **La evidencia no es compartible — resuelta la mitad difícil (2026-09-07).** El problema no
+  era solo que las rutas fueran absolutas: Playwright escribe en directorios llamados
+  `inventory-inventory-invent-6da45-products-by-price-ascending-chromium-problem`, así que ni
+  quien la reportaba encontraba los archivos. `/report-bug` ahora corre
+  `scripts/collect-evidence.mjs`, que copia screenshot, video y trace a **una carpeta legible**
+  bajo `bug-evidence/` con un `README.txt` que lleva el error y cómo abrir el trace. Copia
+  nunca mueve; el output original queda intacto.
+
+  **Lo que sigue abierto es adjuntarla**, y es una decisión más que un problema técnico: el MCP
+  de Atlassian no expone tool de adjuntos, así que hoy es arrastrar la carpeta a mano. Las vías
+  serían la REST API de Jira con credenciales propias, o linkear el artifact de CI cuando la
+  falla vino de CI (`test.yml` ya sube `playwright-report/` con retención de 7 días). Ninguna
+  se construye antes de que alguien la necesite dos veces.
 
 ### Sigue en pie del plan original
 

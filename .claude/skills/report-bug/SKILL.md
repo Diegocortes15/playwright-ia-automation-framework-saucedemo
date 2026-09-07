@@ -1,7 +1,7 @@
 ---
 name: report-bug
 description: Turn a failed Playwright run into a ready-to-file bug report draft — repro steps, expected vs actual, correlated runtime observations and evidence paths — for a human to review and file. Never files anything itself.
-allowed-tools: Bash(node:*) Bash(ls:*) Read Glob Grep
+allowed-tools: Bash(node:*) Bash(ls:*) Bash(zip:*) Read Glob Grep
 ---
 
 # report-bug
@@ -32,6 +32,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 ## Scripts
 
 - [`scripts/collect-failure.mjs`](scripts/collect-failure.mjs) — gathers the failure, its evidence, its acceptance criterion and its observations into structured JSON. Plain Node, no dependencies. Locating facts is lookup, not judgment, so it is a script rather than prose.
+- [`scripts/collect-evidence.mjs`](scripts/collect-evidence.mjs) — copies that failure's screenshot, video and trace into one readable folder under `bug-evidence/`, with a `README.txt` carrying the error and how to open the trace. Copies only; the run output is never moved or deleted.
 
 ## Scope
 

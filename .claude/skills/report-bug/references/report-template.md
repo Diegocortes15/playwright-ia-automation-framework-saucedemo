@@ -32,10 +32,12 @@ reports should find the same thing in the same place every time.
 
 ## Evidence
 
-- Screenshot: `<path>`
-- Video: `<path>`
-- Trace: `npx playwright show-trace <path>`
+**Attach:** `<bug-evidence/<slug>--<project>/>` — screenshot, video, trace and a README with the
+error and how to open the trace. Collected by Step 1.5; drag the folder onto the ticket, or zip
+it with the command that step prints.
+
 - Failing test: `<file>:<line>` — `<title>`
+- Trace, once attached: `npx playwright show-trace trace.zip`
 
 ## Runtime observations during this test
 
@@ -57,3 +59,4 @@ reports should find the same thing in the same place every time.
   When the user supplies the criterion (from the ticket, as they did for SW-13), quote it and say where it came from, so a reader is never left assuming it was machine-resolved.
 - **Observations are context, never a conclusion.** A 404 recorded during the test may explain the failure or may be unrelated noise already triaged as `ignored`. Present them; do not build the diagnosis on them.
 - **No severity, no priority, no component.** Those are the reporter's call and depend on a tracker's own taxonomy. Guessing them wastes the triager's time correcting them.
+- **Never list raw `test-results/` paths as the evidence.** They are absolute, they sit on one machine, and their directory names are unreadable — a reader cannot open them and the reporter can barely find them. Name the collected folder instead, and say plainly if it was not collected: a report whose evidence nobody can open has, in practice, no evidence, and saying so is better than implying otherwise.
