@@ -280,7 +280,11 @@ Skip this step entirely in CREATE-NEW mode. In AUGMENT mode, edit `<testfile>` i
 
 For each new test record (already bucket-classified in Step 6):
 
-1. **Duplicate guard.** Normalize the record's title (lowercase, strip leading tags like `@smoke`/`@<user>`, collapse whitespace) and compare against the normalized titles already in the file. On a clear match, **skip** the record and record a note: `⏭️ skipped "<title>" — already covered by "<existing test>"`. When unsure, include it and let the reviewer decide (matches [`qa-analysis.md`](qa-analysis.md)'s conservative "default NOT skip").
+1. **Duplicate guard — scoped to the resolved context describe, never the whole file.** Normalize the record's title (lowercase, collapse whitespace) and compare it against the normalized titles **inside the context describe resolved above**. On a clear match, **skip** the record and note: `⏭️ skipped "<title>" — already covered by "<existing test>" in <context-label>`. When unsure, include it and let the reviewer decide (matches [`qa-analysis.md`](qa-analysis.md)'s conservative "default NOT skip").
+
+   **An identical title in a _different_ context describe is not a duplicate — it is the multi-user case, and it must be inserted.** One file holds one describe per user-context, so `every product price is formatted with a leading dollar sign` under `@standard` and the same sentence under `@problem` are two different tests: same assertion, different user, and only one of them has coverage. A file-scoped comparison skips the second, reports `⏭️ already covered`, and hands back a PR claiming coverage that does not exist — the failure ADR-0020 exists to prevent, arriving as a green run rather than a red one.
+
+   Do **not** strip tags while normalizing. Tags have not lived in titles since ADR-0015 moved them to the `{ tag }` option, so there is nothing to strip; an instruction to strip them can only mislead a reader into thinking title-embedded tags are still a thing.
 2. **Locate the bucket** _within the resolved context describe_ (above). Find the `test.describe('Positive' | 'Negative' | 'Edge', () => { ... })` block matching the record's `bucket`.
    - Block exists → `Edit` to insert the new `test(...)` at the end of that block (before its closing `});`).
    - Block absent → insert a new bucket describe in the fixed **Positive → Negative → Edge** order, positioned correctly relative to existing buckets.
