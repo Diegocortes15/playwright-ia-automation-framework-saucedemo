@@ -23,9 +23,10 @@ npm run test:ui          # Playwright UI mode
 
 ## Playwright CLI
 
-This project ships with the `@playwright/cli` Claude Code skill registered at `.claude/skills/playwright-cli/`. When you need to inspect the live application — discover selectors on an unfamiliar page, verify a selector before writing a test, or debug a flaky test by reading the rendered DOM — invoke the skill or call `playwright-cli` commands directly via Bash.
+This project ships with the `@playwright/cli` Claude Code skill registered at `.claude/skills/playwright-cli/`. When you need to inspect the live application — discover selectors on an unfamiliar page, verify a selector before writing a test, or debug a flaky test by reading the rendered DOM — invoke the skill or call `npx playwright-cli` commands directly via Bash.
 
-- Skill frontmatter `allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)` permits these commands without per-call approval.
+- **Always `npx playwright-cli`, never bare `playwright-cli`** — the binary is not on `PATH`, it lives in `node_modules/.bin/`, so the bare form fails with `command not found`. The vendored `SKILL.md` writes it bare in all 164 of its examples; that file is **generated**, so correcting it there would be undone by the next `install --skills`. This line is the correction, and it survives regeneration.
+- Skill frontmatter `allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)` permits these commands without per-call approval — `Bash(npx:*)` is the one that matters.
 - Browser auto-detected at install time (Chrome on most dev machines).
 - The CLI is independent of the test runner — `npm test` uses the bundled Playwright chromium and is unaffected.
 - On `@playwright/cli` upgrade, re-run `npx playwright-cli install --skills` and commit the regenerated skill files in the same commit as the version bump.

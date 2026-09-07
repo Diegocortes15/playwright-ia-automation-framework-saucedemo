@@ -73,12 +73,12 @@ never executed in between.
 
 ```bash
 # Unauthenticated (no storageState):
-playwright-cli open <url>
+npx playwright-cli open <url>
 
 # Authenticated (storageState provided):
-playwright-cli open
-playwright-cli state-load <path>
-playwright-cli goto <url>
+npx playwright-cli open
+npx playwright-cli state-load <path>
+npx playwright-cli goto <url>
 ```
 
 **Caveat — `state-load` limitation:** `playwright-cli`'s `state-load` calls `setStorageState` on an existing context, which restores cookies + localStorage but **does NOT restore sessionStorage** (sessionStorage is per-tab and can't be reapplied after page creation). For apps that gate routes on a sessionStorage flag (saucedemo is one such app — `session-username` lives in sessionStorage), `state-load` followed by `goto` redirects back to the login page. If you detect this redirect (page URL doesn't match the target after `goto`), fall back to manual login via `playwright-cli fill` + `click` against the login form, then `goto` the target URL.
@@ -86,7 +86,7 @@ playwright-cli goto <url>
 ### 6. Snapshot the page
 
 ```bash
-playwright-cli snapshot
+npx playwright-cli snapshot
 ```
 
 Returns a structured tree with element refs.
@@ -100,7 +100,7 @@ Walk the snapshot for each component signature loaded in step 4. For each match,
 For each remaining interactive element (excluding any covered by detected components):
 
 ```bash
-playwright-cli generate-locator <ref>
+npx playwright-cli generate-locator <ref>
 ```
 
 Pick a semantic field name from the element's accessible name. **Naming rule:**
