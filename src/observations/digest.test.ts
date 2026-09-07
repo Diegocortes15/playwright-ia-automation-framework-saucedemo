@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { describeObservation, groupOf, iconFor, renderDigest } from './digest';
+import { describeObservation, groupByVerdict, groupOf, iconFor, renderDigest } from './digest';
 import type { Observation } from './types';
 
 function obs(overrides: Partial<Observation> = {}): Observation {
@@ -120,4 +120,66 @@ test('the icon separates "the app broke" from "the app refused or lacked somethi
 test('console errors and dialogs keep their own icon', () => {
   expect(iconFor('console-error')).toBe('❗');
   expect(iconFor('dialog')).toBe('💬');
+});
+
+test('entries a person gave the same answer to print that answer once', () => {
+  const note = 'placeholder credentials — one cause, two detectors.';
+  const digest = renderDigest(
+    {
+      observations: [
+        obs({ signature: 'a', status: 'ignored', note }),
+        obs({ signature: 'b', status: 'ignored', note }),
+        obs({ signature: 'c', status: 'ignored', note }),
+      ],
+    },
+    '2026-09-07',
+  );
+
+  // Three facts survive — grouping is a rendering change, never a loss of entries.
+  expect(digest.split('#### ').length - 1).toBe(3);
+  // One verdict, announced as covering all three.
+  expect(digest.split(note).length - 1).toBe(1);
+  expect(digest).toContain('### 3 observations, one verdict');
+});
+
+test('the same reasoning under two statuses stays two verdicts', () => {
+  // Collapsing these would hide that someone reached different conclusions from one argument.
+  const note = 'same reasoning';
+  const groups = groupByVerdict([
+    obs({ signature: 'a', status: 'ignored', note }),
+    obs({ signature: 'b', status: 'triaged', note }),
+  ]);
+  expect(groups).toHaveLength(2);
+});
+
+test('entries nobody has explained never pool together', () => {
+  // "Nobody explained this" is not a shared explanation, and one heading over both would
+  // invent a judgment nobody made.
+  const groups = groupByVerdict([obs({ signature: 'a' }), obs({ signature: 'b' })]);
+  expect(groups).toHaveLength(2);
+  expect(
+    renderDigest({ observations: [obs({ signature: 'a' }), obs({ signature: 'b' })] }, 'x'),
+  ).not.toContain('one verdict');
+});
+
+test('a lone entry renders exactly as it did before grouping existed', () => {
+  const digest = renderDigest(
+    { observations: [obs({ signature: 'a', status: 'ignored', note: 'known' })] },
+    '2026-09-07',
+  );
+  expect(digest).toContain('**Reviewed — marked `ignored`.** known');
+  expect(digest).not.toContain('one verdict');
+});
+
+test('grouping preserves the order entries first appeared in', () => {
+  const shared = 'shared';
+  const groups = groupByVerdict([
+    obs({ signature: 'first', status: 'ignored', note: shared }),
+    obs({ signature: 'second', status: 'ignored', note: 'other' }),
+    obs({ signature: 'third', status: 'ignored', note: shared }),
+  ]);
+  expect(groups.map((g) => g.observations.map((o) => o.signature))).toEqual([
+    ['first', 'third'],
+    ['second'],
+  ]);
 });
