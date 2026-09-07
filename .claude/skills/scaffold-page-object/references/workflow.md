@@ -31,17 +31,43 @@ No merging, no overwriting. Predictable safety.
 
 ### 4. Hybrid auto-discover of framework components
 
-Two-source comparison:
+Run the check — do NOT eyeball the two lists:
 
-**a) Canonical list:** `Glob src/components/*.ts` to get all framework components by filename (e.g., `Header.ts` → `Header`).
+```bash
+.claude/skills/scaffold-page-object/scripts/check-component-signatures.sh
+```
 
-**b) Detection signatures:** `Read references/component-detection.md` to get the per-component root-selector signatures.
+| Exit | Meaning |
+| ---- | ------- |
+| 0 | Reconciled. Stdout lists each component as `detect: <Name>` or `nested: <Name>` — the `detect:` set is what Step 7 looks for |
+| 1 | Mismatch. The message names the file or the row to fix; abort and report it verbatim |
+| 66 | `references/component-detection.md` not found — restore the skill |
+| 67 | `src/components/` not found — wrong directory, or the framework is not bootstrapped |
 
-**Compare:** If the folder contains a component file with no signature in the doc, emit a loud warning and abort:
+The two sources it reconciles are the **canonical list** (`src/components/*.ts`, by filename) and
+the **signature table** in `references/component-detection.md`.
 
-> _"Found `src/components/<NewName>.ts` but no detection signature in `references/component-detection.md`. Add a signature row before re-running."_
+**It reconciles in BOTH directions** (per ADR-0025). This step runs before the page is opened, so a
+failure here aborts every run regardless of the target URL. That is deliberate: a stale table
+generates a Page Object that does not compile.
 
-This prevents silently missing newly-added components.
+1. **File with no row** → abort:
+
+   > _"Found `src/components/<NewName>.ts` but no detection signature in `references/component-detection.md`. Add a signature row before re-running."_
+
+2. **Row with no file** → abort:
+
+   > _"`references/component-detection.md` lists `<Name>` but `src/components/<Name>.ts` does not exist. Delete the row (the component was removed) before re-running."_
+
+A row whose Root signature reads **Nested** satisfies (1) without being added to the detection
+set — the script reports it as `nested:` — because it is composed by a parent component and never
+looked for on its own. Compose the parent; never compose a nested component directly from a
+Page Object.
+
+This catches both failure modes that actually happened: `BurgerMenu.ts` landed 2026-06-03 with no
+row and silently aborted every run for three months, while the `ProductCard` and `SortDropdown`
+rows outlived their deleted files since 2026-05-24. Neither was noticed, because the skill was
+never executed in between.
 
 ### 5. Open the page via playwright-cli
 
