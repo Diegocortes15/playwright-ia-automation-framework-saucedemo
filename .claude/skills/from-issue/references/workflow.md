@@ -15,6 +15,27 @@ The procedural workflow Claude follows when the `from-issue` skill is invoked. T
 - **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per ADR-0010, Step 8).
 - **`dry-run`** (optional flag) — skip steps 11–12 (branch, push, PR). Files written and tests run locally only.
 
+## Aborting
+
+Many steps abort. From **Step 5 onward, every abort leaves files on disk** — that is where the
+run starts writing: a scaffolded Page Object, a generated spec, an in-place edit to a committed
+feature file, an appended user in `tests/users.ts`. ADR-0020 means no PR is opened. It does not
+mean nothing happened.
+
+**So every abort from Step 5 onward ends by naming what it left behind**, grouped the way
+`git status` sees it, because the two cases need opposite treatment:
+
+> Left on disk: `tests/inventory/inventory.spec.ts` (already committed, now modified) and
+> `src/pages/ProductDetailPage.ts` (new, untracked). No PR was opened.
+
+Not doing this has a specific, delayed cost. Step 1.5 refuses to run on a dirty tree — so the
+wreckage never surfaces on the run that made it. It surfaces on the **next** invocation, as a
+clean-tree refusal naming files the user has stopped connecting to the run that wrote them.
+
+Do **not** revert the files yourself, and do not offer to. A failed run is the only evidence of
+why it failed and the diff is most of that evidence; deciding whether a half-generated spec is
+worth keeping needs a person who has read it.
+
 ## Steps
 
 ### 1. Validate inputs
@@ -43,7 +64,7 @@ fast-forwards it onto its remote. It never forces and never auto-merges.
 | ---- | ------- |
 | 0 | `$base` holds the resolved branch — continue |
 | 10 | You are on a previous ticket's branch. **Ask the user** which branch `<KEY>` should branch from, check it out, re-run. Never guess |
-| 11 | Working tree is dirty. Abort with the script's message |
+| 11 | Working tree is dirty. Abort with the script's message — it names the dirty paths, splitting modified-but-committed from untracked, and says an earlier aborted run leaves exactly this |
 | 12 | The base diverged from its remote. Abort with the script's message |
 
 Exit 10 is the one case that needs a person: the script can tell that the current branch is a

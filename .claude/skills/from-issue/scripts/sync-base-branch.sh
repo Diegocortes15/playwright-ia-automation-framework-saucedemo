@@ -33,8 +33,30 @@ if printf '%s' "$current" | grep -qE '^[A-Z][A-Z0-9]*-[0-9]+-'; then
   exit 10
 fi
 
-if [ -n "$(git status --porcelain)" ]; then
+dirty=$(git status --porcelain)
+if [ -n "$dirty" ]; then
+  # Name what is dirty, and separate the two cases, because the right action is opposite.
+  #
+  # This is almost always the wreckage of a PREVIOUS aborted run. A run that stops after Step 5
+  # has already written files and, per ADR-0020, opens no PR -- so the spec it generated or the
+  # committed file it edited in place stays on disk. The next run then dies here, and a bare
+  # "working tree is dirty" tells you neither what nor why.
+  modified=$(echo "$dirty" | grep -v '^??' | sed 's/^...//')
+  untracked=$(echo "$dirty" | grep '^??' | sed 's/^...//')
+
   echo "sync-base-branch: working tree is dirty — commit or stash before running /from-issue." >&2
+  if [ -n "$modified" ]; then
+    echo "" >&2
+    echo "  already committed, now modified — read the diff before discarding:" >&2
+    echo "$modified" | sed 's/^/    /' >&2
+  fi
+  if [ -n "$untracked" ]; then
+    echo "" >&2
+    echo "  untracked — a generated file nothing has committed yet:" >&2
+    echo "$untracked" | sed 's/^/    /' >&2
+  fi
+  echo "" >&2
+  echo "  An earlier /from-issue run that aborted after Step 5 leaves exactly this." >&2
   exit 11
 fi
 
