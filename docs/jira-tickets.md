@@ -33,6 +33,17 @@ Then "Epic sadface: Password is required" is shown
 - Mention WHERE in the app it happens ("on the inventory page", "in the cart") so the skill can infer which Page Objects are needed.
 - Consider Negative + Edge cases — the skill buckets tests into Positive / Negative / Edge.
 
+## The shape an acceptance criterion takes
+
+`/refine-ticket` writes acceptance criteria in [EARS](https://alistairmavin.com/ears/) form, and hand-authored ones are easier to automate if they match:
+
+- **WHEN** \<trigger\>, the \<system\> **shall** \<response\> — the expected path
+- **IF** \<trigger\>, **THEN** the \<system\> **shall** \<response\> — rejection, invalid input, error handling
+
+Name the real surface (_"the login page shall…"_), not the literal words "the system". Use **one** `shall` per criterion — if you need a second, you have two criteria, which is the same rule as "each AC = ONE behavior" above, just made mechanical.
+
+You do not have to write tickets this way. The skill will rewrite them; the closer you start, the less there is to rewrite.
+
 ## Don't want to hand-author all this?
 
 Run `/refine-ticket SW-123` first — it scores the ticket against exactly these tips, fills the gaps with you (using what's already automated + app docs + anything you point it at), and writes the hardened acceptance criteria back to the ticket. Then run `/from-issue SW-123`. See [`refine-ticket.md`](refine-ticket.md).

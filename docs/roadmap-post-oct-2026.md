@@ -373,11 +373,16 @@ paralelo cuando se apruebe explícitamente.
    > (`pr-description-template.md`, `qa-analysis.md`, etc.). Lo único
    > real que faltaba de este step eran los `scripts/` → ver B12b.
 
-9. **Adoptar EARS notation en `/refine-ticket`** — que los
-   acceptance criteria salgan como
-   "WHEN [condition/event] THE SYSTEM SHALL [expected behavior]".
-   Se convierten casi 1:1 en `test('...', ...)`.
-   Este es el cambio de mayor ROI/menor esfuerzo del bloque.
+9. ~~**Adoptar EARS notation en `/refine-ticket`**~~ — **HECHO (2026-09-07).**
+   Rubric item 10, con los cinco patrones y el mapeo `WHEN`→Positive /
+   `IF…THEN`→Negative documentado. Dos desvíos del pedido original, ambos
+   deliberados: se usa el nombre real del sistema ("the login page shall…")
+   en vez de las palabras literales "THE SYSTEM SHALL", porque el slot de
+   EARS está pensado para eso y un ticket lo lee una persona; y se registró
+   explícitamente que **`Edge` no tiene contraparte en EARS**, así que la
+   keyword es pista para Positive-vs-Negative y nunca argumento para
+   reclasificar (caso real: SW-15 AC 3). Sin ADR nuevo: el roadmap ya había
+   tomado la decisión, esto la implementa.
 10. Formalizar Given/When/Then como estructura obligatoria en el
     template de specs Playwright que usa `/from-issue`
 11. Consolidar `AGENTS.md` como constitución del proyecto:
