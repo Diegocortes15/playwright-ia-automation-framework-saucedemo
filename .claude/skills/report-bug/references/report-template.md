@@ -50,7 +50,9 @@ it with the command that step prints.
 - **Steps are the `test.step` titles verbatim.** They describe what actually ran. Rewriting them into prettier prose breaks the guarantee that following the steps reproduces the failure.
 - **Expected Result and Actual Result are always two headings, never one.** They are different kinds of claim: Expected is a **requirement somebody agreed to**, Actual is an **observation of what happened**. Merging them into "Expected vs actual" reads tidier and costs the distinction the whole report turns on — the `Which is wrong?` section exists precisely because either one can be the thing that is wrong, and SW-15 is the case where it was the Expected. Two headings also mean each can be cited on its own: "the Expected in SW-14 is wrong" is a sentence someone needs to be able to say.
 
-- **Colour the two headings, do not box them.** Where the tracker supports it, tint `Expected Result` green and `Actual Result` red, with a `✓` and a `✗` in front. In Jira that is a `textColor` mark on the heading's text (`#216e4e` and `#ae2e24`) — readable dark tones, not the bright ones.
+- **Colour the two headings, do not box them.** Where the tracker supports it, tint `Expected Result` green and `Actual Result` red, with a `✓` and a `✗` in front. In Jira that is a `textColor` mark on the heading's text: **`#006644`** for Expected, **`#bf2600`** for Actual.
+
+  **Take the values from the tracker's own picker, never invent a hex.** Jira stores the hex but maps it to a design token at render time (`hexToEditorTextPaletteColor('#0747A6')` → `var(--ds-text-accent-blue, #0747A6)`), so a palette colour **adapts to light and dark themes** and an arbitrary one renders literally — which looks like a sticker in whichever theme it was not chosen for. The two hexes above came from the picker for exactly that reason; an earlier pair, invented here, did not and had to be replaced.
 
   Two rules come with it, and both are the reason it works:
 
