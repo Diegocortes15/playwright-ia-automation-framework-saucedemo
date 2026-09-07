@@ -699,11 +699,34 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 - **Bloque A step 2** — correr `claude --debug` y leer errores silenciosos de carga de skills.
 - **Bloque A step 3** — auditar las `description` de las skills contra 3-4 fraseos reales.
 - **Correr `/skill-doctor`** para medir qué cuesta cada skill en contexto de verdad.
-- **La evidencia no es compartible.** Screenshots, videos y traces viven en rutas absolutas de
-  la máquina que corrió la suite, así que la sección Evidence de un bug report **no la puede
-  abrir nadie más**. Es lo único pendiente que importaría de verdad en un engagement real, y es
-  trabajo concreto: adjuntar al ticket o linkear el artifact de CI. El MCP de Atlassian no
-  expone tool de adjuntos, así que necesita otra vía.
+- **La evidencia no es compartible — resuelta la mitad difícil (2026-09-07).** El problema no
+  era solo que las rutas fueran absolutas: Playwright escribe en directorios llamados
+  `inventory-inventory-invent-6da45-products-by-price-ascending-chromium-problem`, así que ni
+  quien la reportaba encontraba los archivos. `/report-bug` ahora corre
+  `scripts/collect-evidence.mjs`, que copia screenshot, video y trace a **una carpeta legible**
+  bajo `bug-evidence/` con un `README.txt` que lleva el error y cómo abrir el trace. Copia
+  nunca mueve; el output original queda intacto.
+
+  **Lo que sigue abierto es adjuntarla — PENDIENTE DE REVISAR, no de investigar.** Las vías
+  gratuitas están agotadas, verificado el 2026-09-07:
+
+  | Vía                                     | Estado                                                                                                                                                                                                                                                             |
+  | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  | Tool de adjuntos en el MCP de Atlassian | **No existe.** Hay comment, worklog, create, edit, get, transition, remote links — nada de attachments                                                                                                                                                             |
+  | CLI oficial de Atlassian (`acli`)       | **Tampoco.** `jira workitem` tiene `attachment-list` y `attachment-delete` pero **ninguno para subir**. La asimetría es lo que hace concluyente el hallazgo: si faltara toda la familia sería un hueco de la doc; están las dos hermanas y falta justo la de crear |
+  | Token de Jira en el repo o el entorno   | No hay ninguno. El OAuth del MCP vive dentro del servidor y no es reutilizable                                                                                                                                                                                     |
+
+  Queda **una sola vía real**: la REST API con `curl` y un API token propio
+  (`POST /rest/api/3/issue/<KEY>/attachments`, header `X-Atlassian-Token: no-check`). Técnicamente
+  trivial; el costo es de diseño. Sería **la primera credencial de Jira viviendo en el repo**, y le
+  daría escritura directa **fuera** del MCP, salteando el único canal que hoy pasa por aprobación
+  humana — justo lo que ADR-0013 acotó a propósito. Encima repite la pregunta que ADR-0026 ya
+  respondió con "todavía no" para presentar bugs.
+
+  **El disparador para revisarlo es la fricción medida, no la incomodidad teórica.** Hoy lo caro
+  —encontrar los archivos— está resuelto: un zip listo con screenshot, video y README. Arrastrarlo
+  son cinco segundos. Si tras unos cuantos bugs presentados eso molesta de verdad, ahí el token y
+  el ADR se justifican.
 
 ### Sigue en pie del plan original
 

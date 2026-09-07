@@ -27,3 +27,6 @@ scratch/
 # the workflow rms it after every run, but ignore it defensively in case of crash
 .pr-body*.md
 .observations/SUMMARY.md
+
+# Evidence collected for a bug report — copies of run output, never source.
+bug-evidence/

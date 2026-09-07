@@ -22,6 +22,32 @@ node .claude/skills/report-bug/scripts/collect-failure.mjs [--grep "<substring>"
 
 Do **not** hunt for these facts by hand if the script fails — fix the run, then re-run the script. Reconstructing them by reading files is how a report ends up describing a different failure than the one that happened.
 
+**Its `evidence` block is raw run output, not something to paste into the draft.** Those are absolute paths inside hashed `test-results/` directories on one machine, which is exactly what `report-template.md` forbids in a report. They are there so Step 1.5 knows what to copy. Name the folder Step 1.5 prints instead.
+
+### 1.5. Collect the evidence into one place
+
+```bash
+node .claude/skills/report-bug/scripts/collect-evidence.mjs [--grep "<substring>"]
+```
+
+| Exit | Meaning |
+| ---- | ------- |
+| 0 | Collected — the folder path and its contents are printed; use them in the draft |
+| 3 | No failure matched (same condition as Step 1's exit 3) |
+| 4 | No `test-results/results.json` |
+| 5 | The failure exists but its evidence files do not — the message names both possible causes |
+
+**Why this step exists.** Playwright writes evidence into directories named things like
+`inventory-inventory-invent-6da45-products-by-price-ascending-chromium-problem`, under absolute
+paths on the machine that ran the suite. A report listing those paths has, in practice, **no
+evidence at all**: nobody else can open them, and whoever filed it cannot easily find them
+either. This turns that into one folder with `screenshot.png`, `video.webm`, `trace.zip` and a
+`README.txt` — a single thing to drag onto a ticket.
+
+**Exit 5 is worth reading rather than retrying.** It means `results.json` describes a failure
+whose files are gone, which is either a capture-settings problem or a stale run — opposite fixes,
+and the message says which is which.
+
 ### 2. Decide what kind of failure this is
 
 **This is the judgment the skill exists to support, and it is not yours to settle.** Read the acceptance criterion against the actual behaviour and present *both* readings:
