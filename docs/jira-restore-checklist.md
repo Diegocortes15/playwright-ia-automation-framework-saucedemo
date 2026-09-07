@@ -87,7 +87,7 @@ only place its acceptance criteria now exist.
 
 Both surfaced running `--from-file`, not by reading the code. Neither is fixed.
 
-- [ ] **Provenance in AUGMENT mode is unspecified.** Workflow Step 2 says a file-sourced run
+- [x] ~~**Provenance in AUGMENT mode is unspecified.**~~ **Largely dissolved by ADR-0026** (2026-09-07): a file-sourced run now commits nothing, so the `Augmented by:` line it would have written never enters the repository and there is no provenance to lose. The generated file still sits on disk for inspection, where the run's own report names the source. Left here rather than deleted because the original text below explains the shape of the problem: Workflow Step 2 says a file-sourced run
       writes `// Source: local file <path>`, but that header is rendered in Step 7, which only
       runs for CREATE-NEW. In AUGMENT the header belongs to the originating ticket and Step 8.5
       only appends `<KEY> (YYYY-MM-DD)` to `Augmented by:`. There is no specified place to record
@@ -105,22 +105,22 @@ Both surfaced running `--from-file`, not by reading the code. Neither is fixed.
       it only applies to the _other_ branch, where a person concludes the ticket was wrong and
       the generated tests are discarded.
 
-### The `--from-file` TCMS contradiction (new, 2026-09-06)
+### ~~The `--from-file` TCMS contradiction~~ — closed by ADR-0026
 
-- [ ] **`tcms-sync.md` gives two instructions that cannot both hold**, and the conflict makes every
-      file-sourced run unmergeable by construction: - line 36 — _"The sync rejects any record missing a non-empty `jira` array."_ - lines 46–51 — _"When the run used `--from-file`, write `"jira": []` on every record."_
+- [x] ~~`tcms-sync.md` gave two instructions that cannot both hold~~ ("the sync rejects any record
+      missing a non-empty `jira` array" vs "when the run used `--from-file`, write `"jira": []`"),
+      which made every file-sourced run unmergeable by construction — the failure landing on `main`
+      **after** the merge, not on the PR. **Resolved 2026-09-07 by ADR-0026**, which deletes the
+      instruction rather than relaxing the check: a file-sourced run now skips Steps 11, 11.5 and 12
+      exactly as `dry-run` does, so no branch, no commit, no PR and no records artifact. An empty
+      `jira` array is never written, and `suite-sync.ts`'s throw becomes a real guarantee instead of
+      a trap.
 
-      `src/tcms/suite-sync.ts:86-87` throws on an empty `jira` array; `main()` reaches that
-      validation because `qaseConfig()` resolves (both `QASE_API_TOKEN` and `QASE_PROJECT_CODE`
-      are set on the repo); and the `Sync test cases to Qase (merge only)` step runs on
-      `github.event_name == 'push'` with no `continue-on-error`. So the failure lands on `main`
-      *after* the merge, not on the PR. PR #46 followed both instructions faithfully and produced
-      exactly that artifact.
-
-      `--from-file` (#42) was added after ADR-0016/0017 and nobody noticed, because no file-sourced
-      run had ever been merged. **Needs a decision and an ADR:** either the sync skips records with
-      an empty `jira` array, or `--from-file` writes no records at all. The wider question worth
-      settling first is whether a file-sourced run should be mergeable *at all*.
+      The obvious reaction once Jira returned — delete `--from-file` — was considered and rejected:
+      its stated purpose ("testing changes to this skill without burning a real ticket") outlives
+      the outage, **four real tickets were burned in one session** testing pipeline behaviour,
+      ADR-0019 depends on it for a repo with no Atlassian connection, and ADR-0024's Context cites
+      the SW-902 run.
 
 ## 1. Verify what was built blind
 
@@ -228,14 +228,14 @@ None of these came from reading code. They are ordered by how much damage they w
       so, and `scripts/check-component-signatures.sh` reconciles both directions — with both of its
       failure modes verified against injected mismatches rather than assumed.
 
-- [ ] **`/report-bug` cannot resolve an acceptance criterion for the case it exists to serve.**
+- [x] ~~**`/report-bug` cannot resolve an acceptance criterion for the case it exists to serve.**~~ **Addressed 2026-09-07 by ADR-0026.** The criterion still cannot be _obtained_ — a failure carries a feature and a test title, not a ticket key — but the silence is gone: `collect-failure.mjs` now returns `no-records-file` / `no-matching-record` / `unreadable-records-file` instead of a bare `undefined`, and the draft renders the reason before falling back to the assertion. `no-matching-record` names ADR-0020 explicitly, so a reader learns the absence is by design. All four branches verified against injected failures, not assumed. Original text:
       `collect-failure.mjs` reads the AC from `.tcms/records/<feature>.json` and matches on test
       title, but ADR-0020 specifies that a blocked run writes **no TCMS artifact**. So for a run
       blocked by an app-versus-AC contradiction, `acceptanceCriterion` is structurally always
       `undefined`. Confirmed 2026-09-06. The AC was supplied from the Jira read instead. Needs a
       design decision, not a doc edit.
 
-- [ ] **ADR-0024 requires a filed defect identifier, and nothing in this project can file one.**
+- [ ] **ADR-0024 requires a filed defect identifier, and nothing in this project can file one.** **Deliberately still open** — ADR-0026 considered letting `/report-bug` file on approval (mirroring ADR-0013) and **rejected it for now**: "files nothing" is the sharpest statement of the human-in-the-loop principle in this repo, filing a new defect is a larger act than editing an existing ticket's ACs, and exactly one defect has been filed by hand. Revisit when the friction has been felt more than once. Original text:
       The ADR says the annotation "always carries the defect's identifier", but `/report-bug`'s
       Scope excludes tracker writes by design ("needs… its own ADR"), `/from-issue` declares
       read-only Jira tools, and only `/refine-ticket` writes (the AC block, ADR-0013). SW-14 was

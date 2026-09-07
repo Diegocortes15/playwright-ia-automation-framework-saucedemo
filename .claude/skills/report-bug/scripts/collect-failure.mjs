@@ -32,16 +32,27 @@ function expectedAndReceived(message) {
   return expected || received ? { expected, received } : undefined;
 }
 
-/** The acceptance criterion this test traces to, from the committed TCMS record. */
+/**
+ * The acceptance criterion this test traces to, from the committed TCMS record.
+ *
+ * Returns `{ acText }` when resolved, or `{ missing: <reason> }` — never a bare undefined.
+ * The reason matters: `no-matching-record` is the expected state after a run blocked by
+ * ADR-0020, which writes no records artifact at all, and that is the very situation
+ * /report-bug exists for. A draft that silently falls back to restating the failed
+ * assertion tells a triager nothing about what the system was supposed to do, and worse,
+ * gives no hint that the absence is by design rather than an oversight.
+ */
 function acceptanceCriterion(feature, title) {
   const path = join(TCMS_DIR, `${feature}.json`);
-  if (!existsSync(path)) return undefined;
+  if (!existsSync(path)) return { missing: 'no-records-file' };
+  let records;
   try {
-    const { records = [] } = JSON.parse(readFileSync(path, 'utf-8'));
-    return records.find((r) => r.title === title)?.acText;
+    ({ records = [] } = JSON.parse(readFileSync(path, 'utf-8')));
   } catch {
-    return undefined;
+    return { missing: 'unreadable-records-file' };
   }
+  const acText = records.find((r) => r.title === title)?.acText;
+  return acText ? { acText } : { missing: 'no-matching-record' };
 }
 
 function observationsFor(attachment) {
@@ -82,7 +93,7 @@ function main() {
           status: result.status,
           // The Page Objects wrap each action in test.step, so these ARE the repro steps.
           reproSteps: (result.steps ?? []).map((s) => s.title),
-          acceptanceCriterion: acceptanceCriterion(feature, spec.title),
+          ...acceptanceCriterion(feature, spec.title),
           error: { message, ...expectedAndReceived(message) },
           observations: observationsFor(byName.observations),
           evidence: {

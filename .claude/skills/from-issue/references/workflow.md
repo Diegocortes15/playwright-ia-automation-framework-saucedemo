@@ -9,7 +9,9 @@ The procedural workflow Claude follows when the `from-issue` skill is invoked. T
   instead of Jira, e.g. `/from-issue --from-file tickets/SW-99-login.md`. Jira stays the real
   ticket source (ADR-0011); this exists so the rest of the pipeline can be exercised without
   a live Atlassian connection, and so changes to this skill can be tested without burning a
-  real ticket. Everything downstream of Step 2 is identical.
+  real ticket. **Steps 1.5 through 10 are identical; Steps 11, 11.5 and 12 are skipped**
+  exactly as under `dry-run` — a file-sourced run is a rehearsal, not a delivery path
+  (ADR-0026).
 - **`--new-file`** (optional flag) — force CREATE-NEW instead of augmenting an existing feature spec (per ADR-0010, Step 8).
 - **`dry-run`** (optional flag) — skip steps 11–12 (branch, push, PR). Files written and tests run locally only.
 
@@ -72,20 +74,23 @@ Given a valid standard_user
   file doubles as a draft of a ticket not yet created.
 - If the front matter is missing `key` or `summary`, abort naming which — do not invent them.
 
-**Record `ticketSource = file:<path>` for the run.** It changes three things downstream, and
+**Record `ticketSource = file:<path>` for the run.** It changes exactly two things, and
 nothing else:
 
 1. **Step 7 provenance header** — the generated spec's `// Source:` line reads
    `local file <path>`, not a Jira browse URL. A spec must never claim a Jira ticket that was
    never read.
-2. **Step 11.5 TCMS records** — write `"jira": []`. There is no ticket to link, and a
-   fabricated key would corrupt the Qase mirror and the report annotations that read it.
-3. **Step 12 PR body** — the "What I understood" block names the file as the source, and the
-   PR carries a line stating it was generated from a local ticket file, so a reviewer is
-   never left wondering which `SW-99` this was.
+2. **The run stops after Step 10.** Steps 11, 11.5 and 12 are skipped: no branch, no commit,
+   no push, no PR, **and no TCMS records artifact** (ADR-0026).
 
-The GitHub-for-Jira auto-link (Step 13) simply won't fire: there is no ticket to link to.
-That is expected, not an error.
+Why no artifact: a records entry with no ticket behind it is a catalogue case that traces to
+no requirement, which is the thing the Qase mirror exists to prevent — and `suite-sync.ts`
+throws on an empty `jira` array, so such a record could never merge anyway. Earlier versions
+of this workflow told you to write `"jira": []`; that instruction produced an artifact the
+sync was coded to reject, and it is gone.
+
+Report the local file paths and the verification status, exactly as a `dry-run` does. If the
+generated tests should actually ship, run the ticket.
 
 #### Otherwise
 
@@ -358,7 +363,7 @@ If both steps passed, skip straight to Step 11.
 
 ### 11. Branch + commit + push
 
-**Dry-run check:** If `dry-run` was passed, SKIP this step and Step 12. Report the local file path and verification status only.
+**Skip check:** If `dry-run` **or `--from-file`** was passed, SKIP this step and Step 12. Report the local file path and verification status only. (`--from-file` per ADR-0026: a file-sourced run is a rehearsal and produces no artifacts.)
 
 First record the branch you're on — the PR will target it (Step 12):
 
@@ -406,7 +411,7 @@ If `git push` fails (no remote, no auth), abort with the git error verbatim. The
 
 ### 11.5. Write the TCMS records artifact (Qase, at-merge model)
 
-**Skip** if `dry-run`. Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see ADR-0017), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
+**Skip** if `dry-run` **or `--from-file`** (ADR-0026 — no ticket, so no catalogue entry). Per [`references/tcms-sync.md`](tcms-sync.md): write the Step 6 semantic model to **`.tcms/records/<feature>.json`** — keyed by **feature, not ticket**: **append** to the existing feature file when one exists (Step 1.5 guarantees you branched from a base that includes any merged sibling work), create it only if absent. One object per generated test: `title`, `acText`, `user`, `tags`, `bucket`, `feature`, `contextLabel`, plus a **per-record `jira` array** (`[{ "key": "<KEY>", "url": "…/browse/<KEY>" }]`) — there is **no file-level `meta` block** (a feature file legitimately spans tickets; see [`tcms-sync.md`](tcms-sync.md) for the exact shape). `git add` it with the rest of the change (Step 11). This does **NOT** touch Qase. The authoritative Qase create/update/archive runs **at merge** in CI (`npm run tcms:sync`, see ADR-0017), so a rejected PR never mutates Qase. No `QASE_*` is needed at PR time.
 
 ### 12. Open PR
 
