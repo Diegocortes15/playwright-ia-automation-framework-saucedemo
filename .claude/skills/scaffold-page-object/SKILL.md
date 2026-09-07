@@ -1,7 +1,7 @@
 ---
 name: scaffold-page-object
 description: Generate a draft Page Object class from a live page snapshot, composing framework components when detected.
-allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(rm:*) Read Glob Grep Write
+allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(rm:*) Bash(.claude/skills/scaffold-page-object/scripts/check-component-signatures.sh:*) Read Glob Grep Write
 ---
 
 # scaffold-page-object
@@ -27,6 +27,10 @@ The full 12-step procedural workflow is in [`references/workflow.md`](references
 - [`references/workflow.md`](references/workflow.md) — the 12-step procedural workflow
 - [`references/page-object-template.md`](references/page-object-template.md) — canonical TS template for generated files
 - [`references/component-detection.md`](references/component-detection.md) — signatures for recognizing framework components in a page
+
+## Scripts
+
+- [`scripts/check-component-signatures.sh`](scripts/check-component-signatures.sh) — reconciles `src/components/*.ts` against the signature table in both directions, and prints the detection set. Used by workflow Step 4; see ADR-0025.
 
 ## See also
 
