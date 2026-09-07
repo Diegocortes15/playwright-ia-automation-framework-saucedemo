@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-15
 **Status:** Accepted — scoped by [ADR-0011](0011-jira-ticket-source.md) (Atlassian MCP adopted for Jira; gh CLI retained for GitHub)
-**Enforced by:** **Nothing — prose only.** Records a choice about what to install. `.mcp.json` holding only the Atlassian server corroborates it but does not enforce it.
+**Enforced by:** `scripts/check-adr-invariants.mjs`, run by `npm run lint:adr` in CI — it fails the build if `.mcp.json` configures a GitHub MCP server. This line previously read _"Nothing — prose only"_ on the grounds that the file corroborated the decision without enforcing it; that was true and was the reason to write the check, since installing an MCP server is a one-command action that no linter reads.
 
 ## Context
 
