@@ -707,11 +707,26 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   bajo `bug-evidence/` con un `README.txt` que lleva el error y cómo abrir el trace. Copia
   nunca mueve; el output original queda intacto.
 
-  **Lo que sigue abierto es adjuntarla**, y es una decisión más que un problema técnico: el MCP
-  de Atlassian no expone tool de adjuntos, así que hoy es arrastrar la carpeta a mano. Las vías
-  serían la REST API de Jira con credenciales propias, o linkear el artifact de CI cuando la
-  falla vino de CI (`test.yml` ya sube `playwright-report/` con retención de 7 días). Ninguna
-  se construye antes de que alguien la necesite dos veces.
+  **Lo que sigue abierto es adjuntarla — PENDIENTE DE REVISAR, no de investigar.** Las vías
+  gratuitas están agotadas, verificado el 2026-09-07:
+
+  | Vía                                     | Estado                                                                                                                                                                                                                                                             |
+  | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  | Tool de adjuntos en el MCP de Atlassian | **No existe.** Hay comment, worklog, create, edit, get, transition, remote links — nada de attachments                                                                                                                                                             |
+  | CLI oficial de Atlassian (`acli`)       | **Tampoco.** `jira workitem` tiene `attachment-list` y `attachment-delete` pero **ninguno para subir**. La asimetría es lo que hace concluyente el hallazgo: si faltara toda la familia sería un hueco de la doc; están las dos hermanas y falta justo la de crear |
+  | Token de Jira en el repo o el entorno   | No hay ninguno. El OAuth del MCP vive dentro del servidor y no es reutilizable                                                                                                                                                                                     |
+
+  Queda **una sola vía real**: la REST API con `curl` y un API token propio
+  (`POST /rest/api/3/issue/<KEY>/attachments`, header `X-Atlassian-Token: no-check`). Técnicamente
+  trivial; el costo es de diseño. Sería **la primera credencial de Jira viviendo en el repo**, y le
+  daría escritura directa **fuera** del MCP, salteando el único canal que hoy pasa por aprobación
+  humana — justo lo que ADR-0013 acotó a propósito. Encima repite la pregunta que ADR-0026 ya
+  respondió con "todavía no" para presentar bugs.
+
+  **El disparador para revisarlo es la fricción medida, no la incomodidad teórica.** Hoy lo caro
+  —encontrar los archivos— está resuelto: un zip listo con screenshot, video y README. Arrastrarlo
+  son cinco segundos. Si tras unos cuantos bugs presentados eso molesta de verdad, ahí el token y
+  el ADR se justifican.
 
 ### Sigue en pie del plan original
 
