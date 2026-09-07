@@ -81,7 +81,24 @@ npx playwright-cli state-load <path>
 npx playwright-cli goto <url>
 ```
 
-**Caveat — `state-load` limitation:** `playwright-cli`'s `state-load` calls `setStorageState` on an existing context, which restores cookies + localStorage but **does NOT restore sessionStorage** (sessionStorage is per-tab and can't be reapplied after page creation). For apps that gate routes on a sessionStorage flag (saucedemo is one such app — `session-username` lives in sessionStorage), `state-load` followed by `goto` redirects back to the login page. If you detect this redirect (page URL doesn't match the target after `goto`), fall back to manual login via `playwright-cli fill` + `click` against the login form, then `goto` the target URL.
+**`state-load` does not work on saucedemo, so logging in by hand is the normal path here, not a fallback.** `state-load` calls `setStorageState` on an existing context, which restores cookies and localStorage but **not sessionStorage** — that is per-tab and cannot be reapplied after page creation. saucedemo keeps `session-username` in sessionStorage, so `state-load` followed by `goto` lands you back on the login page. Expect this; don't treat it as a failure to debug.
+
+Log in with this sequence. **`snapshot` is not optional** — every interactive command takes a element `ref` from a snapshot (`e11`), never a selector or free text, so skipping it leaves you with nothing to pass:
+
+```bash
+npx playwright-cli open
+npx playwright-cli goto https://www.saucedemo.com
+npx playwright-cli snapshot            # ← yields the refs used below
+npx playwright-cli fill e11 standard_user   # textbox "Username" [ref=e11]
+npx playwright-cli fill e13 secret_sauce    # textbox "Password" [ref=e13]
+npx playwright-cli click e15                # button "Login"    [ref=e15]
+npx playwright-cli goto 'https://www.saucedemo.com/inventory-item.html?id=4'
+```
+
+Two things that will bite you:
+
+- **Read the refs out of your own snapshot; never copy the ones above.** They are stable for saucedemo's login form today and are shown so the shape is recognizable, but a ref identifies a node in one snapshot of one page.
+- **Quote any URL containing `?`.** zsh treats it as a glob and the command dies with `no matches found` before `playwright-cli` ever runs — which reads like a CLI error and is not one.
 
 ### 6. Snapshot the page
 

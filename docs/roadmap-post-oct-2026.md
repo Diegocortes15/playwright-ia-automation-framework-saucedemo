@@ -695,18 +695,33 @@ diez minutos y una decisión de diseño no se leen igual.
 
 ### Defectos abiertos — arreglables ya
 
-- **`playwright-cli` no está en PATH.** El Step 5 del scaffold dice `playwright-cli open`, que
-  falla con `command not found`; el binario está en `node_modules/.bin/`. Los comandos `click` y
-  `select` además **exigen un `ref` de snapshot** y fallan con texto libre, cosa que el workflow
-  no dice. (El Step 11 ya se arregló en #56; este quedó.)
-- **El duplicate-guard del Step 8.5 es file-scoped y su inserción es context-scoped.** Compara
-  títulos "already in the file" pero inserta "within the resolved context describe". En un
-  archivo multi-contexto, el mismo comportamiento para otro usuario es un test legítimamente
-  distinto. En la corrida de SW-13 **se esquivó solo por elección de título**.
-- **Un run bloqueado en AUGMENT deja dos archivos commiteados sucios** (el spec y
-  `.observations/observations.json`), lo que bloquea el run siguiente. Ojo: el camino de
-  ADR-0024 **no necesita limpieza** — esos archivos pasan a ser el commit de aterrizaje. La
-  pregunta abierta es solo la otra rama, cuando se concluye que el ticket estaba mal.
+> **Vacía desde el 2026-09-07.** Los tres que vivían acá se cerraron el mismo día (#63,
+> #64, #65) y quedan tachados abajo en vez de borrados: los tres salieron de **correr** el
+> pipeline, ninguno de leerlo, y esa es la única razón por la que aparecieron. Borrar el
+> registro borraría la evidencia de qué los encontró.
+
+- [x] ~~**`playwright-cli` no está en PATH**~~ — **cerrado (2026-09-07), las dos mitades.**
+      El PATH lo arregló #63, que corrigió las 21 invocaciones nuestras a `npx`, dejó a propósito
+      las 164 del `SKILL.md` vendored (se regenera: el arreglo se deshace solo y mientras tanto
+      parece hecho) y puso el chequeo en CI. La otra mitad se cerró acá: el caveat del Step 5
+      mandaba "fall back to manual login via `fill` + `click`", **inejecutable**, porque todo
+      comando interactivo toma un `ref` de snapshot y no texto libre. Peor: en saucedemo ese
+      fallback no es un caso de borde sino **el camino normal**, porque `state-load` nunca restaura
+      sessionStorage. Ahora lleva la secuencia completa, corrida de verdad contra la app, más las
+      dos trampas que encontró correrla: los refs se leen del snapshot propio, y una URL con `?` hay
+      que encomillarla o zsh la expande y mata el comando antes de que el CLI arranque.
+- [x] ~~**El duplicate-guard del Step 8.5 es file-scoped**~~ — **cerrado por #64 (2026-09-07).**
+      Ahora compara solo dentro del context describe resuelto, la nota de skip dice en cuál matcheó,
+      y un título idéntico en otro contexto está señalado como el caso multi-usuario que **debe**
+      insertarse. De paso se sacó la instrucción de "strip leading tags": ADR-0015 sacó los tags de
+      los títulos y tiene lint que falla ante cualquier `@`, así que esa rama era inalcanzable.
+- [x] ~~**Un run bloqueado en AUGMENT deja archivos sucios**~~ — **cerrado por #65 (2026-09-07).**
+      El workflow tiene una sección `## Aborting` única en vez de doce copias: todo aborto desde el
+      Step 5 nombra lo que dejó, separado como lo ve `git status`, y **no revierte nada** — una
+      corrida fallida es la única evidencia de por qué falló. Y `sync-base-branch.sh` ya no dice
+      solo "working tree is dirty": nombra los paths y aclara que un aborto anterior deja
+      exactamente eso. Verificado que los dos modos lo disparan, porque `--porcelain` cuenta
+      untracked también.
 
 ### Decisiones abiertas a propósito
 
@@ -715,10 +730,13 @@ diez minutos y una decisión de diseño no se leen igual.
   `/report-bug` presentara con aprobación y **lo rechazó por ahora**: _"files nothing"_ es la
   formulación más nítida del principio #2, y se presentó exactamente un defecto a mano.
   **Revisar cuando la fricción se sienta más de una vez.**
-- **Los 401 de `events.backtrace.io`** siguen sin triar. La telemetría de errores de la propia
-  app está siendo rechazada, más un error de CORS de `submit.backtrace.io`. Inofensivo en un
-  demo; en una app cliente significaría que el reporte de errores en producción está muerto y
-  nadie se entera, porque la UI se ve bien igual. **Decidir y registrar el `status`.**
+- [x] ~~**Los 401 de `events.backtrace.io`**~~ — **triados por #61 (2026-09-07), junto con la
+      cola entera.** Las cinco entradas son una causa, leída del bundle y no deducida: saucedemo
+      configura `url: https://submit.backtrace.io/UNIVERSE/TOKEN/json` con los placeholders
+      literales sin reemplazar. De ahí el 401, y como un 401 no lleva `Access-Control-Allow-Origin`,
+      el browser encima loguea el CORS **de esa misma respuesta**. No es defecto: credenciales
+      reales en un bundle público serían peor. Sigue en pie la lectura que hacía valioso el ítem —
+      en una app cliente esto significaría que el reporte de errores está muerto y nadie se entera.
 
 ### Verificaciones que esperan un disparador natural
 
@@ -832,8 +850,8 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
 - **Bloque B11 — `AGENTS.md`.** Vale cuestionarlo antes de hacerlo: `CLAUDE.md` está en 142
   líneas y ya es la constitución de facto.
-- **Bloque C** — hooks, probar el subagente Explore antes de construir `/find-tests`, el
-  subagente `pr-reviewer`.
+- **Bloque C** — queda **solo el hook de frontmatter de `SKILL.md`**. `/find-tests` se descartó
+  (#67: Explore sacó 9/9) y `pr-reviewer` también (el terreno cambió debajo).
 - **Bloque E** — presentación y portfolio, en paralelo cuando quieras.
 
 ## Guardarraíles para Claude Code al ejecutar este plan
