@@ -28,7 +28,10 @@ Its Context is stale too: _"chromium runs the full 5-user matrix"_ describes a w
 
 ## Consequences
 
-- The full standard + no-auth suite **passes on both engines**: 79 tests on Firefox in 47.7s, 79 on WebKit in 35.5s, against 83 on chromium in 24s. That question was open for four months; it is now answered.
+- The full standard + no-auth suite **passes on both engines**: 79 tests on Firefox in ~45s and 79 on WebKit in ~31s, against 83 on chromium in ~25s. That question was open for four months; it is now answered.
+- **Its first real use immediately earned its keep**, which is the strongest argument in this record. One WebKit run in five failed `every product price is formatted with a leading dollar sign` against a short product list, while the same test passed in isolation every time. `InventoryPage.goto()` returned as soon as the document loaded, and ten tests in that feature read a list on the very next line; chromium had simply always won that race. The wait now lives in the Page Object, so readiness is a property of the page rather than a discipline each test remembers.
+- **Every one of the seven Page Objects has that same shape** — `goto()` navigates and returns, waiting for nothing. Only `InventoryPage` is fixed here, because only it has actually failed, and the others have never run anywhere but chromium so "no flake yet" is weak evidence rather than none. `LoginPage` in particular must not gain a naive wait: its `goto(path)` variant is used by route-guard tests that _expect_ a redirect away from the target. The trigger is the next page that flakes.
+- Honest about the proof: five clean WebKit runs after the fix do not demonstrate that a one-in-five flake is gone. The mechanism is identified and addressed, and that is what the confidence rests on.
 - Firefox and WebKit must be installed (`npx playwright install firefox webkit`) — about 175 MB. A run without them fails with Playwright's own "Executable doesn't exist" message, which names the fix.
 - CI is unchanged and stays chromium. Whether a project pays for another engine on every pull request is a project's call, and this framework is a template.
 - **Trigger to revisit:** the first defect that escapes through an engine difference, or the day this framework points at a real application rather than a demo. Either makes the case for putting `test:cross` in CI.

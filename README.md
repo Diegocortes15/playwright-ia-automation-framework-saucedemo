@@ -37,7 +37,9 @@ npm run test:firefox                     # the standard user on Gecko
 npm run test:cross -- --grep "@smoke"    # both engines, smoke only — 9 tests, ~11s
 ```
 
-The full standard suite passes on both: **79 tests on Firefox (47.7s), 79 on WebKit (35.5s)**, against 83 on chromium in 24s. Only the standard user goes cross-browser — engine differences live in the framework's interaction code, not in saucedemo's per-user bugs.
+The full standard suite passes on both: **79 tests on Firefox (~45s), 79 on WebKit (~31s)**, against 83 on chromium in ~25s. Only the standard user goes cross-browser — engine differences live in the framework's interaction code, not in saucedemo's per-user bugs.
+
+Its first real use paid for itself: WebKit exposed a race in `InventoryPage.goto()` that chromium had always won, and the fix landed with it ([ADR-0027](docs/adr/0027-cross-browser-opt-in.md)).
 
 ---
 

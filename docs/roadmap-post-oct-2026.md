@@ -653,7 +653,19 @@ producen manualmente".
   (`firefox-no-auth`, `firefox-standard`, `webkit-no-auth`, `webkit-standard`) vía
   `npm run test:firefox` / `test:webkit` / `test:cross`, con cualquier scope encima
   (`-- --grep "@smoke"` da 9 tests en ~11 s). **La suite pasa entera en los dos motores** —
-  79 en Firefox, 79 en WebKit — pregunta que estuvo abierta cuatro meses.
+  79 en Firefox (~45 s), 79 en WebKit (~31 s) — pregunta que estuvo abierta cuatro meses.
+
+  **Y en su primer uso real se pagó solo.** Una corrida de WebKit de cada cinco falló
+  `every product price is formatted with a leading dollar sign` contra una lista corta, mientras
+  el mismo test pasaba siempre en aislamiento. `InventoryPage.goto()` volvía apenas cargaba el
+  documento y diez tests de esa feature leen una lista en la línea siguiente: chromium venía
+  ganando esa carrera desde siempre. La espera ahora vive en el Page Object.
+
+  **Los siete Page Objects tienen la misma forma** —`goto()` navega y vuelve sin esperar nada—.
+  Solo se arregló `InventoryPage`, el único que falló de verdad; los demás nunca corrieron fuera
+  de chromium, así que "todavía no flakeó" es evidencia débil, no ausencia de problema. Ojo con
+  `LoginPage`: su variante `goto(path)` la usan los tests de route-guard que **esperan** el
+  redirect, así que una espera ingenua ahí rompería. Disparador: la próxima página que flakee.
 
   El guardarraíl de ADR-0004 sobrevive y es la parte que todos citaban: **solo el usuario
   estándar**, nunca una matriz por-usuario-por-browser.
