@@ -206,7 +206,7 @@ flowchart TD
 
 **Opt-in and one-way**, so non-technical reviewers can browse human-readable cases. Off unless `QASE_*` is configured.
 
-At merge, CI creates/updates/archives Qase **cases** (suite tree `feature › context › bucket`, steps from `test.step`, expected result = the ticket's AC text) and commits the refreshed id map. **No run is created** — merges stay noise-free. Runs are explicit: `npm run qase:smoke` / `qase:regression`. `src/tcms/qase-client.ts` is the only Qase-aware file, so Xray/Zephyr is a sibling client. Design in [`docs/tcms.md`](docs/tcms.md).
+At merge, CI creates/updates/archives Qase **cases** (suite tree `feature › context › bucket`, steps from `test.step`, expected result = the ticket's AC text) and commits the refreshed id map. **No run is created** — merges stay noise-free. Runs are explicit: `npm run qase:smoke` / `qase:regression`. Every HTTP call to Qase lives in `src/tcms/qase-client.ts` and nowhere else, so Xray/Zephyr is a sibling client — though the vendor's _name_ leaks further than that, and [`docs/failure-modes.md`](docs/failure-modes.md) measures exactly how far. Design in [`docs/tcms.md`](docs/tcms.md).
 
 ![qase board](docs/images/qase-board.png)
 
@@ -300,6 +300,7 @@ For what each skill costs in context, Claude Code ships [`/skill-doctor`](https:
 | ------------------------------------------------ | -------------------------------------------------------------- |
 | [`CLAUDE.md`](CLAUDE.md)                         | AI rules — auto-loaded by Claude Code                          |
 | [`docs/walkthrough.md`](docs/walkthrough.md)     | Two real tickets through the whole pipeline, end to end        |
+| [`docs/failure-modes.md`](docs/failure-modes.md) | Where this breaks, what catches it, and what still does not    |
 | [`docs/architecture.md`](docs/architecture.md)   | Framework structure, composition rules, conventions            |
 | [`docs/from-issue.md`](docs/from-issue.md)       | The ticket-to-PR skill, in depth                               |
 | [`docs/refine-ticket.md`](docs/refine-ticket.md) | The ticket-hardening skill                                     |
