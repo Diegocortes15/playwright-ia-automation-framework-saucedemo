@@ -1,7 +1,11 @@
 # 0004 — Cross-Browser Smoke Pattern (firefox + webkit on standard user only)
 
 **Date:** 2026-05-10
-**Status:** Accepted
+**Status:** Superseded by [ADR-0027](0027-cross-browser-opt-in.md). Its guardrail — only the
+standard user goes cross-browser, never a per-user × per-browser matrix — survives there. Its
+instruction to add always-on `firefox-standard` and `webkit-standard` projects never was
+implemented, and this record sat `Accepted` and false for four months while `CLAUDE.md`, the
+roadmap and ADR-0014 all cited it as the reason cross-browser stayed **out**.
 **Enforced by:** `playwright.config.ts` derives its projects from `AUTH_USERS` (same mechanism as ADR-0002), so the per-user-per-browser matrix cannot appear without editing that array by hand. Structural.
 
 ## Context

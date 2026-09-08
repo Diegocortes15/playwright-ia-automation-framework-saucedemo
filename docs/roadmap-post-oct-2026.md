@@ -642,8 +642,22 @@ producen manualmente".
 
 ### Otras mejoras al framework (post piso base)
 
-- **Cross-browser** (ADR-0004 diferido) — estructura de projects
-  data-driven ya lista para absorberlo sin refactor grande
+- [x] ~~**Cross-browser**~~ — **IMPLEMENTADO Y OPT-IN (2026-09-08, ADR-0027 supersede ADR-0004).**
+      El ítem decía "ADR-0004 diferido", pero ADR-0004 no difería nada: decía **Accepted** y su
+      Decisión mandaba agregar `firefox-standard` y `webkit-standard`. Nunca se implementaron, y
+      `CLAUDE.md`, este roadmap y ADR-0014 lo citaban los tres como la razón de que el cross-browser
+      **quedara afuera** — o sea, todos lo leían al revés de lo que decía. Cuatro meses en `Accepted`
+      siendo falso, más que los tres y medio de ADR-0005 que el README de ADRs cuenta como escarmiento.
+
+  Ahora: `npm test` sigue siendo chromium, y `CROSS_BROWSER=1` suma cuatro proyectos
+  (`firefox-no-auth`, `firefox-standard`, `webkit-no-auth`, `webkit-standard`) vía
+  `npm run test:firefox` / `test:webkit` / `test:cross`, con cualquier scope encima
+  (`-- --grep "@smoke"` da 9 tests en ~11 s). **La suite pasa entera en los dos motores** —
+  79 en Firefox, 79 en WebKit — pregunta que estuvo abierta cuatro meses.
+
+  El guardarraíl de ADR-0004 sobrevive y es la parte que todos citaban: **solo el usuario
+  estándar**, nunca una matriz por-usuario-por-browser.
+
 - **Feedback loop de flakiness** — tool/skill que analice históricos
   de Qase runs, detecte selectores flaky, y advierta a `/from-issue`
   durante autoría
