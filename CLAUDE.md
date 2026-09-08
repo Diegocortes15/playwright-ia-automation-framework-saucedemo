@@ -50,6 +50,8 @@ Current custom skills:
 
 **Ticket reads come from Jira via the Atlassian MCP** (see [ADR-0011](docs/adr/0011-jira-ticket-source.md)) — `/from-issue SW-123` reads the ticket through the MCP, NOT `gh issue`. The GitHub-for-Jira app auto-links the PR onto the ticket (no write-back).
 
+**PR titles follow [Conventional Commits](CONTRIBUTING.md), and branches say what changed, not where they sit in a plan** — this repo squash-merges, so a PR title becomes the permanent commit on `main`. Full conventions in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 This project uses the `gh` CLI for GitHub operations (PRs, releases, workflow runs, arbitrary REST calls). `gh` is the user-installed GitHub CLI; assume it's authenticated (`gh auth login` is a one-time step).
 
 - For PRs: `gh pr create`, `gh pr view`, `gh pr comment`, `gh pr checks`
