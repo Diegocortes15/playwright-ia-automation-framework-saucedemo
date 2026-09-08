@@ -17,7 +17,8 @@
         "test": "error_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
       },
-      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js.",
+      "absentSince": "2026-09-08"
     },
     {
       "signature": "console-error:Access to fetch at 'https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: Response to preflight r",
@@ -36,7 +37,8 @@
         "test": "back button after logout does not restore the session",
         "project": "chromium-no-auth"
       },
-      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js.",
+      "absentSince": "2026-09-08"
     },
     {
       "signature": "console-error:Access to fetch at 'https://submit.backtrace.io/UNIVERSE/TOKEN/json' from origin 'https://www.saucedemo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the ",
@@ -55,7 +57,8 @@
         "test": "locked_out_user with a wrong password still sees the lockout error",
         "project": "chromium-no-auth"
       },
-      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js."
+      "note": "saucedemo ships the Backtrace SDK with its placeholder credentials never replaced: the bundle configures url: https://submit.backtrace.io/UNIVERSE/TOKEN/json, where UNIVERSE and TOKEN are literal strings. Backtrace rejects that with 401, and a 401 response carries no Access-Control-Allow-Origin, so the browser also logs a CORS error about the very same rejected response - which is why two detectors report one cause. Not a defect worth chasing: real credentials in a public bundle would be worse. Verified 2026-09-07 by reading /assets/index-XyuNVFOR.js.",
+      "absentSince": "2026-09-08"
     },
     {
       "signature": "console-error:OBSERVATION_PROBE console failure",
@@ -241,7 +244,7 @@
         "url": "https://events.backtrace.io/api/summed-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "problem_user logs out from the menu and returns to the login page",
+        "test": "standard_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
       },
       "seenIn": [
@@ -264,7 +267,7 @@
         "url": "https://events.backtrace.io/api/unique-events/submit?universe=UNIVERSE&token=TOKEN",
         "method": "POST",
         "httpStatus": 401,
-        "test": "problem_user logs out from the menu and returns to the login page",
+        "test": "standard_user logs out from the menu and returns to the login page",
         "project": "chromium-no-auth"
       },
       "seenIn": [

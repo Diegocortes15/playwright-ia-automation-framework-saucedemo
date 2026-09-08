@@ -704,9 +704,23 @@ diez minutos y una decisión de diseño no se leen igual.
 > quedan tachados abajo en vez de borrados: los tres salieron de **correr** el pipeline,
 > ninguno de leerlo. Borrar el registro borraría la evidencia de qué los encontró.
 
-- **Una observación arreglada no se quita nunca, y nada avisa que ya no pasa.** Encontrado el
-  2026-09-08 preguntando qué ocurre cuando un dev —o un tercero, como backtrace— arregla el
-  400/401 que quedó registrado.
+- [x] ~~**Una observación arreglada no se quita nunca, y nada avisa que ya no pasa**~~ —
+      **arreglado el 2026-09-08, el mismo día que se encontró.** El índice gana `absentSince`, que se
+      pone solo cuando la corrida ejercitó **todas** las features del `seenIn` de la entrada y aun así
+      no la vio, y se borra sola apenas reaparece. Nada se elimina automáticamente: quitar la entrada
+      sigue siendo acto humano (ADR-0021).
+
+  **Correrlo corrigió el diseño dos veces.** Primero confirmó que la versión ingenua mentía —una
+  corrida de un solo proyecto habría declarado muertas las otras once—. Y después, ya con la
+  versión conservadora, marcó tres errores de CORS reales que **no** están arreglados sino que son
+  intermitentes (`count: 1`, ocurrieron una vez en su vida). El mecanismo estaba bien; la
+  redacción del digest era la que sacaba conclusiones, diciendo _"si eso es un arreglo, borrá la
+  entrada"_. Ahora nombra las dos lecturas y no elige, igual que `/report-bug`.
+
+  <details><summary>El diagnóstico original</summary>
+
+  Encontrado el 2026-09-08 preguntando qué ocurre cuando un dev —o un tercero, como backtrace—
+  arregla el 400/401 que quedó registrado.
 
   `mergeObservations` arranca metiendo **todas** las entradas previas en el mapa y solo pisa las
   que reaparecieron en la corrida. Así que una entrada cuya causa desapareció queda **congelada
@@ -729,6 +743,8 @@ diez minutos y una decisión de diseño no se leen igual.
   Consecuencia mientras tanto, que conviene tener presente al leer el digest: **`14 reviewed` no
   significa "14 cosas que pasan hoy"**, significa "14 cosas que pasaron alguna vez y alguien
   clasificó".
+
+  </details>
 
 - [x] ~~**`playwright-cli` no está en PATH**~~ — **cerrado (2026-09-07), las dos mitades.**
       El PATH lo arregló #63, que corrigió las 21 invocaciones nuestras a `npx`, dejó a propósito
