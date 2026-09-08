@@ -8,9 +8,14 @@
 
 > An end-to-end test framework where **a Jira ticket becomes a reviewed, TCMS-mirrored Playwright pull request** — authored by AI agents, gated by deterministic CI. Built on [saucedemo](https://www.saucedemo.com) as both a **reusable template** and a **portfolio piece**.
 
-![overview](docs/images/hero.png)
+**In four bullets:**
 
-The framework is **code-first and AI-extended**. At runtime it is plain, fast, deterministic Playwright + TypeScript — nothing exotic. The "AI" lives in the _authoring_ layer: [Claude Code](https://claude.ai/code) skills read a Jira ticket, generate Page-Object-backed tests, run them, and open a GitHub PR. A human reviews and merges; CI keeps everything honest.
+- **A ticket goes in; a reviewed pull request comes out** — the tests, the Page Objects they need, and the acceptance criterion each test covers.
+- **The AI writes once. Every run after that is plain Playwright** reading committed files. Clone this and run `npm test` with no Claude Code installed and you still get the Jira links and the criteria.
+- **A run never opens a red PR.** It diagnoses and retries up to three times; if the _application_ is what contradicts the ticket, it opens nothing and says so.
+- **11 of 14 generated PRs landed exactly as generated** — measured, with its caveats, [below](#the-skills).
+
+![overview](docs/images/hero.png)
 
 ---
 
@@ -135,7 +140,19 @@ Five [Claude Code skills](.claude/skills/) — four written here, one vendored f
 
 `/from-issue` is the conductor: it calls `/scaffold-page-object` when a Page Object is missing, uses `playwright-cli` to confirm selectors against the live DOM, and grows the auth matrix when a ticket needs an unwired user.
 
-**How it reaches the outside world:** tickets come from **Jira via the Atlassian MCP** — never `gh issue` ([ADR-0011](docs/adr/)) — while every GitHub action runs through the **`gh` CLI**, with deliberately **no** GitHub MCP ([ADR-0007](docs/adr/)). Only `/refine-ticket` writes to Jira ([ADR-0013](docs/adr/)). Qase is written one-way at merge; Slack receives scheduled-run outcomes.
+### Why skills, and why exactly one MCP server
+
+The interesting part is not that this uses skills — it is that it **uses one MCP server and deliberately refuses another**, on a rule rather than a preference:
+
+- **A CLI, when a good one already exists.** GitHub goes through `gh` ([ADR-0007](docs/adr/)) and the browser through `playwright-cli` ([ADR-0006](docs/adr/)) — both already installed and authenticated, more token-efficient than a server, and neither needs a PAT in the repo or an MCP registration.
+- **An MCP server, when there is no such CLI and OAuth beats a secret.** Jira reads go through the Atlassian MCP ([ADR-0011](docs/adr/)) for two named reasons: no Jira CLI is as ubiquitous as `gh`, and its OAuth means **no API token lives in this repository**.
+- **A skill for the workflow itself.** Skills are the _procedure_ — read the ticket, scaffold, generate, run, open the PR. The CLI and the MCP are just how it reaches out.
+
+ADR-0011 says outright that it **scopes** ADR-0007 rather than reversing it, which is the honest shape: `gh` still owns GitHub, the MCP owns Jira only. Only `/refine-ticket` ever writes to Jira ([ADR-0013](docs/adr/)); Qase is written one-way at merge, and Slack receives scheduled-run outcomes.
+
+**What it costs:** an MCP server is a connection that can drop, and it did — Jira access was lost to inactivity and needed a fresh session to reconnect. A CLI does not have that failure mode. The trade bought no secrets in the repo, and that was judged worth it.
+
+**How well it works, measured:** of **14** merged `/from-issue` pull requests, **11 landed exactly as generated**. The other three needed one follow-up commit each — extracting a component, removing a conditional from a test body, and tightening a locator to an exact match. Two caveats that keep the number honest: there is a **single reviewer**, and a change amended into the original commit would be invisible to this count.
 
 ![refined Jira ticket](docs/images/jira-ticket.png)
 
