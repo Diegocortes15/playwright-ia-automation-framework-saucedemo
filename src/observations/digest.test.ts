@@ -183,3 +183,29 @@ test('grouping preserves the order entries first appeared in', () => {
     ['second'],
   ]);
 });
+
+test('an entry that stopped happening says so, and says what to do about it', () => {
+  const digest = renderDigest(
+    {
+      observations: [
+        obs({ signature: 'a', status: 'ignored', note: 'known', absentSince: '2026-09-08' }),
+        obs({ signature: 'b', status: 'ignored', note: 'other' }),
+      ],
+    },
+    '2026-09-08',
+  );
+
+  expect(digest).toContain('**Not seen since 2026-09-08**');
+  // Both readings named, no verdict — an intermittent event gets marked too.
+  expect(digest).toContain('the cause was fixed, or it never fired reliably');
+  // Counted in the header, so it is visible without reading every entry.
+  expect(digest).toContain('1 not seen when last exercised');
+});
+
+test('with nothing absent the header stays two-part, not "0 no longer occurring"', () => {
+  const digest = renderDigest({ observations: [obs({ signature: 'a' })] }, '2026-09-08');
+  expect(digest).toContain('**1 not yet reviewed · 0 reviewed.**');
+  // Only the header is asserted: the intro paragraph always explains what the label means,
+  // so a document-wide search for the phrase would match that prose and prove nothing.
+  expect(digest).not.toContain('· 0 not seen when last exercised');
+});

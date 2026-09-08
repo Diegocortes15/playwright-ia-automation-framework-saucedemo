@@ -33,6 +33,12 @@ export interface Observation {
   status: string;
   /** Why it was triaged that way. Written by a human, preserved across runs. */
   note?: string;
+  /**
+   * Set when a run that exercised **every** feature in `seenIn` did not observe this, and
+   * cleared the moment it reappears. Absence is only meaningful when the code that used to
+   * produce it actually ran, so a partial run never sets it.
+   */
+  absentSince?: string;
   sample: {
     message: string;
     url?: string;

@@ -113,13 +113,33 @@ function renderFact(observation: Observation): string {
       ? `the \`${seenIn[0]}\` tests`
       : `${seenIn.length} features (\`${seenIn.join('`, `')}\`)`;
 
-  return [
+  const lines = [
     headline(observation),
     '',
     describeObservation(observation),
     '',
     `${times} ${when}. Seen across ${where}. Example: _"${sample.test}"_ (${sample.project}).`,
-  ].join('\n');
+  ];
+
+  // The one thing the index could never say before: this did not happen when it had the
+  // chance to. Deliberately reported as a fact with both readings named, never as a verdict.
+  //
+  // The first version of this line said "if that is a fix, delete this entry" and was wrong in
+  // a way only running it revealed: three intermittent console errors -- each having occurred
+  // exactly once, ever -- were marked the first time a run did not reproduce them. Telling
+  // someone to delete those trains them to ignore the line, which is the same objection this
+  // project raises against any gate that cries wolf.
+  if (observation.absentSince) {
+    lines.push(
+      '',
+      `**Not seen since ${observation.absentSince}**, in runs that did exercise ${where}. ` +
+        'Two readings, and this file does not pick one: the cause was fixed, or it never fired ' +
+        'reliably in the first place — a low count above is the tell for the second. The mark ' +
+        "clears itself if it reappears; removing the entry is a person's call.",
+    );
+  }
+
+  return lines.join('\n');
 }
 
 /** What a person decided about those facts. */
@@ -201,6 +221,9 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
   const all = file.observations;
   const unreviewed = all.filter((o) => o.status === 'new');
   const reviewed = all.filter((o) => o.status !== 'new');
+  // Counted across both groups: whether a thing still happens is a separate question from
+  // whether anyone has looked at it.
+  const absent = all.filter((o) => o.absentSince);
 
   const out: string[] = [
     '# What the app did that no test asserted on',
@@ -211,7 +234,16 @@ export function renderDigest(file: ObservationsFile, generatedOn: string): strin
     'classified, edit its `status` and `note` **once** in that file; marking it `ignored` also',
     'stops it annotating the Playwright report, everywhere.',
     '',
-    `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
+    'A count here is what the last run saw, not a lifetime total — and an entry stays until a',
+    'person deletes it, so `reviewed` means "someone classified this", never "this still',
+    'happens". An entry marked **not seen when last exercised** did not occur in a run that did',
+    'execute the features it comes from — which reads as a fix, or as something that was always',
+    'intermittent. The record states it; you decide.',
+    '',
+    absent.length > 0
+      ? `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed · ` +
+        `${absent.length} not seen when last exercised.**`
+      : `**${unreviewed.length} not yet reviewed · ${reviewed.length} reviewed.**`,
   ];
 
   if (all.length === 0) {

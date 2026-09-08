@@ -70,3 +70,84 @@ test('output is sorted by kind then signature, so the committed file diffs clean
     merged.map((o) => o.signature),
   );
 });
+
+test('a run that exercised its features and did not see it marks it absent', () => {
+  const gone = obs({ signature: 'console-error:fixed by the vendor', seenIn: ['checkout'] });
+
+  const [merged] = mergeObservations([gone], [], {
+    coveredFeatures: new Set(['checkout']),
+    today: '2026-09-08',
+  });
+
+  expect(merged.absentSince).toBe('2026-09-08');
+});
+
+test('a partial run marks nothing — absence proves nothing if the code never ran', () => {
+  // The whole reason the naive version was rejected: running one project would otherwise
+  // declare every out-of-scope entry dead.
+  const gone = obs({ signature: 'console-error:still happening elsewhere', seenIn: ['checkout'] });
+
+  const [merged] = mergeObservations([gone], [], {
+    coveredFeatures: new Set(['login']),
+    today: '2026-09-08',
+  });
+
+  expect(merged.absentSince).toBeUndefined();
+});
+
+test('an entry seen in two features needs BOTH covered before it counts as absent', () => {
+  const gone = obs({ signature: 'console-error:two homes', seenIn: ['checkout', 'login'] });
+
+  const partial = mergeObservations([gone], [], {
+    coveredFeatures: new Set(['checkout']),
+    today: '2026-09-08',
+  });
+  expect(partial[0].absentSince).toBeUndefined();
+
+  const full = mergeObservations([gone], [], {
+    coveredFeatures: new Set(['checkout', 'login']),
+    today: '2026-09-08',
+  });
+  expect(full[0].absentSince).toBe('2026-09-08');
+});
+
+test('the absence date is the first one, not the latest — "not seen since" means since', () => {
+  const gone = obs({ signature: 'console-error:long gone', absentSince: '2026-09-01' });
+
+  const [merged] = mergeObservations([gone], [], {
+    coveredFeatures: new Set(['checkout']),
+    today: '2026-09-08',
+  });
+
+  expect(merged.absentSince).toBe('2026-09-01');
+});
+
+test('when it comes back the absence mark is dropped, and triage still survives', () => {
+  const wasGone = obs({
+    signature: 'console-error:it returned',
+    absentSince: '2026-09-01',
+    status: 'ignored',
+    note: 'third-party telemetry',
+  });
+  const backAgain = obs({
+    signature: 'console-error:it returned',
+    count: 4,
+    lastSeen: '2026-09-08',
+  });
+
+  const [merged] = mergeObservations([wasGone], [backAgain], {
+    coveredFeatures: new Set(['checkout']),
+    today: '2026-09-08',
+  });
+
+  expect(merged.absentSince).toBeUndefined();
+  expect(merged.status).toBe('ignored');
+  expect(merged.note).toBe('third-party telemetry');
+  expect(merged.count).toBe(4);
+});
+
+test('with no coverage information nothing is marked — the old two-argument call is unchanged', () => {
+  const gone = obs({ signature: 'console-error:unknown coverage' });
+  const [merged] = mergeObservations([gone], []);
+  expect(merged.absentSince).toBeUndefined();
+});
