@@ -285,6 +285,7 @@ For what each skill costs in context, Claude Code ships [`/skill-doctor`](https:
 | File                                             | Purpose                                                        |
 | ------------------------------------------------ | -------------------------------------------------------------- |
 | [`CLAUDE.md`](CLAUDE.md)                         | AI rules — auto-loaded by Claude Code                          |
+| [`docs/walkthrough.md`](docs/walkthrough.md)     | Two real tickets through the whole pipeline, end to end        |
 | [`docs/architecture.md`](docs/architecture.md)   | Framework structure, composition rules, conventions            |
 | [`docs/from-issue.md`](docs/from-issue.md)       | The ticket-to-PR skill, in depth                               |
 | [`docs/refine-ticket.md`](docs/refine-ticket.md) | The ticket-hardening skill                                     |

@@ -700,10 +700,35 @@ diez minutos y una decisión de diseño no se leen igual.
 
 ### Defectos abiertos — arreglables ya
 
-> **Vacía desde el 2026-09-07.** Los tres que vivían acá se cerraron el mismo día (#63,
-> #64, #65) y quedan tachados abajo en vez de borrados: los tres salieron de **correr** el
-> pipeline, ninguno de leerlo, y esa es la única razón por la que aparecieron. Borrar el
-> registro borraría la evidencia de qué los encontró.
+> Estuvo vacía un día. Los tres que vivían acá se cerraron el 2026-09-07 (#63, #64, #65) y
+> quedan tachados abajo en vez de borrados: los tres salieron de **correr** el pipeline,
+> ninguno de leerlo. Borrar el registro borraría la evidencia de qué los encontró.
+
+- **Una observación arreglada no se quita nunca, y nada avisa que ya no pasa.** Encontrado el
+  2026-09-08 preguntando qué ocurre cuando un dev —o un tercero, como backtrace— arregla el
+  400/401 que quedó registrado.
+
+  `mergeObservations` arranca metiendo **todas** las entradas previas en el mapa y solo pisa las
+  que reaparecieron en la corrida. Así que una entrada cuya causa desapareció queda **congelada
+  para siempre** con su último `count`, su `lastSeen` y su sample. Nada la borra, nada la marca.
+  El único rastro es la fecha de `lastSeen` quedándose atrás, y el digest la imprime pero nunca
+  dice _"esto ya no pasa"_: hay que mirar una fecha y acordarse de qué día es hoy.
+
+  **Lo que lo vuelve un defecto y no una decisión es que el framework ya resolvió esto para el
+  otro lado.** Un `test.fail()` avisa solo cuando el defecto se arregla — la corrida reporta
+  _"Expected to fail, but passed."_ y ADR-0024 exige quitar el marcador en ese mismo PR. Las
+  observaciones no tienen equivalente. Misma clase de problema, mecanismo de aviso en uno y no
+  en el otro.
+
+  **Y el arreglo obvio miente.** Marcar como vieja toda entrada cuyo `lastSeen` sea anterior a la
+  corrida más reciente rompe con cualquier corrida parcial: correr solo `chromium-problem`
+  marcaría como muertas las 11 entradas restantes. Para que el flag no mienta, el índice tiene
+  que saber si la corrida fue **completa**, y eso ya es diseño con decisión atrás — probablemente
+  un ADR, porque cambia el contrato del archivo.
+
+  Consecuencia mientras tanto, que conviene tener presente al leer el digest: **`14 reviewed` no
+  significa "14 cosas que pasan hoy"**, significa "14 cosas que pasaron alguna vez y alguien
+  clasificó".
 
 - [x] ~~**`playwright-cli` no está en PATH**~~ — **cerrado (2026-09-07), las dos mitades.**
       El PATH lo arregló #63, que corrigió las 21 invocaciones nuestras a `npx`, dejó a propósito
@@ -911,7 +936,17 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
       normalización no; certificar la cáscara y no el contenido compra tranquilidad falsa, que
       es peor que no tener gate.
 
-- **Reescribir el walkthrough sobre una corrida real.** PR #35 se **cerró el 2026-09-07**, no
+- [x] ~~**Reescribir el walkthrough sobre una corrida real**~~ — **HECHO (2026-09-08).**
+      `docs/walkthrough.md`, 182 líneas contra las 201 del cerrado, sobre SW-15 (#53) y SW-13 (#49)
+      en vez de un ticket inventado. Abre con la idea que lo vuelve entendible y que el doc de julio
+      no tenía: **la IA escribe una sola vez y el runtime es Playwright puro** leyendo artefactos
+      commiteados — por eso quien clona el repo sin Claude Code igual ve los links de Jira, el
+      criterio que cada test cubre y la explicación en prosa de las fallas esperadas. Lo que no
+      obtiene es una explicación _nueva_ para un defecto _nuevo_.
+
+  <details><summary>Por qué se cerró el #35</summary>
+
+  PR #35 se **cerró el 2026-09-07**, no
   porque la idea estuviera mal sino porque el pipeline que documentaba ya no existe: escrito el
   2026-07-02, no menciona ninguna vez ADR-0020 (nunca abre un PR rojo, con loop de 3 intentos),
   ADR-0024 (`test.fail()`), ADR-0010 (augment), ADR-0022 (Obstacles) ni ADR-0021
@@ -926,17 +961,25 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   `test.fail()` clavado a SW-14. Esa rama es lo que hace a este framework distinto de un repo
   Playwright normal, y es exactamente lo que un documento de julio no podía contar.
 
-  Una cosa que el PR cerrado **sí tenía bien** y conviene no perder al reescribir: la nota de
-  elección de herramientas era correcta —_"tickets come from Jira via the Atlassian MCP (never
-  `gh issue`)"_, citando ADR-0007—. Verificado, no asumido.
+  Una cosa que el PR cerrado **sí tenía bien**: la nota de elección de herramientas era correcta
+  —_"tickets come from Jira via the Atlassian MCP (never `gh issue`)"_, citando ADR-0007—.
+  Verificado, no asumido.
+
+  </details>
 
 - **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
   `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
   de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
 - **Bloque B11 — `AGENTS.md`.** Vale cuestionarlo antes de hacerlo: `CLAUDE.md` está en 142
   líneas y ya es la constitución de facto.
-- **Bloque C** — queda **solo el hook de frontmatter de `SKILL.md`**. `/find-tests` se descartó
-  (#67: Explore sacó 9/9) y `pr-reviewer` también (el terreno cambió debajo).
+- [x] ~~**Bloque C**~~ — **CERRADO ENTERO (2026-09-08).** `/find-tests` descartado (#67: Explore
+      sacó 9/9), `pr-reviewer` descartado (el terreno cambió debajo), y el **hook de frontmatter de
+      `SKILL.md` se descarta por YAGNI, con la medición del mismo día que lo respalda**: el Bloque A
+      step 3 recorrió las cinco skills y las cinco tienen `name` y `description` no vacía, todas muy
+      por debajo del límite de 1024. **El hook no guardaría nada hoy.** Mismo argumento con el que
+      ADR-0019 rechazó su gate de CI y con el que se descartó `skill-validator`: a esta escala, un
+      gate sobre algo ya limpio que cambia pocas veces al año es teatro.
+      **Disparador para reconsiderarlo:** cuando escriba skills acá alguien más que el autor único.
 - **Bloque E** — presentación y portfolio, en paralelo cuando quieras.
 
 ## Guardarraíles para Claude Code al ejecutar este plan
