@@ -814,9 +814,49 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   sea profesional, es que las skills **salgan del repo**, porque ahí nadie va a grepear antes de
   un handoff del que no se enteró.
 
-- **Bloque A step 2** — correr `claude --debug` y leer errores silenciosos de carga de skills.
-- **Bloque A step 3** — auditar las `description` de las skills contra 3-4 fraseos reales.
-- **Correr `/skill-doctor`** para medir qué cuesta cada skill en contexto de verdad.
+- [x] ~~**Bloque A step 2** — `claude --debug`~~ — **HECHO (2026-09-08). Sin errores silenciosos.**
+      `claude doctor` no reporta problemas de instalación, y el log de arranque dice
+      `Loaded 5 unique skills (5 unconditional, 0 conditional, project: 5)`: **las cinco cargan
+      limpias**. Los `Failed to stat directory` que aparecen son todos de directorios opcionales que
+      no existen (`agents`, `commands`, `output-styles`, cache de plugins), ninguno nuestro.
+
+  Detalle de método que costó dos intentos y conviene no repetir: `claude --debug -p …` **no
+  imprime el log** — devolvió 2 líneas y una advertencia de stdin. Lo que funciona es
+  `claude --debug-file <path> -p … < /dev/null`, que escribió 178 líneas útiles.
+
+  **De regalo, una pregunta que estaba abierta quedó respondida:** el MCP de Atlassian
+  `Successfully connected (transport: http) in 840ms`, con token válido ~6 h. La conexión de
+  Jira está viva y no hace falta nada para reconectarla.
+
+- [x] ~~**Bloque A step 3** — auditar las `description`~~ — **HECHO (2026-09-08).**
+      Las cinco tienen `name` y `description` no vacías, todas muy por debajo del límite de 1024
+      (la más larga, `/refine-ticket`, usa 264 caracteres). Nada que arreglar ahí.
+
+  Lo que sí salió: **`playwright-cli` tiene la descripción más corta y más vaga** — 11 palabras,
+  _"Automate browser interactions, test web pages and work with Playwright tests"_ — y reclama
+  terreno que en la práctica es de `/from-issue` o de un simple `npm test`. El solapamiento del
+  resto es por diseño: `from-issue` comparte términos con todas porque es el orquestador que las
+  compone.
+
+  **No se arregla editándola**: es la skill vendored, se regenera con `install --skills`. Ya está
+  compensado donde la regeneración no llega — `CLAUDE.md` acota cuándo se busca esta skill
+  (descubrir selectores, verificarlos antes de escribir un test, leer el DOM renderizado), que es
+  el mismo patrón que resolvió el problema del PATH en #63.
+
+- **Correr `/skill-doctor`** — **lo tenés que correr vos.** Verificado el 2026-09-08: es un
+  comando de UI de Claude Code, no una skill, así que no puedo invocarlo desde una sesión de
+  agente. La versión instalada (2.1.263) cumple el mínimo que pide (v2.1.252+).
+- **Bug desde una conversación de Slack — un MCP propio de este repo.** Idea tuya (2026-09-08):
+  cuando un issue se discute en un canal y la conclusión es "esto es un bug", que el hilo se
+  convierta en un ticket sin que nadie transcriba nada a mano. Es el mismo problema que
+  `/report-bug` resuelve para una corrida fallida, con otra fuente de entrada.
+
+  **Orden decidido: la evidencia de Jira va inmediatamente antes de esto, y esto va al final de
+  todo.** No al revés — atacar primero el adjunto de evidencia deja resuelto el "cómo sube un
+  archivo a un ticket", que es exactamente lo que este MCP necesitaría después para no nacer
+  cojo. Y hasta que no haya un segundo consumidor real, ADR-0026 sigue diciendo que un defecto
+  presentado a mano no justifica escribir a un tracker.
+
 - **La evidencia no es compartible — resuelta la mitad difícil (2026-09-07).** El problema no
   era solo que las rutas fueran absolutas: Playwright escribe en directorios llamados
   `inventory-inventory-invent-6da45-products-by-price-ascending-chromium-problem`, así que ni
