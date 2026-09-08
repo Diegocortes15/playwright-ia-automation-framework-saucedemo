@@ -582,7 +582,9 @@ de valor.
 
 ### Bloque E — Presentación / portfolio (paralelo, no bloqueante)
 
-19. TL;DR de 3-4 bullets al tope del README
+19. ~~TL;DR de 3-4 bullets al tope del README~~ — **HECHO (2026-09-08).** Cuatro bullets antes
+    de la imagen. **Reemplazan** al párrafo que había debajo, que decía lo mismo más flojo, en
+    vez de sumarse a él.
 20. GIF/screencast (~20s) del flujo `/from-issue` SW-11 → PR abierto
 21. Sección "Failure modes & mitigations" en README, anticipando
     preguntas duras de entrevista:
@@ -590,10 +592,19 @@ de valor.
     - ¿Qué pasa cuando el LLM alucina un selector o AC?
     - ¿Cuánto cuesta correr `/from-issue` por ticket en tokens?
     - ¿Si Qase se cae o cambian de TCMS?
-22. Primeras agent metrics aunque sean manuales (ej. "de 8 PRs
-    generados con `/from-issue`, 6 pasaron review sin cambios")
-23. Párrafo "why Skills instead of MCP server" para mostrar madurez
-    de decisión
+22. ~~Primeras agent metrics~~ — **HECHO (2026-09-08), y el número del plan estaba inventado.**
+    Decía "de 8 PRs, 6 pasaron review sin cambios". Medido: **14 PRs de `/from-issue` mergeados,
+    11 aterrizaron tal como se generaron**. Los otros tres necesitaron un commit cada uno —
+    extraer un componente, sacar un condicional de un test, y ajustar un locator a match exacto.
+    Va con las dos advertencias que lo mantienen honesto: **un solo reviewer**, y un cambio
+    enmendado sobre el commit original sería invisible para esta cuenta.
+23. ~~Párrafo "why Skills instead of MCP server"~~ — **HECHO (2026-09-08), con el título
+    corregido.** "Skills en vez de MCP" describía mal lo que este proyecto hace: **usa** un MCP
+    (Atlassian) y **rechaza** otro (GitHub). La sección enuncia la regla que estaba repartida
+    entre ADR-0006, 0007 y 0011 sin que ningún lado la dijera junta — CLI cuando ya existe una
+    buena y autenticada, MCP cuando no la hay y OAuth evita un secreto en el repo, y la skill
+    para el flujo que orquesta ambos. Incluye lo que **costó**: un MCP es una conexión que se
+    cae, y se cayó.
 24. Considerar renombrar repo "ia" → "ai" para consistencia con inglés
 25. Post corto en LinkedIn/dev.to explicando arquitectura
     authoring-vs-runtime para tracción de portfolio
