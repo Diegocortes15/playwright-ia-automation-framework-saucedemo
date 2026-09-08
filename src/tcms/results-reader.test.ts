@@ -187,3 +187,77 @@ test('skipped only when every project skipped', () => {
   expect(hit.status).toBe('skipped');
   expect(hit.failedProjects).toEqual([]);
 });
+
+// A flaky test as Playwright actually writes it under `retries`: attempt one failed,
+// attempt two passed. Reading attempt 0 reported this as a failure while the CI job
+// reported success — two records of the same run contradicting each other.
+const flakyReport = {
+  suites: [
+    {
+      specs: [
+        {
+          title: 'a test that flaked',
+          tests: [
+            {
+              projectName: 'chromium-standard',
+              results: [
+                { status: 'failed', steps: [{ title: 'Navigate to the inventory page' }] },
+                {
+                  status: 'passed',
+                  steps: [
+                    { title: 'Navigate to the inventory page' },
+                    { title: 'Read the product prices' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+test('a test that passed on retry is passed, not failed — the job says green and so does this', () => {
+  const hit = indexResults(flakyReport).get('a test that flaked');
+  expect(hit?.status).toBe('passed');
+  expect(hit?.failedProjects).toEqual([]);
+});
+
+test('...and it is named as flaky, so green does not mean nothing happened', () => {
+  const hit = indexResults(flakyReport).get('a test that flaked');
+  expect(hit?.flakyProjects).toEqual(['chromium-standard']);
+});
+
+test('steps come from the last attempt, which is the only complete one', () => {
+  // A failed first attempt stops partway through its steps.
+  const hit = indexResults(flakyReport).get('a test that flaked');
+  expect(hit?.steps).toEqual(['Navigate to the inventory page', 'Read the product prices']);
+});
+
+test('a test that failed every attempt is still failed, and is not called flaky', () => {
+  const hopeless = {
+    suites: [
+      {
+        specs: [
+          {
+            title: 'a test that never passed',
+            tests: [
+              {
+                projectName: 'chromium-standard',
+                results: [
+                  { status: 'failed', steps: [] },
+                  { status: 'failed', steps: [] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const hit = indexResults(hopeless).get('a test that never passed');
+  expect(hit?.status).toBe('failed');
+  expect(hit?.flakyProjects).toEqual([]);
+  expect(hit?.failedProjects).toEqual(['chromium-standard']);
+});

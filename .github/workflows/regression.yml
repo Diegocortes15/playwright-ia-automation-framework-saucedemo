@@ -113,6 +113,13 @@ jobs:
           CI: 'true'
         run: npm run qase:${{ needs.gate.outputs.suite }}
 
+      # The scheduled full suite is where a flake is likeliest to appear — far more tests than
+      # the PR gate, which runs only what changed. It never fails the job; `retries: 2` already
+      # decided a flake is not a failure. It just stops one from passing unseen.
+      - name: Report flaky tests
+        if: ${{ always() }}
+        run: npm run flaky
+
       # Runtime observations (ADR-0021) — things the app did that no test asserted on.
       # Uploaded, never committed: a nightly commit-back would churn main every day.
       - name: Upload observations (always)

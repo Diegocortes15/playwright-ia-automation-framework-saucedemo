@@ -231,6 +231,7 @@ At merge, CI creates/updates/archives Qase **cases** (suite tree `feature › co
 | `npm run typecheck`                              | `tsc --noEmit` (strict)                                    |
 | `npm run lint` / `lint:fix`                      | ESLint (`--max-warnings 0`) / with autofix                 |
 | `npm run lint:docs` / `lint:adr`                 | Documented commands actually run / config agrees with ADRs |
+| `npm run flaky`                                  | Name any test that passed only on retry (never fails)      |
 | `npm run format` / `format:check`                | Prettier write / check                                     |
 | `npm run qase:smoke` / `qase:regression`         | Run a scope **and** record a labeled Qase run              |
 | `npm run tcms:sync` / `tcms:run`                 | Sync the Qase catalog / record an ad-hoc Qase run          |
