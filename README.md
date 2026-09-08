@@ -10,13 +10,86 @@
 
 ![overview](docs/images/hero.png)
 
-The framework is **code-first and AI-extended**. Tests are plain, fast, deterministic Playwright + TypeScript — nothing exotic at runtime. The "AI" part is the _authoring_ layer: a set of custom [Claude Code](https://claude.ai/code) skills read a Jira ticket, generate Page-Object-backed tests, run them, and open a GitHub PR — optionally mirroring each test into a [Qase](https://qase.io) TCMS so non-technical reviewers can browse human-readable cases. A human reviews and merges; CI keeps everything honest.
+The framework is **code-first and AI-extended**. At runtime it is plain, fast, deterministic Playwright + TypeScript — nothing exotic. The "AI" lives in the _authoring_ layer: [Claude Code](https://claude.ai/code) skills read a Jira ticket, generate Page-Object-backed tests, run them, and open a GitHub PR. A human reviews and merges; CI keeps everything honest.
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo.git
+cd playwright-ia-automation-framework-saucedemo
+npm install
+npx playwright install chromium
+cp .env.example .env          # saucedemo defaults work out of the box
+npm test
+```
+
+**83 tests, ~24 seconds.** The tests need nothing else — no Claude Code, no Jira, no Qase account. The AI-authoring layer is additive and entirely optional.
+
+Node **22.x** is enforced rather than suggested: `.nvmrc`, an `engines` field and `engine-strict=true` mean `npm install` refuses another major instead of warning.
+
+---
+
+## See it work — a five-minute demo
+
+Everything here runs locally against the public app. Good for showing someone what the framework does without reading any code.
+
+### 1. A run where failing is the correct outcome
+
+```bash
+npx playwright test --project=chromium-problem
+```
+
+```
+✘ problem_user sorts products by name descending
+✘ problem_user sorts products by price ascending
+✓ problem_user sees one identical broken image for every product
+
+4 passed (3.7s)
+```
+
+**Two tests failed and the suite is green.** They are locked to a real, open defect with `test.fail()`, so they assert the _correct_ behaviour while the bug is open. The day it is fixed, the run reports **"Expected to fail, but passed."** and someone has to come remove the marker — the suite notifies you instead of relying on memory ([ADR-0024](docs/adr/0024-blocked-test-lands-as-expected-failure.md)).
+
+### 2. Why it failed, in a sentence a non-engineer can read
+
+```bash
+npm run report
+```
+
+Click either failing test → **Annotations**. Every generated test carries its Jira links, the acceptance criterion it covers, and — when it is locked to a defect — a plain-language explanation:
+
+> **known defect** · SW-14 — the inventory sort dropdown discards the selection for problem_user: the `<select>`'s own value reverts to `az`, so neither the active label nor the product order ever changes. This test asserts the correct behaviour and is expected to fail while the defect is open, so the suite stays green. The day it is fixed the run reports "Expected to fail, but passed." — remove the `test.fail()` marker in that same pull request.
+
+### 3. What the app did that no test asserted on
+
+```bash
+npm run observations
+```
+
+Every run records console errors, uncaught exceptions, failed requests and native dialogs, then renders them as prose — **network and console without opening devtools**:
+
+```
+**0 not yet reviewed · 14 reviewed.**
+
+#### ⚠️ failed request (third party) (reviewed)
+The page asked a third-party service for `POST https://events.backtrace.io/…` and got
+back **401** — the request was rejected as unauthorised.
+```
+
+Observations **never fail a test** — the fixture records, it never judges ([ADR-0021](docs/adr/0021-runtime-observations.md)). Triage is human and durable: mark an entry `ignored` with a note and it stays quiet across runs.
+
+### 4. The full picture — DOM, network, console, step by step
+
+`trace: 'on'` means **every** test has a trace, not just failures. In the HTML report, click a test → **Traces** for an inline timeline with DOM snapshots at every action.
+
+### 5. Turn a failure into a bug report draft
+
+With Claude Code: **`/report-bug`**. It assembles repro steps, the acceptance criterion the test traces to, expected vs. actual, correlated observations, and copies the screenshot, video and trace into one attachable folder. **It files nothing** — you read the draft and decide.
 
 ---
 
 ## How it works — the pipeline
-
-The whole system, top-down: a ticket goes in one end, a reviewed-and-mirrored test comes out the other.
 
 ```mermaid
 flowchart LR
@@ -28,80 +101,41 @@ flowchart LR
     M -->|"CI: full suite<br/>+ catalog sync"| Q["Qase TCMS<br/>(human-readable cases)"]
 ```
 
-1. **`/refine-ticket`** hardens a Jira ticket's acceptance criteria against a "bulletproof" rubric (grounded in the existing automation + app docs) and writes the refined ACs back to Jira — so the next step has nothing to guess.
-2. **`/from-issue`** reads the refined ticket through the **Atlassian MCP**, generates tests + Page Objects (scaffolding new ones via `/scaffold-page-object`, verifying selectors live via `playwright-cli`), runs them, writes a committed TCMS record, and opens a **GitHub PR**.
-3. **CI on the PR** runs **only the spec files that PR changed** + a **typecheck + strict-lint gate** — fast, focused feedback.
+1. **`/refine-ticket`** hardens a ticket's acceptance criteria against a rubric and writes them back to Jira — so the next step has nothing to guess.
+2. **`/from-issue`** reads the ticket through the **Atlassian MCP**, generates tests + Page Objects, runs them, writes a committed TCMS record, and opens a **PR**. It **never opens a red PR**: on failure it diagnoses and retries up to three times, and if the _app_ is what contradicts the criterion, it reports and opens nothing ([ADR-0020](docs/adr/0020-no-red-pr.md)).
+3. **CI on the PR** runs only the specs that PR changed, behind a typecheck + strict-lint gate.
 4. **A human reviews and merges** — the PR is the review gate.
-5. **CI on merge** runs the **full suite**, **syncs the catalog to Qase**, and commits the refreshed id map back — so the mirror stays accurate with zero manual steps.
+5. **CI on merge** runs the full suite, syncs the catalog to Qase, and commits the refreshed id map back.
 
 ---
 
-## Highlights
+## The skills
 
-- 🎫 **Ticket-to-PR automation** — `/from-issue SW-123` turns a Jira story into a passing, reviewed Playwright PR.
-- 🧩 **Composed Page Objects** — strict Page Object + Component model (`Header`, `Footer`, `CartBadge`, `BurgerMenu`) with enforced composition rules.
-- 🔐 **Data-driven auth matrix** — Playwright projects derive from a single `AUTH_USERS` array; the toolchain grows the matrix one user at a time, only as tickets need it.
-- 🗂️ **Opt-in TCMS mirror** — one-way code→[Qase](https://qase.io) sync at merge: human-readable cases with steps, per-case Jira provenance, and an auto-maintained id map.
-- ⚡ **Smart CI** — PRs run only their changed specs; merges run the full suite; a typecheck + `--max-warnings 0` lint gate blocks regressions before they land.
-- 📣 **Scheduled & notified** — an every-other-day smoke and a biweekly regression run themselves, each recording a Qase run and posting the result (with duration + environment) to Slack.
-- 🌐 **Config-driven** — base URL, credentials, and TCMS settings come from env; point it at a different app without touching code.
-- 📚 **Documented decisions** — every architectural choice is an ADR; the AI rules live in [`CLAUDE.md`](CLAUDE.md).
+Five [Claude Code skills](.claude/skills/) — four written here, one vendored from `@playwright/cli`.
 
----
+| Skill                       | What it does                                                                    | Writes to      |
+| --------------------------- | ------------------------------------------------------------------------------- | -------------- |
+| **`/refine-ticket`**        | Hardens a ticket's ACs, writes them back. ([guide](docs/refine-ticket.md))      | Jira           |
+| **`/from-issue`**           | Ticket → tests → PR, never red. ([guide](docs/from-issue.md))                   | Repo + PR      |
+| **`/scaffold-page-object`** | Draft Page Object from a live snapshot. ([guide](docs/scaffold-page-object.md)) | Repo           |
+| **`/report-bug`**           | A failed run → a bug-report draft with evidence. **Files nothing.**             | — (draft only) |
+| **`playwright-cli`**        | Drives a real browser to verify selectors. ([guide](docs/playwright-cli.md))    | — (read-only)  |
 
-## Tech stack
+`/from-issue` is the conductor: it calls `/scaffold-page-object` when a Page Object is missing, uses `playwright-cli` to confirm selectors against the live DOM, and grows the auth matrix when a ticket needs an unwired user.
 
-| Area           | Choice                                                          |
-| -------------- | --------------------------------------------------------------- |
-| Runtime / lang | Node 22 · TypeScript 5.9 (strict)                               |
-| Test runner    | Playwright 1.59 (`@playwright/test`)                            |
-| Quality gates  | ESLint v9 flat config + `eslint-plugin-playwright` · Prettier 3 |
-| CI/CD          | GitHub Actions (change gate + scheduled runs) · Slack alerts    |
-| TCMS           | Qase (REST, behind a swappable seam)                            |
-| Ticket source  | Jira (via the Atlassian MCP)                                    |
-| AI authoring   | Claude Code custom skills + `@playwright/cli`                   |
-
----
-
-## The AI-assisted workflow (skills)
-
-The authoring layer is four composable [Claude Code skills](.claude/skills/). They build on each other top-down:
-
-| Skill                       | What it does                                                                                                                     | Writes to        |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| **`/refine-ticket`**        | Hardens a Jira ticket's ACs against a rubric; writes the refined criteria back. ([guide](docs/refine-ticket.md))                 | Jira             |
-| **`/from-issue`**           | Reads a ticket → generates tests + Page Objects → runs them → opens a GitHub PR (+ a TCMS record). ([guide](docs/from-issue.md)) | Repo + GitHub PR |
-| **`/scaffold-page-object`** | Generates a draft Page Object from a live page snapshot, composing detected components. ([guide](docs/scaffold-page-object.md))  | Repo             |
-| **`playwright-cli`**        | Drives a real browser to discover/verify selectors and read the rendered DOM before authoring. ([guide](docs/playwright-cli.md)) | — (read-only)    |
+**How it reaches the outside world:** tickets come from **Jira via the Atlassian MCP** — never `gh issue` ([ADR-0011](docs/adr/)) — while every GitHub action runs through the **`gh` CLI**, with deliberately **no** GitHub MCP ([ADR-0007](docs/adr/)). Only `/refine-ticket` writes to Jira ([ADR-0013](docs/adr/)). Qase is written one-way at merge; Slack receives scheduled-run outcomes.
 
 ![refined Jira ticket](docs/images/jira-ticket.png)
 
-`/from-issue` is the conductor: it calls `/scaffold-page-object` when a Page Object doesn't exist yet, uses `playwright-cli` to confirm selectors, grows the auth harness when a ticket needs an unwired user, and surfaces every assumption it made in the PR body for the reviewer.
-
-> **📋 See a real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request from this repo. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, the **⚠️ Assumptions** the agent flagged for review, and the verification results — exactly what a reviewer reads before merging.
+> **📋 A real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, and the **⚠️ Assumptions** the agent flagged for review.
 
 ![generated-pr](docs/images/from-issue-pr.png)
 
 ---
 
-## Integrations — how the agent reaches the outside world
-
-The AI-authoring layer talks to four external systems. Each connection choice is a documented ADR — notably, tickets come from **Jira via the Atlassian MCP** (not `gh issue`), while all **GitHub** actions run through the **`gh` CLI** (not a GitHub MCP server).
-
-| System                    | Connected via                  | Direction       | Notes                                                                                                                                                 |
-| ------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Jira** — tickets        | **Atlassian MCP**              | read + write¹   | The single source of tickets: `/from-issue SW-123` reads the ticket (project `SW`) through the MCP, never `gh issue`. ([ADR-0011](docs/adr/))         |
-| **GitHub** — PRs/runs/API | **`gh` CLI** (authenticated)   | read + write    | Every GitHub op — open the PR, read workflow runs, arbitrary REST — runs through `gh`. We deliberately run **no** GitHub MCP. ([ADR-0007](docs/adr/)) |
-| **Qase** — TCMS           | REST (behind a swappable seam) | write (one-way) | Code→Qase mirror at merge + labeled `qase:*` runs. ([docs/tcms.md](docs/tcms.md))                                                                     |
-| **Slack** — notifications | Incoming webhook               | write           | Scheduled/on-demand run outcomes (see [Continuous integration](#continuous-integration)).                                                             |
-
-¹ Only **`/refine-ticket`** writes back to Jira (the hardened acceptance criteria — [ADR-0013](docs/adr/)); every other skill reads Jira only. The `@playwright/cli` skill also drives a real browser locally to discover/verify selectors, but that's a dev tool, not an external service.
-
----
-
 ## Architecture
 
-Strict, one-directional composition: **tests know Pages; Pages compose Components; Components hold Locators.** Tests never touch a raw Locator.
+Strict one-directional composition: **tests know Pages; Pages compose Components; Components hold Locators.** Tests never touch a raw Locator.
 
 ```mermaid
 flowchart TD
@@ -124,141 +158,52 @@ flowchart TD
     Pages -.->|"page-direct locators"| Loc
 ```
 
-**Key ideas:**
+- **The rules are enforced, not suggested** — Pages never return Pages, queries return data (never a `Locator`), nesting depth ≤ 2, no XPath, no `waitForTimeout`. ESLint fails the build on the checkable ones. Full list in [`CLAUDE.md`](CLAUDE.md) and [`docs/architecture.md`](docs/architecture.md).
+- **Data-driven projects** — `playwright.config.ts` derives every project from `tests/users.ts` `AUTH_USERS` (`['standard', 'problem']` today). Each user yields `setup-<user>` + `chromium-<user>`, plus `chromium-no-auth`. New users wire in on demand ([ADR-0014](docs/adr/)); cross-browser is a separate deliberate decision ([ADR-0004](docs/adr/)).
+- **Tags route tests to projects** — `@no-auth`, `@standard`, `@problem`, `@all-users`, `@smoke`. They live in the `{ tag }` option, never in the title ([ADR-0015](docs/adr/)) — a lint rule enforces it.
 
-- **Composition rules are enforced** — e.g. Pages never return other Pages, queries return data (never `Locator`), component nesting depth ≤ 2. The full list is in [`CLAUDE.md`](CLAUDE.md) and [`docs/architecture.md`](docs/architecture.md).
-- **Fixtures inject ready Page Objects** — specs `import { test, expect } from '@fixtures/test'` and receive `loginPage`, `inventoryPage`, … pre-wired.
-- **Data-driven projects** — `playwright.config.ts` derives its projects from `tests/users.ts` `AUTH_USERS` (`['standard', 'problem']` today). Each user yields a `setup-<user>` (storageState) + `chromium-<user>` project, plus `chromium-no-auth`. New users wire in on demand; cross-browser is a deliberate separate decision ([ADR-0004](docs/adr/)).
-- **Role tags route tests to projects** — `@no-auth`, `@standard`, `@problem`, `@all-users`, `@smoke` (see the tag table in [`CLAUDE.md`](CLAUDE.md)).
-
-**Coverage so far:** login · inventory (content + sort) · footer · cart · checkout (information → overview → complete) · logout · burger menu.
-
----
-
-## TCMS mirror (Qase)
-
-An **opt-in, one-way** mirror so non-technical reviewers can browse human-readable cases. Off unless `QASE_*` is configured.
-
-- **At merge**, CI runs `tcms:sync` — it creates/updates/archives Qase **cases** (suite tree `feature › context › bucket`, steps from `test.step`, expected result = the ticket's AC text, per-case Jira provenance) and commits the refreshed `qase-map.json` (the test→case id index) back to the branch. **No run is created** — merges stay noise-free.
-- **Runs are explicit** — `npm run qase:smoke` / `qase:regression` execute a scope _and_ record a labeled Qase run; `tcms:run` records an ad-hoc run from the last results.
-- **Swappable** — `src/tcms/qase-client.ts` is the only Qase-aware file; it implements a tool-agnostic seam, so Xray/Zephyr/etc. is a sibling client. Full design in [`docs/tcms.md`](docs/tcms.md).
-
-![qase board](docs/images/qase-board.png)
+**Coverage:** login · inventory (content + sort) · product detail · footer · cart · checkout (information → overview → complete) · logout · burger menu.
 
 ---
 
 ## Continuous integration
 
-Two workflows: **[`test.yml`](.github/workflows/test.yml)** gates every change; **[`regression.yml`](.github/workflows/regression.yml)** runs scheduled and on-demand suites.
+| Workflow                                             | Trigger                                     | What runs                                                                   |
+| ---------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| [`test.yml`](.github/workflows/test.yml)             | Pull request                                | typecheck + lint (`--max-warnings 0`) → **only the specs the PR changed**   |
+| [`test.yml`](.github/workflows/test.yml)             | Push to `main`                              | typecheck + lint → **full suite** → Qase sync → commit refreshed `qase-map` |
+| [`regression.yml`](.github/workflows/regression.yml) | smoke every other day · regression biweekly | the scope + a labeled Qase run + an HTML report + a Slack message           |
+| [`regression.yml`](.github/workflows/regression.yml) | Actions → **Run workflow**                  | smoke _or_ full, on demand                                                  |
 
-### `test.yml` — the change gate
+"Changed specs only" is a deliberate choice over Playwright's `--only-changed`, which follows the import graph and re-runs the world when a shared fixture changes; the full suite on merge is the real integration gate. Each scheduled run posts pass/fail counts, duration, environment, and links to the Qase run and the report artifact.
 
-| Event              | What runs                                                                                     | Why                                              |
-| ------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Pull request**   | typecheck + lint (`--max-warnings 0`) → **only the spec files the PR changed**                | Fast, focused feedback; scales to large suites   |
-| **Push to `main`** | typecheck + lint → **full suite** → Qase catalog sync → auto-commit refreshed `qase-map.json` | A complete gate + an always-accurate TCMS mirror |
+**What's captured when:**
 
-The "changed specs only" selection is a deliberate choice over Playwright's `--only-changed` (which follows the import graph and re-runs the world when a shared fixture changes) — the full suite on merge is the real integration gate.
-
-### `regression.yml` — scheduled + on-demand
-
-Runs the full suite or a `@smoke` scope, records a **labeled Qase run**, uploads the HTML report, and **posts the result to Slack**.
-
-| Trigger                    | Cadence                                               | Suite           |
-| -------------------------- | ----------------------------------------------------- | --------------- |
-| **Scheduled — smoke**      | every other day · 00:00 Bogotá (midnight)             | `@smoke`        |
-| **Scheduled — regression** | biweekly · Sun 23:00 Bogotá (the night before Monday) | full suite      |
-| **On demand**              | Actions → **Run workflow** → pick the suite           | smoke _or_ full |
-
-Each run posts a **Slack** message carrying the outcome (**pass/fail + counts**), the **run duration**, the **environment** it executed on, a **Qase run** link, the **GitHub run** link (→ report artifact), and an **automated-vs-manual + who-triggered** identifier. One workflow serves both cadences plus manual runs, distinguished by `github.event.schedule`; scheduling times are Bogotá (UTC−5) and the biweekly regression runs the night before so it's ready to read Monday morning.
-
----
-
-## Reports & debugging
-
-Every run produces a self-contained **HTML report** (`playwright-report/`) and, because `trace: 'on'`, a **trace** for _every_ test — so the [Trace Viewer](https://playwright.dev/docs/trace-viewer) (a full timeline: actions, DOM snapshots, network, console) is available for any test, not just failures. Screenshots and video are additionally captured **on failure**.
-
-### Locally
-
-```bash
-npm test                 # runs + writes playwright-report/ and per-test traces
-npm run report           # open the HTML report in a browser
-```
-
-In the report, click a test → **Traces** to open the trace viewer inline. Or open a trace file directly:
-
-```bash
-npx playwright show-trace test-results/<test-dir>/trace.zip
-```
-
-### From CI (GitHub Actions)
-
-The report is uploaded as an artifact on **every** run (pass or fail), so you can inspect any run:
-
-1. Open the workflow run → **Summary** → **Artifacts** → download **`playwright-report`**.
-2. Unzip it, then serve it locally (the traces are bundled inside, so the viewer works too):
-
-```bash
-npx playwright show-report ./playwright-report
-```
-
-### What's captured when
-
-| Artifact    | When       | Config (`playwright.config.ts`) |
+| Artifact    | When       | Config                          |
 | ----------- | ---------- | ------------------------------- |
 | Trace       | every test | `trace: 'on'`                   |
 | Screenshot  | on failure | `screenshot: 'only-on-failure'` |
 | Video       | on failure | `video: 'retain-on-failure'`    |
 | HTML report | every run  | `reporter: [['html', …]]`       |
 
-Each report's header also records **how long the run took** and the **environment it executed on** — OS · Chromium · Node · Playwright — via `metadata` in `playwright.config.ts`. It's the same environment line the Slack notification and the Qase run description carry, sourced once (no browser launch) from [`src/utils/run-environment.ts`](src/utils/run-environment.ts).
-
-> `trace: 'on'` makes the trace viewer available everywhere at the cost of larger artifacts + slightly slower runs — a deliberate trade for always-on debuggability. Switch to `retain-on-failure` if that ever becomes heavy.
->
-> _Optional next step:_ the CI report is a downloadable artifact, not a hosted link. To get a clickable per-run report URL, publish `playwright-report/` to GitHub Pages.
+`trace: 'on'` buys always-on debuggability at the cost of larger artifacts — a deliberate trade. From CI, download the **`playwright-report`** artifact and run `npx playwright show-report ./playwright-report`; the traces are bundled inside.
 
 ---
 
-## Getting started
+## TCMS mirror (Qase)
 
-### Prerequisites
+**Opt-in and one-way**, so non-technical reviewers can browse human-readable cases. Off unless `QASE_*` is configured.
 
-- Node.js **22.x** · `git` · ~300 MB free disk for the Chromium browser
+At merge, CI creates/updates/archives Qase **cases** (suite tree `feature › context › bucket`, steps from `test.step`, expected result = the ticket's AC text) and commits the refreshed id map. **No run is created** — merges stay noise-free. Runs are explicit: `npm run qase:smoke` / `qase:regression`. `src/tcms/qase-client.ts` is the only Qase-aware file, so Xray/Zephyr is a sibling client. Design in [`docs/tcms.md`](docs/tcms.md).
 
-`22.x` is enforced, not suggested: `.nvmrc`, an `engines` field, and `engine-strict=true` in `.npmrc` mean `npm install` refuses to run on another major rather than warning. Both CI workflows pin the same version.
-
-### Install & run
-
-```bash
-git clone https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo.git
-cd playwright-ia-automation-framework-saucedemo
-npm install
-npx playwright install chromium
-cp .env.example .env          # baseURL + password (saucedemo defaults work out of the box)
-npm test                      # full suite, green in ~under a minute
-```
-
-> The AI-authoring workflow (the `/from-issue` etc. skills) additionally requires Claude Code, the Atlassian MCP connected, and `gh` authenticated. The tests themselves need none of that.
-
-### Optional: validating the skills
-
-Only needed if you're **editing a skill**. [ADR-0019](docs/adr/0019-skill-portability.md) rests on one invariant — no markdown link inside a skill resolves outside it — and this is the whole check:
-
-```bash
-grep -rn "](\.\./\|](/\|](docs/\|](src/\|](tests/\|](data/" .claude/skills/
-```
-
-**No output means clean.** It catches both failure modes: a link escaping the repo, and a skill pointing at a sibling skill's file. Verified by injecting one of each — and on the current tree it returns nothing, with no false positives to explain away.
-
-Run it before handing a skill to anyone. It is deliberately manual rather than a CI gate; ADR-0019's alternatives record why, and name the scale at which that would change.
-
-**`skill-validator` was evaluated and dropped (2026-09-07).** [It](https://github.com/agent-ecosystem/skill-validator) is a healthy MIT project from an independent community org, and its `check` runs fully locally — the objection was not safety. It is that installing it wants `brew trust` on a third-party tap, and it ships two false positives this repo had to document, while the one-line `grep` above finds the same defects with none. ADR-0019 had already reached that conclusion in prose (_"all findable with `grep`"_); this only stopped pointing at a tool nobody had installed. Its token accounting is the part worth coming back for, if a skill ever needs to be shrunk.
-
-For which skills actually get used and what they cost in context, Claude Code ships [`/skill-doctor`](https://code.claude.com/docs/en/skills) (v2.1.252+). It measures observed usage — a different question from whether a skill is well-formed, and the two do not overlap.
+![qase board](docs/images/qase-board.png)
 
 ---
 
-## npm scripts
+## Reference
+
+<details>
+<summary><strong>npm scripts</strong></summary>
 
 | Script                                           | What it does                                               |
 | ------------------------------------------------ | ---------------------------------------------------------- |
@@ -266,17 +211,20 @@ For which skills actually get used and what they cost in context, Claude Code sh
 | `npm run test:standard`                          | Only `chromium-standard` (fast local iteration)            |
 | `npm run test:smoke` / `test:regression`         | `@smoke`-tagged tests / the full suite (run-only, no TCMS) |
 | `npm run test:debug` / `test:headed` / `test:ui` | Standard project under Inspector / headed / UI mode        |
-| `npm run test:unit`                              | Browserless unit tests for the TCMS modules                |
-| `npm run report` / `codegen`                     | Open the last HTML report / Playwright codegen             |
+| `npm run test:unit`                              | Browserless unit tests for the TCMS + observation modules  |
+| `npm run report` / `observations`                | Open the HTML report / render the observations digest      |
+| `npm run codegen`                                | Playwright codegen                                         |
 | `npm run typecheck`                              | `tsc --noEmit` (strict)                                    |
 | `npm run lint` / `lint:fix`                      | ESLint (`--max-warnings 0`) / with autofix                 |
+| `npm run lint:docs` / `lint:adr`                 | Documented commands actually run / config agrees with ADRs |
 | `npm run format` / `format:check`                | Prettier write / check                                     |
 | `npm run qase:smoke` / `qase:regression`         | Run a scope **and** record a labeled Qase run              |
 | `npm run tcms:sync` / `tcms:run`                 | Sync the Qase catalog / record an ad-hoc Qase run          |
 
----
+</details>
 
-## Project structure
+<details>
+<summary><strong>Project structure</strong></summary>
 
 ```
 .
@@ -284,21 +232,24 @@ For which skills actually get used and what they cost in context, Claude Code sh
 │   ├── pages/          # Page Objects (LoginPage, InventoryPage, CartPage, checkout/*)
 │   ├── components/     # Reusable components (Header, Footer, CartBadge, BurgerMenu)
 │   ├── fixtures/       # Playwright fixture — injects Page Objects into tests
+│   ├── observations/   # Runtime observation capture, dedup index and digest
 │   ├── tcms/           # Qase TCMS mirror (seam, case-mapper, sync, client)
 │   └── utils/          # env config (single process.env read point) + logger
-├── data/               # Reference data (shared/products.json) + typed loaders (@data/*)
+├── data/               # Reference data + typed loaders (@data/*)
 ├── tests/              # Specs (one folder per feature) + auth.setup.ts + users.ts
 ├── auth/               # Generated storageState (git-ignored)
-├── .claude/skills/     # AI authoring skills (from-issue, refine-ticket, scaffold-page-object, playwright-cli)
-├── docs/               # architecture, app/, adr/, skill guides, tcms, superpowers/
+├── scripts/            # Repo-level checks (documented commands, ADR invariants)
+├── .claude/skills/     # AI authoring skills
+├── docs/               # architecture, app/, adr/, skill guides, tcms
 └── .github/workflows/  # GitHub Actions CI
 ```
 
----
+</details>
 
-## Configuration
+<details>
+<summary><strong>Configuration</strong></summary>
 
-All environment config flows through `src/utils/env.ts` (the single `process.env` read point). Copy `.env.example` → `.env`:
+All environment config flows through `src/utils/env.ts` — the single `process.env` read point. Copy `.env.example` → `.env`:
 
 | Variable             | Required | Purpose                                                  |
 | -------------------- | -------- | -------------------------------------------------------- |
@@ -310,17 +261,33 @@ All environment config flows through `src/utils/env.ts` (the single `process.env
 
 In CI these are GitHub Actions secrets.
 
+</details>
+
+<details>
+<summary><strong>Editing a skill</strong></summary>
+
+[ADR-0019](docs/adr/0019-skill-portability.md) rests on one invariant — no markdown link inside a skill resolves outside it — and this is the whole check:
+
+```bash
+grep -rn "](\.\./\|](/\|](docs/\|](src/\|](tests/\|](data/" .claude/skills/
+```
+
+No output means clean. It catches both failure modes (a link escaping the repo, and a skill pointing at a sibling skill's file) and returns nothing on the current tree. Deliberately manual rather than a CI gate; ADR-0019 records why, and names the scale that would change it.
+
+For what each skill costs in context, Claude Code ships [`/skill-doctor`](https://code.claude.com/docs/en/skills) — observed usage, a different question from whether a skill is well-formed.
+
+</details>
+
 ---
 
 ## Documentation
 
-| File                                             | Purpose                                             |
-| ------------------------------------------------ | --------------------------------------------------- |
-| [`CLAUDE.md`](CLAUDE.md)                         | AI rules — auto-loaded by Claude Code               |
-| [`docs/architecture.md`](docs/architecture.md)   | Framework structure, composition rules, conventions |
-| [`docs/from-issue.md`](docs/from-issue.md)       | The ticket-to-PR skill, in depth                    |
-| [`docs/refine-ticket.md`](docs/refine-ticket.md) | The ticket-hardening skill                          |
-| [`docs/tcms.md`](docs/tcms.md)                   | The Qase TCMS mirror design                         |
-| [`docs/app/`](docs/app/)                         | About the app under test (saucedemo users + flows)  |
-| [`docs/adr/`](docs/adr/)                         | Architecture Decision Records (numbered)            |
-| [`docs/runbook.md`](docs/runbook.md)             | Operational runbook                                 |
+| File                                             | Purpose                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                         | AI rules — auto-loaded by Claude Code                          |
+| [`docs/architecture.md`](docs/architecture.md)   | Framework structure, composition rules, conventions            |
+| [`docs/from-issue.md`](docs/from-issue.md)       | The ticket-to-PR skill, in depth                               |
+| [`docs/refine-ticket.md`](docs/refine-ticket.md) | The ticket-hardening skill                                     |
+| [`docs/tcms.md`](docs/tcms.md)                   | The Qase TCMS mirror design                                    |
+| [`docs/app/`](docs/app/)                         | The app under test — every claim names the test that proves it |
+| [`docs/adr/`](docs/adr/)                         | Architecture Decision Records — start at its README            |
