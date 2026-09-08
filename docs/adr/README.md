@@ -54,11 +54,11 @@ Records written before 2026-09-07 predate `Confidence` and `Review by`. **They a
 
 |                                   | Count  |
 | --------------------------------- | ------ |
-| Total records                     | **26** |
-| Superseding / scoping / extending | 8      |
+| Total records                     | **27** |
+| Superseding / scoping / extending | 9      |
 | **Originating decisions**         | **18** |
 
-Eighteen is inside the range; twenty-six is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-seventh, which is exactly what nobody could do before this file existed.
+Eighteen is inside the range; twenty-seven is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-eighth, which is exactly what nobody could do before this file existed. ADR-0027 was the twenty-seventh, and it moved the superseding count rather than the originating one: it replaced a record that had been `Accepted` and false for four months.
 
 ## Index
 
@@ -67,7 +67,7 @@ Eighteen is inside the range; twenty-six is not. Keep the table current when you
 | 0001 | Page Object Model by Component                                |                        |
 | 0002 | Multi-user via Playwright Projects + storageState + role tags |                        |
 | 0003 | Hybrid data layout with typed loaders                         |                        |
-| 0004 | Cross-browser smoke pattern (deferred)                        |                        |
+| 0004 | Cross-browser smoke pattern                                   | superseded by 0027     |
 | 0005 | ESM import attributes for JSON                                | **Superseded by 0023** |
 | 0006 | Playwright CLI for AI application inspection                  |                        |
 | 0007 | gh CLI for GitHub operations (no GitHub MCP)                  |                        |
@@ -90,6 +90,7 @@ Eighteen is inside the range; twenty-six is not. Keep the table current when you
 | 0024 | A blocked test lands as `test.fail()`, on human approval      | extends 0020           |
 | 0025 | Component signatures reconcile in both directions             | scopes 0008            |
 | 0026 | A file-sourced run produces no artifacts                      | scopes 0016 / 0017     |
+| 0027 | Cross-browser is implemented, and opt-in                      | supersedes 0004        |
 
 ---
 

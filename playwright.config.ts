@@ -9,9 +9,32 @@ const env = runEnvironment();
 
 // Clean-room config (e2e-jira-from-issues), data-driven from tests/users.ts
 // (Phase H / ADR-0014). Projects derive from AUTH_USERS, which /from-issue grows
-// one user at a time as tickets require authenticated pages. Cross-browser
-// (firefox/webkit-standard) remains a separate ADR-0004 decision. @sort-functional is dormant:
+// one user at a time as tickets require authenticated pages. @sort-functional is dormant:
 // nothing greps it, so it routes to no project — see docs/architecture.md before reviving it.
+
+// Cross-browser is present but OPT-IN (ADR-0027, superseding ADR-0004). Firefox and WebKit
+// projects only enter the list when asked for, so `npm test` stays chromium and stays fast;
+// choosing when to pay for another engine is a project's call, not the framework's.
+//
+// Asked for = the CROSS_BROWSER env var, and ONLY that. An earlier version also sniffed
+// `process.argv` for a --project naming an engine, so the bare command would work without the
+// flag. It does not: Playwright re-evaluates this config inside every worker process, and a
+// worker's argv does not carry the parent's --project. The projects therefore existed in the
+// main process, listed correctly, started running, and then every test died with
+// `Project "firefox-no-auth" not found in the worker process`. An env var propagates to
+// workers; argv does not. Use the npm scripts, which set it for you.
+//
+// Only the standard user goes cross-browser, per the guardrail ADR-0004 established and this
+// record keeps: engine differences live in OUR interaction code, not in saucedemo's per-user
+// bugs, so re-running problem_user on three engines buys nothing. Both of its contexts are
+// mirrored, though — a smoke run on Firefox that omitted `@no-auth` would omit logging in,
+// which is the single most valuable thing to check on another engine.
+const crossBrowserRequested = process.env.CROSS_BROWSER === '1';
+
+const CROSS_BROWSERS = [
+  { engine: 'firefox', device: 'Desktop Firefox' },
+  { engine: 'webkit', device: 'Desktop Safari' },
+] as const;
 
 export default defineConfig({
   testDir: './tests',
@@ -77,5 +100,25 @@ export default defineConfig({
         storageState: `auth/${user}.json`,
       },
     })),
+
+    // Opt-in only. Absent from the list entirely unless requested, so they cost nothing —
+    // not a run, not a listing, not a line of report — when nobody asks.
+    ...(crossBrowserRequested
+      ? CROSS_BROWSERS.flatMap(({ engine, device }) => [
+          {
+            name: `${engine}-no-auth`,
+            testIgnore: /.*\.setup\.ts/,
+            grep: /@no-auth/,
+            use: { ...devices[device] },
+          },
+          {
+            name: `${engine}-standard`,
+            testIgnore: /.*\.setup\.ts/,
+            grep: /@all-users|@standard/,
+            dependencies: ['setup-standard'],
+            use: { ...devices[device], storageState: 'auth/standard.json' },
+          },
+        ])
+      : []),
   ],
 });

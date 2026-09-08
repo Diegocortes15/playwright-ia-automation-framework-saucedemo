@@ -42,6 +42,16 @@ export class InventoryPage {
   async goto(): Promise<void> {
     await test.step('Navigate to the inventory page', async () => {
       await this.page.goto('/inventory.html');
+      // `page.goto` resolves on the document, not on the client-rendered product list, and ten
+      // tests in this feature read a list on the very next line. On chromium the render always
+      // won that race. WebKit did not: one full run in five failed "every product price is
+      // formatted with a leading dollar sign" against a short list, and the same test passed
+      // every time in isolation — the signature of a race, not a bug in the assertion.
+      //
+      // Waiting here fixes all ten at once and makes readiness a property of the page rather
+      // than a discipline each test has to remember. Not a fixed sleep: this is Playwright's
+      // own auto-waiting, so it costs nothing once the list is up.
+      await this.productNames.first().waitFor({ state: 'visible' });
     });
   }
 

@@ -29,6 +29,18 @@ npm test
 
 Node **22.x** is enforced rather than suggested: `.nvmrc`, an `engines` field and `engine-strict=true` mean `npm install` refuses another major instead of warning.
 
+**Another engine, when you want one.** Cross-browser is implemented and **opt-in** ([ADR-0027](docs/adr/0027-cross-browser-opt-in.md)) — `npm test` never pays for it:
+
+```bash
+npx playwright install firefox webkit    # ~175 MB, once
+npm run test:firefox                     # the standard user on Gecko
+npm run test:cross -- --grep "@smoke"    # both engines, smoke only — 9 tests, ~11s
+```
+
+The full standard suite passes on both: **79 tests on Firefox (~45s), 79 on WebKit (~31s)**, against 83 on chromium in ~25s. Only the standard user goes cross-browser — engine differences live in the framework's interaction code, not in saucedemo's per-user bugs.
+
+Its first real use paid for itself: WebKit exposed a race in `InventoryPage.goto()` that chromium had always won, and the fix landed with it ([ADR-0027](docs/adr/0027-cross-browser-opt-in.md)).
+
 ---
 
 ## See it work — a five-minute demo
@@ -212,6 +224,8 @@ At merge, CI creates/updates/archives Qase **cases** (suite tree `feature › co
 | `npm run test:smoke` / `test:regression`         | `@smoke`-tagged tests / the full suite (run-only, no TCMS) |
 | `npm run test:debug` / `test:headed` / `test:ui` | Standard project under Inspector / headed / UI mode        |
 | `npm run test:unit`                              | Browserless unit tests for the TCMS + observation modules  |
+| `npm run test:firefox` / `test:webkit`           | The standard user on another engine (opt-in, ADR-0027)     |
+| `npm run test:cross`                             | Both engines at once; add `-- --grep "@smoke"` for a scope |
 | `npm run report` / `observations`                | Open the HTML report / render the observations digest      |
 | `npm run codegen`                                | Playwright codegen                                         |
 | `npm run typecheck`                              | `tsc --noEmit` (strict)                                    |

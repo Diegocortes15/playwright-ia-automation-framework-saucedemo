@@ -642,8 +642,34 @@ producen manualmente".
 
 ### Otras mejoras al framework (post piso base)
 
-- **Cross-browser** (ADR-0004 diferido) — estructura de projects
-  data-driven ya lista para absorberlo sin refactor grande
+- [x] ~~**Cross-browser**~~ — **IMPLEMENTADO Y OPT-IN (2026-09-08, ADR-0027 supersede ADR-0004).**
+      El ítem decía "ADR-0004 diferido", pero ADR-0004 no difería nada: decía **Accepted** y su
+      Decisión mandaba agregar `firefox-standard` y `webkit-standard`. Nunca se implementaron, y
+      `CLAUDE.md`, este roadmap y ADR-0014 lo citaban los tres como la razón de que el cross-browser
+      **quedara afuera** — o sea, todos lo leían al revés de lo que decía. Cuatro meses en `Accepted`
+      siendo falso, más que los tres y medio de ADR-0005 que el README de ADRs cuenta como escarmiento.
+
+  Ahora: `npm test` sigue siendo chromium, y `CROSS_BROWSER=1` suma cuatro proyectos
+  (`firefox-no-auth`, `firefox-standard`, `webkit-no-auth`, `webkit-standard`) vía
+  `npm run test:firefox` / `test:webkit` / `test:cross`, con cualquier scope encima
+  (`-- --grep "@smoke"` da 9 tests en ~11 s). **La suite pasa entera en los dos motores** —
+  79 en Firefox (~45 s), 79 en WebKit (~31 s) — pregunta que estuvo abierta cuatro meses.
+
+  **Y en su primer uso real se pagó solo.** Una corrida de WebKit de cada cinco falló
+  `every product price is formatted with a leading dollar sign` contra una lista corta, mientras
+  el mismo test pasaba siempre en aislamiento. `InventoryPage.goto()` volvía apenas cargaba el
+  documento y diez tests de esa feature leen una lista en la línea siguiente: chromium venía
+  ganando esa carrera desde siempre. La espera ahora vive en el Page Object.
+
+  **Los siete Page Objects tienen la misma forma** —`goto()` navega y vuelve sin esperar nada—.
+  Solo se arregló `InventoryPage`, el único que falló de verdad; los demás nunca corrieron fuera
+  de chromium, así que "todavía no flakeó" es evidencia débil, no ausencia de problema. Ojo con
+  `LoginPage`: su variante `goto(path)` la usan los tests de route-guard que **esperan** el
+  redirect, así que una espera ingenua ahí rompería. Disparador: la próxima página que flakee.
+
+  El guardarraíl de ADR-0004 sobrevive y es la parte que todos citaban: **solo el usuario
+  estándar**, nunca una matriz por-usuario-por-browser.
+
 - **Feedback loop de flakiness** — tool/skill que analice históricos
   de Qase runs, detecte selectores flaky, y advierta a `/from-issue`
   durante autoría
