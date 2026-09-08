@@ -141,7 +141,7 @@ test('a flaky case is recorded as passed, with the retry named in the comment', 
     ],
   };
 
-  const { results, flaky } = selectResults(flakyReport, map);
+  const { results } = selectResults(flakyReport, map);
   // Status agrees with the CI job, which exits 0 on a flake. The nuance rides in the comment
   // rather than being invented as a Qase status that does not exist.
   expect(results).toContainEqual({
@@ -149,35 +149,6 @@ test('a flaky case is recorded as passed, with the retry named in the comment', 
     status: 'passed',
     comment: 'flaky — needed a retry on: no-auth',
   });
-  expect(flaky).toEqual(['standard_user logs in']);
-});
-
-test('a flake is reported even when its test has no Qase case — the mirror is opt-in', () => {
-  const unmappedFlake = {
-    suites: [
-      {
-        specs: [
-          {
-            title: 'a brand-new test not in the map',
-            tests: [
-              {
-                projectName: 'standard',
-                results: [
-                  { status: 'failed', steps: [] },
-                  { status: 'passed', steps: [] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-
-  const { results, skipped, flaky } = selectResults(unmappedFlake, map);
-  expect(results).toHaveLength(0);
-  expect(skipped).toEqual(['a brand-new test not in the map']);
-  expect(flaky).toEqual(['a brand-new test not in the map']);
 });
 
 test('failing on one project and flaking on another says both', () => {

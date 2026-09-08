@@ -24,14 +24,12 @@ function titleIndex(map: QaseMap): Map<string, number> {
 export function selectResults(
   report: unknown,
   map: QaseMap,
-): { results: CaseResult[]; skipped: string[]; flaky: string[] } {
+): { results: CaseResult[]; skipped: string[] } {
   const byTitle = titleIndex(map);
   const results: CaseResult[] = [];
   const skipped: string[] = [];
-  const flaky: string[] = [];
   for (const [normTitle, hit] of indexResults(report)) {
     if (normTitle.startsWith(SETUP_PREFIX)) continue; // skip auth.setup steps (not real cases)
-    if (hit.flakyProjects.length) flaky.push(normTitle);
     const caseId = byTitle.get(normTitle);
     if (caseId === undefined) {
       skipped.push(normTitle);
@@ -48,9 +46,7 @@ export function selectResults(
       comment: notes.length ? notes.join(' · ') : undefined,
     });
   }
-  // A flake is tracked even when its test has no Qase case: the point is that somebody sees
-  // it, and the mirror is opt-in.
-  return { results, skipped, flaky };
+  return { results, skipped };
 }
 
 // Pure: the run title. With a label (e.g. SMOKE / REGRESSION) → "<LABEL> — <when>";
@@ -134,14 +130,7 @@ export async function recordRun(label?: string): Promise<void> {
   }
   const report = JSON.parse(readFileSync('test-results/results.json', 'utf-8'));
   const map = loadMap('qase-map.json');
-  const { results, skipped, flaky } = selectResults(report, map);
-  // Reported first, and reported even when nothing else is: Playwright exits 0 on a flake, so
-  // a green run can carry one silently. This is the only place it surfaces. Deliberately above
-  // the early return below — a flake matters whether or not its test has a Qase case.
-  if (flaky.length) {
-    console.log(color(`${flaky.length} flaky test(s) — passed only on retry:`, AMBER));
-    for (const title of flaky) console.log(color(`  ${title}`, AMBER));
-  }
+  const { results, skipped } = selectResults(report, map);
   if (results.length === 0) {
     console.log('No matching Qase cases for this run. Run `npm run tcms:sync` to refresh the map.');
     if (skipped.length) console.log(color(`Not in Qase: ${skipped.join('; ')}`, AMBER));

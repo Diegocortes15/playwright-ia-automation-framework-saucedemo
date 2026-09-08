@@ -99,14 +99,6 @@ jobs:
           CI: 'true'
         run: npm test
 
-      # `retries: 2` means a flaky test does not fail this job — Playwright exits 0 and the run
-      # is green. Nothing read that before, so a test could fail and then pass and leave no
-      # trace anyone would see. This never fails the build; it raises a warning annotation on
-      # the run summary. `always()` so it still reports when the suite itself went red.
-      - name: Report flaky tests
-        if: ${{ always() }}
-        run: npm run flaky
-
       # Catalog sync at merge (push only): create/update/archive Qase cases. No run.
       - name: Sync test cases to Qase (merge only)
         if: ${{ always() && github.event_name == 'push' }}

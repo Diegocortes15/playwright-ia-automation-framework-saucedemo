@@ -696,14 +696,25 @@ producen manualmente".
 
   La causa: `results-reader` leía `results[0]`, el **primer** intento, que en un flake es el que
   falló. Ahora manda el **último** intento —que además es el único con los steps completos—, el
-  estado coincide con el job, y el hecho de que necesitó un reintento viaja en el comentario en
-  vez de inventar un estado que Qase no tiene. `npm run flaky` lo nombra, y corre en los dos
-  workflows con `always()`: nunca rompe el build, porque un gate que vuelve rojo un flake enseña
-  a re-correr hasta que pase, que es peor que el silencio.
+  estado coincide con el job, y el hecho de que necesitó un reintento viaja en el comentario del
+  caso en vez de inventar un estado que Qase no tiene.
 
-  **Queda abierto con disparador:** una caza de flakes por repetición (`correr N veces y decir
-qué no fue estable`). Es el método que encontró el de WebKit — pero lo hice con un `for` de
-  bash y alcanzó. Construirlo cuando el `for` empiece a molestar.
+  **Eso es todo lo que se construyó, y es a propósito.** Se llegó a escribir un reporter
+  (`npm run flaky` más steps en los dos workflows) que nombraba cualquier test que solo pasó al
+  reintentar. Se **descartó antes de mergear**: habría impreso _"no test needed a retry"_
+  doscientas veces, porque en 200 corridas no hubo ninguno, y el único flake que este proyecto
+  vio en su vida apareció **local y en WebKit**, motor que CI no corre.
+
+  Vale dejar escrito el sesgo, no solo la conclusión: el ítem original resultó hueco, y **hay una
+  presión real a construir _algo_ igual para no volver con las manos vacías**. Parte de ese
+  reporter salió de ahí, no de la evidencia. El arreglo del lector sí salió de la evidencia.
+
+  **Dos cosas quedan abiertas con disparador:**
+  - **El reporter**, el día que `test:cross` entre a CI (ADR-0027 nombra ese disparador): ahí los
+    flakes pasan de hipotéticos a probables, y una corrida programada de la suite completa que
+    nadie mira es donde uno se escondería.
+  - **La caza por repetición** (correr N veces y decir qué no fue estable). Es el método que
+    encontró el de WebKit, pero se hizo con un `for` de bash y alcanzó. Cuando el `for` moleste.
 
 - **Métricas del agente** — dashboard o skill que mida % de PRs
   generados por `/from-issue` que pasan review sin cambios
