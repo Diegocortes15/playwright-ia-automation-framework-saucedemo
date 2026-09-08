@@ -665,7 +665,12 @@ producen manualmente".
   Solo se arregló `InventoryPage`, el único que falló de verdad; los demás nunca corrieron fuera
   de chromium, así que "todavía no flakeó" es evidencia débil, no ausencia de problema. Ojo con
   `LoginPage`: su variante `goto(path)` la usan los tests de route-guard que **esperan** el
-  redirect, así que una espera ingenua ahí rompería. Disparador: la próxima página que flakee.
+  redirect, así que una espera ingenua ahí rompería.
+
+  **Disparador: la próxima página que flakee — y se anuncia sola.** El 2026-09-08 se evaluó
+  salir a cazarlas corriendo la suite en repetición y **se descartó**: Playwright ya marca
+  `flaky` nativamente, Slack ya imprime el conteo en la regresión programada, y el reporte lo
+  filtra con un chip. No hace falta buscar lo que el sistema reporta solo.
 
   El guardarraíl de ADR-0004 sobrevive y es la parte que todos citaban: **solo el usuario
   estándar**, nunca una matriz por-usuario-por-browser.
@@ -713,8 +718,25 @@ producen manualmente".
   - **El reporter**, el día que `test:cross` entre a CI (ADR-0027 nombra ese disparador): ahí los
     flakes pasan de hipotéticos a probables, y una corrida programada de la suite completa que
     nadie mira es donde uno se escondería.
-  - **La caza por repetición** (correr N veces y decir qué no fue estable). Es el método que
-    encontró el de WebKit, pero se hizo con un `for` de bash y alcanzó. Cuando el `for` moleste.
+  - ~~**La caza por repetición**~~ — **DESCARTADA (2026-09-08).** Era correr la suite
+    cross-browser N veces para ver si los otros seis Page Objects arrastran la carrera que
+    WebKit destapó en `InventoryPage`.
+
+    Se descarta porque **la detección ya existe y funciona**, cosa que quedó clara recorriendo
+    el pipeline entero: Playwright marca `flaky` de forma nativa (`test.status`, más el contador
+    `stats.flaky`), el mensaje de Slack de la regresión programada ya imprime `⚠️ N flaky`
+    cuando es mayor a cero, el reporte HTML los filtra con un chip propio, y desde #76 el
+    registro en Qase dice la verdad en vez de reportar `failed` sobre un test que pasó.
+
+    Con eso en pie, cazar flakes hipotéticos corriendo la suite diez veces es trabajo
+    especulativo: **si uno de esos seis flakea, se anuncia solo.** El disparador deja de ser
+    "salir a buscarlo" y pasa a ser "atenderlo cuando aparezca", que es como funciona en un
+    proyecto real con historia.
+
+    Queda en pie el matiz honesto: el argumento original para arreglar solo `InventoryPage`
+    —"los demás no fallaron todavía"— sigue siendo débil, porque nunca corrieron fuera de
+    chromium. Lo que lo vuelve aceptable no es el argumento, es que **la instrumentación
+    convierte el silencio en una señal confiable**.
 
 - **Métricas del agente** — dashboard o skill que mida % de PRs
   generados por `/from-issue` que pasan review sin cambios
