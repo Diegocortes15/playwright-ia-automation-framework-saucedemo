@@ -63,7 +63,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE console failure",
@@ -82,7 +82,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE from a failing test",
@@ -101,7 +101,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "Sorting is broken! This error has been reported to Backtrace.",
@@ -119,9 +119,9 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/cart.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 1,
+      "count": 3,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -143,7 +143,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -162,9 +162,9 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/checkout-step-one.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 1,
+      "count": 10,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -186,7 +186,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -205,17 +205,17 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 3,
+      "count": 47,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "product detail page shows the selected product name, description and price",
-        "project": "chromium-standard"
+        "test": "direct access to /inventory.html while logged out is blocked with an error",
+        "project": "chromium-no-auth"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
@@ -234,7 +234,7 @@
       "thirdParty": true,
       "count": 7,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
@@ -257,7 +257,7 @@
       "thirdParty": true,
       "count": 7,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
@@ -280,7 +280,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-07",
+      "lastSeen": "2026-09-08",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE uncaught failure",
