@@ -670,9 +670,52 @@ producen manualmente".
   El guardarraíl de ADR-0004 sobrevive y es la parte que todos citaban: **solo el usuario
   estándar**, nunca una matriz por-usuario-por-browser.
 
-- **Feedback loop de flakiness** — tool/skill que analice históricos
-  de Qase runs, detecte selectores flaky, y advierta a `/from-issue`
-  durante autoría
+- [x] ~~**Feedback loop de flakiness**~~ — **el ítem como estaba escrito se descartó
+      (2026-09-08); lo que había debajo era otra cosa, y esa sí se arregló.**
+
+  Decía: analizar históricos de Qase runs, detectar selectores flaky y avisarle a `/from-issue`
+  durante la autoría. Tres razones, cada una medida:
+  1. **No hay datos.** Cero tests flaky en **200 corridas de CI** (184 verdes, 1 falla, 14
+     canceladas).
+  2. **Fuente equivocada.** CI en un PR corre **solo los specs que cambiaron**, y solo chromium
+     — estructuralmente el lugar donde menos probable es ver un flake. El único flake real que
+     tenemos apareció **local, en WebKit**, que CI no corre nunca.
+  3. **Diagnóstico equivocado.** Ese flake no era un selector: era una espera faltante después
+     de navegar (`InventoryPage.goto()`, ADR-0027). Un detector de "selectores flaky" no lo
+     habría encontrado.
+
+  **Lo que sí era real, y estaba peor de lo que parecía.** `grep flaky` sobre todo el repo daba
+  **cero**: con `retries: 2` en CI, un test flaky pasa el job en silencio. Y verificado con un
+  probe contra el código real, los dos registros se contradecían:
+
+  |                     | Qué decía                               |
+  | ------------------- | --------------------------------------- |
+  | El job de CI        | **success** — flaky no rompe la corrida |
+  | El registro en Qase | **failed**, atribuido al proyecto       |
+  | Cualquier lado      | nunca la palabra "flaky"                |
+
+  La causa: `results-reader` leía `results[0]`, el **primer** intento, que en un flake es el que
+  falló. Ahora manda el **último** intento —que además es el único con los steps completos—, el
+  estado coincide con el job, y el hecho de que necesitó un reintento viaja en el comentario del
+  caso en vez de inventar un estado que Qase no tiene.
+
+  **Eso es todo lo que se construyó, y es a propósito.** Se llegó a escribir un reporter
+  (`npm run flaky` más steps en los dos workflows) que nombraba cualquier test que solo pasó al
+  reintentar. Se **descartó antes de mergear**: habría impreso _"no test needed a retry"_
+  doscientas veces, porque en 200 corridas no hubo ninguno, y el único flake que este proyecto
+  vio en su vida apareció **local y en WebKit**, motor que CI no corre.
+
+  Vale dejar escrito el sesgo, no solo la conclusión: el ítem original resultó hueco, y **hay una
+  presión real a construir _algo_ igual para no volver con las manos vacías**. Parte de ese
+  reporter salió de ahí, no de la evidencia. El arreglo del lector sí salió de la evidencia.
+
+  **Dos cosas quedan abiertas con disparador:**
+  - **El reporter**, el día que `test:cross` entre a CI (ADR-0027 nombra ese disparador): ahí los
+    flakes pasan de hipotéticos a probables, y una corrida programada de la suite completa que
+    nadie mira es donde uno se escondería.
+  - **La caza por repetición** (correr N veces y decir qué no fue estable). Es el método que
+    encontró el de WebKit, pero se hizo con un `for` de bash y alcanzó. Cuando el `for` moleste.
+
 - **Métricas del agente** — dashboard o skill que mida % de PRs
   generados por `/from-issue` que pasan review sin cambios
 - **MCP server propio del framework** — exponer catálogo

@@ -35,12 +35,15 @@ export function selectResults(
       skipped.push(normTitle);
       continue;
     }
+    // Both can be true at once: failed on one project, flaky on another.
+    const notes = [
+      hit.failedProjects.length ? `failed on: ${hit.failedProjects.join(', ')}` : '',
+      hit.flakyProjects.length ? `flaky — needed a retry on: ${hit.flakyProjects.join(', ')}` : '',
+    ].filter(Boolean);
     results.push({
       caseId,
       status: hit.status,
-      comment: hit.failedProjects.length
-        ? `failed on: ${hit.failedProjects.join(', ')}`
-        : undefined,
+      comment: notes.length ? notes.join(' · ') : undefined,
     });
   }
   return { results, skipped };

@@ -4,6 +4,12 @@ export interface IndexedResult {
   steps: string[];
   status: TcmsStatus;
   failedProjects: string[]; // project names where the test did not pass (for the run comment)
+  /**
+   * Projects where the test needed a retry to pass. Green, and not the same thing as green:
+   * Playwright exits 0 on a flake, so a run can be a success with something quietly wrong in
+   * it. Nothing in this project read that word before.
+   */
+  flakyProjects: string[];
 }
 
 const HOOK_TITLES = new Set(['Before Hooks', 'After Hooks', 'Worker Cleanup']);
@@ -39,11 +45,21 @@ export function indexResults(report: unknown): Map<string, IndexedResult> {
 function walk(suite: PwSuite, out: Map<string, IndexedResult>): void {
   for (const child of suite.suites ?? []) walk(child, out);
   for (const spec of suite.specs ?? []) {
-    const perProject = (spec.tests ?? []).map((t) => ({
-      project: t.projectName,
-      status: mapStatus(t.results?.[0]?.status),
-      steps: extractSteps(t.results?.[0]?.steps ?? []),
-    }));
+    const perProject = (spec.tests ?? []).map((t) => {
+      const attempts = t.results ?? [];
+      // The LAST attempt, not the first. With `retries: 2` on CI a flaky test's attempts are
+      // [failed, passed]: reading attempt 0 reported it as a failure to the TCMS while the CI
+      // job reported success, so the two records contradicted each other and neither said
+      // "flaky". The last attempt is also the one with complete steps — a failed first attempt
+      // stops partway through them.
+      const last = attempts[attempts.length - 1];
+      return {
+        project: t.projectName,
+        status: mapStatus(last?.status),
+        flaky: attempts.length > 1 && last?.status === 'passed',
+        steps: extractSteps(last?.steps ?? []),
+      };
+    });
     if (perProject.length === 0) continue;
     out.set(normalizeTitle(spec.title), aggregate(perProject));
   }
@@ -53,17 +69,24 @@ function walk(suite: PwSuite, out: Map<string, IndexedResult>): void {
 // passed only if every project passed; skipped only if every project skipped;
 // otherwise failed. Steps are identical across projects — take the first non-empty.
 function aggregate(
-  perProject: { project?: string; status: TcmsStatus; steps: string[] }[],
+  perProject: { project?: string; status: TcmsStatus; flaky: boolean; steps: string[] }[],
 ): IndexedResult {
-  const failedProjects = perProject
-    .filter((p) => p.status === 'failed')
-    .map((p) => p.project)
-    .filter((p): p is string => Boolean(p));
+  const named = (pick: (p: (typeof perProject)[number]) => boolean): string[] =>
+    perProject
+      .filter(pick)
+      .map((p) => p.project)
+      .filter((p): p is string => Boolean(p));
+
+  const failedProjects = named((p) => p.status === 'failed');
+  // A flake is recorded as passed, because it passed and the job agrees. The fact that it
+  // needed a retry rides in the comment instead of being invented as a status Qase has no
+  // word for.
+  const flakyProjects = named((p) => p.flaky);
   const allPassed = perProject.every((p) => p.status === 'passed');
   const allSkipped = perProject.every((p) => p.status === 'skipped');
   const status: TcmsStatus = allPassed ? 'passed' : allSkipped ? 'skipped' : 'failed';
   const steps = perProject.find((p) => p.steps.length > 0)?.steps ?? [];
-  return { steps, status, failedProjects };
+  return { steps, status, failedProjects, flakyProjects };
 }
 
 // PW 1.59 top-level steps are the test.step calls. Defensively drop hook entries

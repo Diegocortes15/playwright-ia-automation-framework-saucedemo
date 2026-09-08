@@ -118,3 +118,66 @@ test('triggerTag: empty locally, Automated for schedule, Manual (actor) for disp
     );
   }
 });
+
+test('a flaky case is recorded as passed, with the retry named in the comment', () => {
+  const flakyReport = {
+    suites: [
+      {
+        specs: [
+          {
+            title: 'standard_user logs in',
+            tests: [
+              {
+                projectName: 'no-auth',
+                results: [
+                  { status: 'failed', steps: [] },
+                  { status: 'passed', steps: [{ title: 'Submit' }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const { results } = selectResults(flakyReport, map);
+  // Status agrees with the CI job, which exits 0 on a flake. The nuance rides in the comment
+  // rather than being invented as a Qase status that does not exist.
+  expect(results).toContainEqual({
+    caseId: 17,
+    status: 'passed',
+    comment: 'flaky — needed a retry on: no-auth',
+  });
+});
+
+test('failing on one project and flaking on another says both', () => {
+  const both = {
+    suites: [
+      {
+        specs: [
+          {
+            title: 'footer shows the copyright',
+            tests: [
+              { projectName: 'chromium-standard', results: [{ status: 'failed', steps: [] }] },
+              {
+                projectName: 'webkit-standard',
+                results: [
+                  { status: 'failed', steps: [] },
+                  { status: 'passed', steps: [] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const { results } = selectResults(both, map);
+  expect(results).toContainEqual({
+    caseId: 9,
+    status: 'failed',
+    comment: 'failed on: chromium-standard · flaky — needed a retry on: webkit-standard',
+  });
+});
