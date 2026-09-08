@@ -584,12 +584,24 @@ de valor.
 
 19. TL;DR de 3-4 bullets al tope del README
 20. GIF/screencast (~20s) del flujo `/from-issue` SW-11 → PR abierto
-21. Sección "Failure modes & mitigations" en README, anticipando
-    preguntas duras de entrevista:
+21. ~~Sección "Failure modes & mitigations" en README~~ — **HECHO (2026-09-08), pero en
+    `docs/failure-modes.md`, no en el README.** Meterle 85 líneas al README contradiría el
+    recorte de #71, que lo bajó justamente porque daba pereza; va enlazado desde el índice.
+    Contesta las cuatro preguntas de abajo **y** agrega la mitad que las hace creíbles: los
+    siete modos de falla que este proyecto vivió de verdad, con cuánto tardaron en notarse y
+    qué los agarra ahora. Seis de los siete eran documentación derivando de la realidad, no
+    defectos de código.
+
+    Reglas que se siguieron: todo afirmado está verificado, y **lo que no tiene mitigación se
+    lista igual**. El costo en tokens quedó declarado como **no medido** en vez de estimado.
+    Escribirlo corrigió una afirmación del propio README —decía que `qase-client.ts` era el
+    único archivo que sabe de Qase; son **once**, aunque las llamadas HTTP sí están en uno—.
+    Las preguntas originales eran:
     - ¿Cómo escala a app real, no saucedemo?
     - ¿Qué pasa cuando el LLM alucina un selector o AC?
     - ¿Cuánto cuesta correr `/from-issue` por ticket en tokens?
     - ¿Si Qase se cae o cambian de TCMS?
+
 22. Primeras agent metrics aunque sean manuales (ej. "de 8 PRs
     generados con `/from-issue`, 6 pasaron review sin cambios")
 23. Párrafo "why Skills instead of MCP server" para mostrar madurez
