@@ -326,16 +326,52 @@ detectado contradice el plan, mencionarlo explícitamente.
 Bloques secuenciales dentro de cada uno. El bloque E puede ir en
 paralelo cuando se apruebe explícitamente.
 
+> **Cómo leer los bloques A–E.** El texto de cada ítem es el plan original y **no se
+> reescribe** — es el registro de lo que se pensó. Lo que cambia es el marcador al frente,
+> para que el estado se lea en el ítem mismo en vez de estar enterrado en otra sección:
+>
+> - **[HECHO]** — se ejecutó; el blockquote debajo dice qué salió
+> - **[CERRADO]** — no había trigger; la condición que lo activaba no se cumplió
+> - **[DESCARTADO]** — se evaluó y se decidió no hacerlo, con la razón debajo
+> - **[REDUCIDO]** — sobrevive, pero más chico que como estaba escrito
+> - sin marcador — **abierto de verdad**
+>
+> Normalizado el 2026-09-08. Antes había ítems que se leían abiertos mientras su descarte
+> vivía tres secciones más abajo, y eso manda a la próxima sesión a perseguir fantasmas.
+
 ### Bloque A — Piso base de skills (obligatorio, en orden)
 
-1. Instalar `skills validator` (agent skills verifier command,
+1. **[DESCARTADO]** Instalar `skills validator` (agent skills verifier command,
    vía `uv` → investigar comando exacto al arranque) y correr
    sobre las 4 skills
-2. Correr `claude --debug` en el repo para detectar errores
+
+   > **DESCARTADO (2026-09-08)** — el comando exacto nunca se identificó ("investigar
+   > al arranque"), y la clase de herramienta sí se evaluó: `skill-validator` se probó
+   > y se descartó porque instalarlo pide `brew trust` sobre un tap de terceros y trae
+   > dos falsos positivos, mientras un `grep` de una línea encuentra lo mismo con cero.
+   > Ese `grep` es hoy el chequeo, documentado en README.md.
+
+2. **[HECHO]** Correr `claude --debug` en el repo para detectar errores
    silenciosos de carga
-3. Auditar descriptions con foco en variaciones reales de cómo se
+
+   > **HECHO (2026-09-08)** — sin errores silenciosos. El log dice que carga las
+   > cinco skills del proyecto, y los `Failed to stat directory` que aparecen son
+   > de directorios opcionales inexistentes, ninguno nuestro.
+   >
+   > Detalle de método: `claude --debug -p` **no** imprime el log; hay que usar
+   > `--debug-file` con stdin redirigido. De paso quedó verificado que el MCP de
+   > Atlassian conecta en 840 ms.
+
+3. **[HECHO]** Auditar descriptions con foco en variaciones reales de cómo se
    pediría cada skill (testear con 3-4 variaciones cada una)
-4. Agregar `allowed-tools` a:
+
+   > **HECHO (2026-09-08)** — las cinco tienen `name` y `description` no vacías, todas
+   > muy por debajo del límite de 1024. Lo que salió: `playwright-cli` tiene la más
+   > corta y vaga (11 palabras) y reclama terreno que en la práctica es de
+   > `/from-issue` o de `npm test`. No se arregla editándola —es la vendored, se
+   > regenera— y ya está compensado en `CLAUDE.md`, donde la regeneración no llega.
+
+4. **[REDUCIDO]** Agregar `allowed-tools` a:
    - `/playwright-cli` → Read/Grep/Glob/Bash únicamente
    - `/refine-ticket` → solo Jira MCP, no debería tocar repo
 
@@ -349,10 +385,10 @@ paralelo cuando se apruebe explícitamente.
    > agregarle Read/Grep/Glob, lo que **amplía** en vez de restringir.
    > El step se reduce a: revisar caso por caso, no ampliar por defecto.
 
-5. Correr `skill-audit` de dabit3 (https://github.com/dabit3/skill-audit)
+5. **[DESCARTADO]** Correr `skill-audit` de dabit3 (https://github.com/dabit3/skill-audit)
    baseline sobre las 4 skills y arreglar findings Critical+High
-6. Activar pre-commit hook local con `skill-audit`
-7. Activar gate en GitHub Actions CI con umbrales escalonados:
+6. **[DESCARTADO]** Activar pre-commit hook local con `skill-audit`
+7. **[DESCARTADO]** Activar gate en GitHub Actions CI con umbrales escalonados:
    - Critical+High → fail siempre desde día 1
    - Medium → warn 2-3 semanas, luego fail
    - Low → informativo permanente
@@ -370,6 +406,8 @@ paralelo cuando se apruebe explícitamente.
 > en un ejemplo marcado como credencial) o sugerencias que contradicen
 > ADR-0008 ("agregá una sección `## Usage`").
 >
+> >
+>
 > - **`skill-audit` (dabit3): descartado.** No lee `references/` (`readdirSync`
 >   no recursivo) → auditaba 516 de 4.177 líneas, el **12,4%**. Además
 >   concatena `SKILL.md` consigo mismo, así que duplica cada finding con
@@ -381,28 +419,27 @@ paralelo cuando se apruebe explícitamente.
 >   _(Revertido el 2026-09-07: descartado también como comando manual, porque un `grep`
 >   de una línea encuentra lo mismo sin sus dos falsos positivos y sin `brew trust`. El
 >   conteo de tokens sigue siendo lo único que no se reemplaza — ver el ítem tachado.)_
->
-> Un gate en CI para 4 archivos que cambian dos veces al año, en un repo de
-> un solo autor, es teatro de compliance. Para un cliente el valor está en
-> las agent metrics (item 22) y en "Failure modes" (item 21), no en un
-> linter de markdown.
+>   > Un gate en CI para 4 archivos que cambian dos veces al año, en un repo de
+>   > un solo autor, es teatro de compliance. Para un cliente el valor está en
+>   > las agent metrics (item 22) y en "Failure modes" (item 21), no en un
+>   > linter de markdown.
 
 > **Presupuesto de tokens medido (2026-09-04)** — la métrica que sí sirve,
 > y la prueba dura de que ADR-0008 funciona:
 >
-> | Skill                | `SKILL.md` (siempre en contexto) | Total con `references/` |
-> | -------------------- | -------------------------------- | ----------------------- |
-> | from-issue           | 808                              | 23.562                  |
-> | playwright-cli       | 2.623                            | 13.704                  |
-> | scaffold-page-object | 346                              | 4.149                   |
-> | refine-ticket        | 635                              | 3.969                   |
-> | **Total**            | **4.412**                        | **45.384**              |
->
-> 4.412 tokens cargan siempre; 41.000 cargan bajo demanda.
+> > | Skill                | `SKILL.md` (siempre en contexto) | Total con `references/` |
+> > | -------------------- | -------------------------------- | ----------------------- |
+> > | from-issue           | 808                              | 23.562                  |
+> > | playwright-cli       | 2.623                            | 13.704                  |
+> > | scaffold-page-object | 346                              | 4.149                   |
+> > | refine-ticket        | 635                              | 3.969                   |
+> > | **Total**            | **4.412**                        | **45.384**              |
+> >
+> > 4.412 tokens cargan siempre; 41.000 cargan bajo demanda.
 
 ### Bloque B — Mejoras de contenido a skills
 
-8. Si `/from-issue/SKILL.md` pasa las 500 líneas: factorizar a
+8. **[CERRADO]** Si `/from-issue/SKILL.md` pasa las 500 líneas: factorizar a
    `from-issue/references/` (pr-body-template.md, assumptions-rubric.md,
    ac-coverage-mapping.md, composition-rules.md) y
    `from-issue/scripts/` (preflight.sh, generate-pr-body.sh)
@@ -444,7 +481,7 @@ paralelo cuando se apruebe explícitamente.
       sin razón, no `console.log`, no adjetivos ambiguos ("robust",
       "fast", "friendly")
     - Patrón EARS obligatorio para AC
-12. Auditar CLAUDE.md contra AGENTS.md — mover a `references/` lo
+12. **[CERRADO]** Auditar CLAUDE.md contra AGENTS.md — mover a `references/` lo
     que no aplique en 80% de conversaciones
 
     > **CERRADO (2026-09-04)** — sin candidatos: `CLAUDE.md` tiene
@@ -467,7 +504,7 @@ repite, no los tres de una.
 
 ### Bloque C — Nuevos mecanismos
 
-13. Evaluar hooks — 3 candidatos:
+13. **[CERRADO]** Evaluar hooks — 3 candidatos:
     - Hook on file save de tests/Page Objects: lint + typecheck
       automático
     - ~~Hook on tool call de `git commit` o `gh pr create`: bloquear
@@ -477,6 +514,14 @@ repite, no los tres de una.
       como gate de CI. Un hook sería una segunda verificación más débil
     - Hook on file save de `.claude/skills/*/SKILL.md`: validar
       frontmatter (description no vacía, ≤1024 chars, parseable)
+
+    > **CERRADO (2026-09-08)** — los tres candidatos cayeron. Dos ya tenían anotación
+    > inline (el lint cubre `.only()`/`.skip()`/xpath mejor que un hook). El tercero,
+    > validar el frontmatter de `SKILL.md`, se descartó por YAGNI con medición del mismo
+    > día: las cinco skills tienen `name` y `description` no vacías, muy por debajo del
+    > límite de 1024, así que el hook no guardaría nada. Mismo argumento con el que
+    > ADR-0019 rechazó su gate de CI. Disparador: que escriba skills alguien más.
+
 14. ~~**Probar Explore built-in subagent** antes de construir `/find-tests`~~ —
     **HECHO (2026-09-07). `/find-tests` DESCARTADO: Explore sacó 9/9.**
 
@@ -553,7 +598,7 @@ de valor.
     - Sin adjetivos ambiguos
     - Con al menos un Given/When/Then
     - Es el "cheap gate" pre-generación
-17. `/find-tests` custom SOLO si Explore built-in no cubrió el
+17. **[DESCARTADO]** `/find-tests` custom SOLO si Explore built-in no cubrió el
     pain point (step 14):
     - SKILL.md + references/ (coverage-map.md, conventions.md,
       examples.md) + scripts/ (find-test-by-keyword.sh,
@@ -561,7 +606,14 @@ de valor.
     - allowed-tools: Read/Grep/Glob/Bash
     - Beneficio adicional: coverage-map.md podría regenerarse
       automáticamente desde tests (documentación viva)
-18. `/plan-ticket` SOLO si `/from-issue` NO hace augment/enrich
+
+    > **DESCARTADO (2026-09-08)** — la condición se evaluó y no se cumple: Explore
+    > built-in sacó **9/9** en las tres preguntas del pain point, con la rúbrica
+    > congelada antes de leer las respuestas. Y no se reduce al subset previsto
+    > ("convenciones que Explore no conoce") porque no hubo tal subset: citó números
+    > de ADR, reglas de eslint y el registro companion de `.tcms/`. Ver el ítem 14.
+
+18. **[CERRADO]** `/plan-ticket` SOLO si `/from-issue` NO hace augment/enrich
     internamente (verificación en Fase 1.3):
     - Devuelve plan pre-ejecución
     - allowed-tools: Read + Atlassian MCP
