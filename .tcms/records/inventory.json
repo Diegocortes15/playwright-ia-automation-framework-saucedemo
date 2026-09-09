@@ -227,6 +227,54 @@
         "url": "https://diegocortes15.atlassian.net/browse/SW-14",
         "reason": "the inventory sort dropdown discards the selection for problem_user: the <select>'s own value reverts to az, so neither the active label nor the product order ever changes."
       }
+    },
+    {
+      "title": "error_user sorts products by name descending",
+      "acText": "Given error_user is authenticated on the inventory page, when they select \"Name (Z to A)\" from the sort dropdown, then the products are listed by name descending and the active sort label reads \"Name (Z to A)\".",
+      "user": "error_user",
+      "tags": ["@error"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "error_user",
+      "jira": [
+        {
+          "key": "SW-16",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-16"
+        },
+        {
+          "key": "SW-17",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-17"
+        }
+      ],
+      "expectedFailure": {
+        "key": "SW-17",
+        "url": "https://diegocortes15.atlassian.net/browse/SW-17",
+        "reason": "the inventory sort dropdown discards the selection for error_user: the active label stays \"Name (A to Z)\" whatever option is chosen, so the control never registers the click. Same symptom as SW-14 for problem_user, filed separately and likely one root cause."
+      }
+    },
+    {
+      "title": "error_user sorts products by price ascending",
+      "acText": "Given error_user is authenticated on the inventory page, when they select \"Price (low to high)\" from the sort dropdown, then the products are listed by price ascending and the active sort label reads \"Price (low to high)\".",
+      "user": "error_user",
+      "tags": ["@error"],
+      "bucket": "Positive",
+      "feature": "inventory",
+      "contextLabel": "error_user",
+      "jira": [
+        {
+          "key": "SW-16",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-16"
+        },
+        {
+          "key": "SW-17",
+          "url": "https://diegocortes15.atlassian.net/browse/SW-17"
+        }
+      ],
+      "expectedFailure": {
+        "key": "SW-17",
+        "url": "https://diegocortes15.atlassian.net/browse/SW-17",
+        "reason": "the inventory sort dropdown discards the selection for error_user: the active label stays \"Name (A to Z)\" whatever option is chosen, so the control never registers the click. Same symptom as SW-14 for problem_user, filed separately and likely one root cause."
+      }
     }
   ]
 }
