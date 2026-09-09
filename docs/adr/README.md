@@ -54,11 +54,11 @@ Records written before 2026-09-07 predate `Confidence` and `Review by`. **They a
 
 |                                   | Count  |
 | --------------------------------- | ------ |
-| Total records                     | **27** |
-| Superseding / scoping / extending | 9      |
+| Total records                     | **28** |
+| Superseding / scoping / extending | 10     |
 | **Originating decisions**         | **18** |
 
-Eighteen is inside the range; twenty-seven is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-eighth, which is exactly what nobody could do before this file existed. ADR-0027 was the twenty-seventh, and it moved the superseding count rather than the originating one: it replaced a record that had been `Accepted` and false for four months.
+Eighteen is inside the range; twenty-seven is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-eighth, which is exactly what nobody could do before this file existed. ADR-0027 was the twenty-seventh and ADR-0028 the twenty-eighth; both moved the superseding count rather than the originating one. 0027 replaced a record that had been `Accepted` and false for four months, and 0028 records that ADR-0013's `allowed-tools` guard does not reach a shell script.
 
 ## Index
 
@@ -91,6 +91,7 @@ Eighteen is inside the range; twenty-seven is not. Keep the table current when y
 | 0025 | Component signatures reconcile in both directions             | scopes 0008            |
 | 0026 | A file-sourced run produces no artifacts                      | scopes 0016 / 0017     |
 | 0027 | Cross-browser is implemented, and opt-in                      | supersedes 0004        |
+| 0028 | Evidence reaches a ticket via a script and an API token       | scopes 0013            |
 
 ---
 
