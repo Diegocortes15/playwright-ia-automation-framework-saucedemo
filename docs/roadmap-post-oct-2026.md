@@ -472,15 +472,33 @@ paralelo cuando se apruebe explícitamente.
     obligatorios encima de eso serían estructura que **ningún lint verifica y
     ningún reporte muestra** — decoración que se pudre igual que se pudrió
     `architecture.md`. Es el "teatro burocrático" del principio #5.
-11. Consolidar `AGENTS.md` como constitución del proyecto:
+11. **[DESCARTADO]** Consolidar `AGENTS.md` como constitución del proyecto:
     - Stack: Node 22, TS 5.9 strict, Playwright 1.59
     - Convenciones: Page Object strict, fixtures, role-tag routing
-      (@no-auth, @standard, @problem, @all-users, @smoke),
-      composición tests→pages→components→locators
+
+    > **DESCARTADO (2026-09-08).** El contenido que pedía ya está, y se verificó uno por
+    > uno: las convenciones y la tabla de tags en `CLAUDE.md`; las reglas prohibidas en el
+    > lint —xpath, `waitForTimeout` y también `.only()`, que dispara
+    > `playwright/no-focused-test` desde el config recomendado del plugin, comprobado
+    > inyectando uno—; EARS en el rubric de `/refine-ticket` (ítem 9); el stack en el
+    > README.
+    >
+    > **El argumento real por AGENTS.md nunca fue el contenido, era la portabilidad**:
+    > `CLAUDE.md` es específico de Claude Code y `agents.md` es una convención que otras
+    > herramientas leen. Se descarta porque **no hay una segunda herramienta a la cual ser
+    > portable**, y `CLAUDE.md` a 145 líneas está haciendo el trabajo.
+    > **Disparador:** que entre en uso un segundo agente que no lea `CLAUDE.md`.
+    >
+    > Un detalle honesto: de todo lo que proponía, lo único que **nada** cubre hoy es
+    > prohibir `console.log`. Es una regla de una línea (`no-console`) el día que aparezca
+    > el primero; no hay ninguno en el repo ahora.
+    > (@no-auth, @standard, @problem, @all-users, @smoke),
+    > composición tests→pages→components→locators
     - Reglas prohibidas: no xpath, no waitForTimeout, no `.only()`
       sin razón, no `console.log`, no adjetivos ambiguos ("robust",
       "fast", "friendly")
     - Patrón EARS obligatorio para AC
+
 12. **[CERRADO]** Auditar CLAUDE.md contra AGENTS.md — mover a `references/` lo
     que no aplique en 80% de conversaciones
 
@@ -593,11 +611,19 @@ repite, no los tres de una.
 Evaluar SOLO si el bloque C se completó y hay evidencia clara
 de valor.
 
-16. `/spec-review` — corre ANTES de `/from-issue`:
+16. **[DESCARTADO]** `/spec-review` — corre ANTES de `/from-issue`:
     - Verifica que los AC del ticket refinado sean EARS-válidos
     - Sin adjetivos ambiguos
     - Con al menos un Given/When/Then
     - Es el "cheap gate" pre-generación
+
+    > **DESCARTADO (2026-09-08)** — el puesto ya está ocupado. `/refine-ticket` corre antes
+    > de `/from-issue` por diseño, y su rubric **item 10 es literalmente "EARS shape"**,
+    > agregado al cerrar el ítem 9. Los otros dos chequeos que este ítem pedía —sin
+    > adjetivos ambiguos, al menos un Given/When/Then— también son del dominio de ese
+    > rubric. Una skill nueva duplicaría una que ya existe y ya está en la posición
+    > correcta del pipeline.
+
 17. **[DESCARTADO]** `/find-tests` custom SOLO si Explore built-in no cubrió el
     pain point (step 14):
     - SKILL.md + references/ (coverage-map.md, conventions.md,
