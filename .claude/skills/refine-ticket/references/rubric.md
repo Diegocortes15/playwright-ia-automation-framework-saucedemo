@@ -19,6 +19,21 @@ Score the **whole ticket** (Feature + every AC). Treat each AC independently for
 9. **Coverage (lightweight flag)** — does the AC overlap something already automated? Heuristic match of the AC's behavior against existing test titles + `tests/<feature>/` files. This is a **flag, not a blocker** ("AC2 looks already covered by `tests/login/login.spec.ts` — drop or confirm"). Degrades gracefully: nothing automated → never fires. (`/from-issue` still dedupes at generation time per ADR-0010; this surfaces it earlier, to the human.)
 10. **EARS shape** — each AC is written in EARS form: an explicit trigger, one system, one response. See the section below for the patterns and the phrasing rule. Gap → rewrite the AC in the pattern that fits. This is not decoration: the trigger keyword is what forces a precondition to be stated, and the single `shall` is what makes item 2 checkable rather than a matter of taste.
 
+11. **Intended or observed** — each AC makes clear whether it states what the system **should**
+    do or what it **currently** does. The distinction is not cosmetic: it decides what happens
+    when the test fails. An AC of intended behaviour that the app contradicts is a **finding** —
+    the ADR-0020 gate blocks the run and a person files the defect. An AC of observed behaviour
+    is characterization, and its test simply passes.
+
+    Both shapes exist in this project's coverage and produced opposite results: _"the products
+    are listed in descending alphabetical order"_ (intended → became `test.fail()` against a
+    filed bug) versus _"every product image collapses to the same broken placeholder instead of
+    a distinct image"_ (observed → passes). Gap → **ask the author which they mean.** A ticket
+    that reads as documentation when a requirement was intended produces a test that passes
+    while asserting the bug is correct, and nothing ever revisits it. This happened: SW-16 was
+    first written as characterization of a broken sort, which would have locked in the defect as
+    expected behaviour; rewritten as intended behaviour, it correctly blocked and produced SW-17.
+
 ## EARS — the shape an AC takes
 
 [EARS](https://alistairmavin.com/ears/) (Easy Approach to Requirements Syntax, Mavin et al., Rolls-Royce, 2009) constrains a requirement to a trigger, a system, and one response. Five patterns; the first two carry almost all the traffic here.
