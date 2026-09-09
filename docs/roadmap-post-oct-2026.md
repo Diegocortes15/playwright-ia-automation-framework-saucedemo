@@ -1134,7 +1134,26 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   cojo. Y hasta que no haya un segundo consumidor real, ADR-0026 sigue diciendo que un defecto
   presentado a mano no justifica escribir a un tracker.
 
-- **La evidencia no es compartible — resuelta la mitad difícil (2026-09-07).** El problema no
+- [x] ~~**La evidencia no es compartible**~~ — **cerrado el 2026-09-09, las dos mitades.**
+      `scripts/attach-evidence.sh` sube las carpetas de `bug-evidence/` a un ticket vía REST con
+      un API token, y ya se usó: **cuatro adjuntos verificados en SW-14 y SW-17**, leyendo los
+      tickets de vuelta. SW-14 llevaba tres días diciendo "attaching the files is manual" con la
+      evidencia en disco todo ese tiempo.
+
+      Lo que faltaba era solo mover el archivo, y costó tres verificaciones establecerlo: el MCP no
+      tiene herramienta de attachments, y `acli` tiene `attachment-list` y `attachment-delete` pero
+      **no upload** — esa asimetría es la que lo volvió conclusivo en vez de una sospecha sobre un
+      flag faltante. Queda REST, y es **la primera credencial de Jira del proyecto** (ADR-0028).
+
+      **Y el registro dice algo incómodo a propósito:** ADR-0013 restringe las escrituras a Jira a
+      `/refine-ticket` y lo hace cumplir con `allowed-tools`, que gobierna qué puede llamar una
+      *skill*. Un script con `curl` queda **fuera de ese mecanismo por completo**. No viola la
+      letra —su sujeto son las skills— pero el guard en el que se apoyaba alcanzaba solo mientras
+      las herramientas del MCP fueran la única ruta. Ya no lo es, así que esa frontera pasó a ser
+      una convención. Disparador anotado: un segundo script queriendo escribir.
+
+      La mitad de 2026-09-07 sigue en pie y era la difícil: el problema no
+
   era solo que las rutas fueran absolutas: Playwright escribe en directorios llamados
   `inventory-inventory-invent-6da45-products-by-price-ascending-chromium-problem`, así que ni
   quien la reportaba encontraba los archivos. `/report-bug` ahora corre
