@@ -839,14 +839,21 @@ producen manualmente".
     chromium. Lo que lo vuelve aceptable no es el argumento, es que **la instrumentación
     convierte el silencio en una señal confiable**.
 
-- **Métricas del agente** — dashboard o skill que mida % de PRs
-  generados por `/from-issue` que pasan review sin cambios
-- **MCP server propio del framework** — exponer catálogo
-  (framework://coverage, framework://test-suites,
-  framework://tcms-mapping, framework://page-objects,
-  search_tests_by_page_object, find_tests_covering_flow) para
-  consumo desde clientes no-Claude. YAGNI: no construir antes de
-  necesidad real de consumo externo
+- [x] ~~**Métricas del agente**~~ — **DESCARTADO (2026-09-09).** La métrica ya está medida y
+      publicada en el README: **14 PRs de `/from-issue` mergeados, 11 aterrizaron tal como se
+      generaron**, con sus dos advertencias (un solo reviewer, y un commit enmendado sería
+      invisible). Se respondió con un `for` de `gh` en veinte segundos; un dashboard para 14 filas
+      es decoración. **Disparador para reconsiderarlo:** que la población crezca lo suficiente
+      para que contar a mano moleste.
+- [x] ~~**MCP server propio del framework**~~ — **DESCARTADO (2026-09-09)**, por su propio
+      texto: "YAGNI: no construir antes de necesidad real de consumo externo". No hay consumidor
+      externo, y el principio #1 de este documento dice lo mismo. Si algún día lo hay, esto es lo
+      que iba a exponer:
+      (framework://coverage, framework://test-suites,
+      framework://tcms-mapping, framework://page-objects,
+      search_tests_by_page_object, find_tests_covering_flow) para
+      consumo desde clientes no-Claude. YAGNI: no construir antes de
+      necesidad real de consumo externo
 
 ### Skills personales transversales
 
@@ -968,6 +975,17 @@ diez minutos y una decisión de diseño no se leen igual.
   `/report-bug` presentara con aprobación y **lo rechazó por ahora**: _"files nothing"_ es la
   formulación más nítida del principio #2, y se presentó exactamente un defecto a mano.
   **Revisar cuando la fricción se sienta más de una vez.**
+
+  **Y esa condición ya se cumplió (2026-09-09).** Van **dos** defectos filados a mano: SW-14 en su
+  momento, y **SW-17** hoy — este último por el agente, a pedido explícito, tras un run de
+  `/from-issue` bloqueado por ADR-0020. O sea que el disparador que este ítem nombró llegó.
+
+  Lo que **no** cambió es quién decide. Escribir a un tracker sigue siendo la clase de acción que
+  este proyecto reserva, y ADR-0013 la limita a `/refine-ticket`. Filar SW-17 fue el agente
+  actuando en nombre del usuario con una herramienta suya, no una skill escribiendo por su cuenta —
+  la distinción es la que hace que ADR-0026 siga en pie. Reconsiderarlo es una decisión, no una
+  consecuencia automática de haber llegado a dos.
+
 - [x] ~~**Los 401 de `events.backtrace.io`**~~ — **triados por #61 (2026-09-07), junto con la
       cola entera.** Las cinco entradas son una causa, leída del bundle y no deducida: saucedemo
       configura `url: https://submit.backtrace.io/UNIVERSE/TOKEN/json` con los placeholders
@@ -980,14 +998,25 @@ diez minutos y una decisión de diseño no se leen igual.
 
 No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
-- **Exit 69 de `typecheck-spec.sh`** nunca disparó. Es el que existe para evitar un PASS no
-  ganado, así que es el que más vale ver.
-- **La sección Obstacles nunca salió `None.`** — ninguna corrida fue libre de fricción. El
-  riesgo vivo ahora parece el inverso: son largas y alguien puede empezar a saltearlas.
-- **El primer ticket que necesite `error_user`** debería cablearlo en `AUTH_USERS` (ADR-0014) y
-  darle al detector de diálogos su primera cobertura e2e. **Ahora tiene un premio concreto
-  medido:** es uno de los dos detectores que hoy solo cubre la sonda (ver arriba), así que
-  cablearlo es lo que empieza a destrabar el borrado de `tests/_framework_validation/`.
+- [x] ~~**Exit 69 de `typecheck-spec.sh`**~~ — **sale de la lista (2026-09-09), el guard se
+      queda.** Nunca disparó, y esperar a que dispare no es trabajo: **sí puede** hacerlo —en un
+      clone fresco antes de `npm install`— así que el guard es correcto y no se toca. Lo que no
+      tiene sentido es tenerlo como pendiente, porque no hay nada que hacer hasta que ocurra.
+      Existe para evitar un PASS no ganado: `npx tsc` sin `node_modules` baja `tsc@2.0.4`, un
+      paquete ocupa-nombre que no es el compilador y devolvería un PASS que nadie se ganó.
+- [x] ~~**La sección Obstacles nunca salió `None.`**~~ — **ocurrió el 2026-09-09.** El run de
+      SW-16 la reportó vacía por primera vez, así que el estado vacío dejó de ser teórico. Eso es
+      exactamente lo que ADR-0022 buscaba al hacerla obligatoria: _"el estado vacío solo significa
+      algo porque no se puede omitir"_. Antes de esto, ninguna corrida fue libre de fricción. El
+      riesgo vivo ahora parece el inverso: son largas y alguien puede empezar a saltearlas.
+- [x] ~~**El primer ticket que necesite `error_user`**~~ — **llegó, y lo cableó (2026-09-09).**
+      SW-16 pidió que `error_user` pudiera ordenar productos; `/from-issue` apendó `error` a
+      `AUTH_USERS` sin preguntar, que es precisamente para lo que existe ADR-0014, y
+      `chromium-error` pasó a existir y correr. Los tests aterrizaron como `test.fail()` contra
+      **SW-17** tras aprobación humana (ADR-0024). El texto original decía que debería cablearlo en `AUTH_USERS` (ADR-0014) y
+      darle al detector de diálogos su primera cobertura e2e. **Ahora tiene un premio concreto
+      medido:** es uno de los dos detectores que hoy solo cubre la sonda (ver arriba), así que
+      cablearlo es lo que empieza a destrabar el borrado de `tests/_framework_validation/`.
 - [x] ~~**Si los `test.fail()` de SW-13 graban observaciones.**~~ **Sí, verificado el
       2026-09-07** corriendo solo esos dos tests en aislamiento: el índice registró el 404 con
       `count: 2` y el sample nombrando `problem_user sorts products by name descending`. El fixture
@@ -1006,18 +1035,33 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
   Dos de los cuatro detectores **no tienen otra cobertura**, así que borrar
   `tests/_framework_validation/` seguiría falsificando el `Enforced by:` de ADR-0021, que
   afirma que ahí se ejercitan los cuatro. Y cada uno está bloqueado por algo distinto:
-  - **`dialog`** — solo el `alert()` de `error_user` al ordenar lo produce, y ese usuario no está
-    en `AUTH_USERS` (ADR-0014, crecimiento por demanda). Se destraba con el primer ticket que lo
-    necesite; hasta entonces ningún test real puede dispararlo.
-  - **`page-error`** — una excepción no capturada en la página. Saucedemo no lanza ninguna en sus
-    flujos normales, así que **puede no tener nunca un disparador natural**. La sonda la fabrica
-    a propósito desde un timer.
+  - [x] ~~**`dialog`**~~ — **resuelto el 2026-09-09.** Al cablear `error_user` (SW-16), sus tests
+        de sort disparan el `alert()` como efecto colateral, y el índice lo registra desde una feature
+        real: `seenIn: ['_framework_validation', 'inventory']`, con la muestra en
+        `error_user sorts products by name descending [chromium-error]`. **Ya no es exclusivo de la
+        sonda.** El texto original decía que solo el `alert()` de `error_user` al ordenar lo produce, y ese usuario no está
+        en `AUTH_USERS` (ADR-0014, crecimiento por demanda). Se destraba con el primer ticket que lo
+        necesite; hasta entonces ningún test real puede dispararlo.
+  - [x] ~~**`page-error`**~~ — **sale de la lista (2026-09-09).** Es una excepción no capturada en
+        la página, y saucedemo no lanza ninguna en sus flujos normales: **no es que falte un
+        disparador, es que esta app no tiene ninguno.** Un ítem que espera algo que por naturaleza no
+        va a pasar no es un pendiente. El detector se queda —en una app real es de las señales más
+        fuertes de que algo se rompió— y su cobertura sigue viniendo de la sonda, que lo fabrica desde
+        un timer.
+
+    **Y eso cierra también la pregunta de borrar `tests/_framework_validation/`**, que quedaba
+    trabada en estos dos detectores. `dialog` se resolvió al cablear `error_user` (SW-16), y
+    `page-error` no se va a resolver nunca acá. Así que **las sondas se quedan**, y no como deuda:
+    son la única cobertura posible de un detector cuyo disparador esta app no produce.
 
   Esto convierte un ítem difuso ("mantenerlas hasta que `/from-issue` corra una vez") en una
   condición concreta: **son borrables cuando `dialog` y `page-error` tengan cobertura real, y no
   antes.**
 
-- **Si el auto-link de GitHub-for-Jira funciona.** El chequeo disponible **no puede responderlo**:
+- **Si el auto-link de GitHub-for-Jira funciona.** **Reconfirmado el 2026-09-09 con el caso más
+  fresco posible**: `getJiraIssueRemoteIssueLinks` devolvió `[]` para SW-16 minutos después de que
+  su PR (#86) se mergeara. Así que el método de verificación está zanjado —**solo el navegador**,
+  mirando el panel Development— y lo único que falta es una mirada humana. El chequeo disponible **no puede responderlo**:
   `getJiraIssueRemoteIssueLinks` devuelve `[]` hasta para tickets cuyo PR se mergeó hace meses,
   porque la app escribe "development information", que ese MCP no expone. Se confirma mirando el
   panel Development en el browser.
