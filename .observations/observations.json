@@ -66,7 +66,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE console failure",
@@ -85,7 +85,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE from a failing test",
@@ -102,19 +102,20 @@
       "signature": "dialog:alert:Sorting is broken! This error has been reported to Backtrace.",
       "kind": "dialog",
       "thirdParty": false,
-      "count": 1,
+      "count": 2,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "Sorting is broken! This error has been reported to Backtrace.",
         "url": "https://www.saucedemo.com/inventory.html",
         "dialogType": "alert",
-        "test": "dialog detector records a real alert, and dismissing it keeps the test running",
-        "project": "chromium-no-auth"
+        "test": "error_user sorts products by name descending",
+        "project": "chromium-error"
       },
       "seenIn": [
-        "_framework_validation"
+        "_framework_validation",
+        "inventory"
       ],
       "note": "error_user's intentional broken-sort alert, triggered on purpose by tests/_framework_validation/ to prove the dialog detector fires. The alert is saucedemo's documented behaviour for that user (docs/app/users.md), not a defect. Today this entry and the page-error probe are the only coverage either detector has - see the roadmap's debt section."
     },
@@ -124,7 +125,7 @@
       "thirdParty": false,
       "count": 3,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -146,7 +147,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -167,7 +168,7 @@
       "thirdParty": false,
       "count": 10,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -189,7 +190,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "404",
@@ -208,17 +209,17 @@
       "signature": "failed-request:GET:https://www.saucedemo.com/inventory.html:404",
       "kind": "failed-request",
       "thirdParty": false,
-      "count": 47,
+      "count": 2,
       "firstSeen": "2026-09-04",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "404",
         "url": "https://www.saucedemo.com/inventory.html",
         "method": "GET",
         "httpStatus": 404,
-        "test": "direct access to /inventory.html while logged out is blocked with an error",
-        "project": "chromium-no-auth"
+        "test": "error_user sorts products by name descending",
+        "project": "chromium-error"
       },
       "note": "saucedemo is hosted on GitHub Pages with the spa-github-pages shim: the server 404s every deep link and the SPA renders it client-side. Intentional for this app; would be a real finding anywhere else.",
       "seenIn": [
@@ -237,7 +238,7 @@
       "thirdParty": true,
       "count": 7,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
@@ -260,7 +261,7 @@
       "thirdParty": true,
       "count": 7,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "401 Unauthorized",
@@ -283,7 +284,7 @@
       "thirdParty": false,
       "count": 1,
       "firstSeen": "2026-09-05",
-      "lastSeen": "2026-09-08",
+      "lastSeen": "2026-09-09",
       "status": "ignored",
       "sample": {
         "message": "OBSERVATION_PROBE uncaught failure",
