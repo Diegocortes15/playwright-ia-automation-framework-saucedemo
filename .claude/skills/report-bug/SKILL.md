@@ -42,4 +42,4 @@ Filing into a tracker is deliberately **not** implemented. Jira writes are the e
 
 - ADR-0020 — why a run that cannot go green opens no PR; this skill is what you reach for afterwards
 - ADR-0021 — the runtime observations this report correlates
-- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ai-framework/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.

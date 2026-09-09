@@ -37,4 +37,4 @@ The full 12-step procedural workflow is in [`references/workflow.md`](references
 
 - `docs/scaffold-page-object.md` — learning guide with worked examples
 - ADR-0008 — why custom skills follow this layout
-- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ai-framework/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
