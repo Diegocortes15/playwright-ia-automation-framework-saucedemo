@@ -1175,11 +1175,18 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
   </details>
 
-- **B12b — más extracción a `scripts/`.** Van tres (`typecheck-spec.sh`,
-  `check-component-signatures.sh`, `typecheck-generated.sh`). Próximos candidatos: el preflight
-  de rama (Step 1.5) y el render del PR body (Step 12). YAGNI por candidato.
-- **Bloque B11 — `AGENTS.md`.** Vale cuestionarlo antes de hacerlo: `CLAUDE.md` está en 142
-  líneas y ya es la constitución de facto.
+- [x] ~~**B12b — más extracción a `scripts/`**~~ — **DESCARTADO (2026-09-09).** Van tres
+      (`typecheck-spec.sh`, `check-component-signatures.sh`, `typecheck-generated.sh`) y los
+      candidatos que quedaban eran el preflight de rama (Step 1.5) y el render del PR body
+      (Step 12). **Ninguno de los dos duele.** El ítem decía "YAGNI por candidato" desde el
+      principio; esto es aplicarlo en vez de dejarlo esperando. Extraer a `scripts/` se justificó
+      las tres veces porque la prosa escondía un bug ejecutable — el primero destapó que el
+      workflow decía `npx tsc`. Si aparece otro caso así, se extrae ese; no queda como ítem.
+- [x] ~~**Bloque B11 — `AGENTS.md`**~~ — **DESCARTADO (2026-09-09).** Ver el ítem 11 del Bloque B
+      para la razón completa: su contenido ya existe, verificado punto por punto, y el argumento
+      real nunca fue el contenido sino la portabilidad a otra herramienta que no lea `CLAUDE.md`.
+      No hay tal herramienta. Esta línea quedó afirmando que seguía en pie **el mismo día** en que
+      se descartó — la clase de deriva que este documento acaba de normalizar.
 - [x] ~~**Bloque C**~~ — **CERRADO ENTERO (2026-09-08).** `/find-tests` descartado (#67: Explore
       sacó 9/9), `pr-reviewer` descartado (el terreno cambió debajo), y el **hook de frontmatter de
       `SKILL.md` se descarta por YAGNI, con la medición del mismo día que lo respalda**: el Bloque A
@@ -1188,7 +1195,11 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
       ADR-0019 rechazó su gate de CI y con el que se descartó `skill-validator`: a esta escala, un
       gate sobre algo ya limpio que cambia pocas veces al año es teatro.
       **Disparador para reconsiderarlo:** cuando escriba skills acá alguien más que el autor único.
-- **Bloque E** — presentación y portfolio, en paralelo cuando quieras.
+- [x] ~~**Bloque E** — presentación y portfolio~~ — **CERRADO (2026-09-09).** Sus siete ítems
+      están todos resueltos: TL;DR, failure-modes, la regla de MCP y la métrica medida se hicieron;
+      el screencast y el post se descartaron por no ser trabajo de repositorio; el renombre se
+      ejecutó (`playwright-ai-framework`). Igual que la línea de B11, esta seguía diciendo "cuando
+      quieras" después de que el bloque terminó.
 
 ## Guardarraíles para Claude Code al ejecutar este plan
 
