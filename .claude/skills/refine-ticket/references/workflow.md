@@ -13,7 +13,7 @@ Read this file before executing the skill. The skill hardens a Jira ticket again
 # Resolve the Atlassian cloudId, then fetch the issue.
 ```
 
-Call `getAccessibleAtlassianResources` (cloudId), then `getJiraIssue` for `<KEY>`. Capture the summary + description (the raw requirement). **If the ticket can't be read**, abort with the MCP error verbatim.
+Call `getAccessibleAtlassianResources` (cloudId), then `getJiraIssue` for `<KEY>` with `responseContentFormat: "adf"`. Capture the summary + the description's **ADF `content[]` array** — the write-back in Step 7 preserves the reporter's nodes verbatim, so it needs the real nodes, not a Markdown rendering of them. **If the ticket can't be read**, abort with the MCP error verbatim.
 
 ## 3. Discover sources
 
@@ -50,13 +50,13 @@ Show the user, in one message:
 - **Before → After** of the ACs (the hardened set).
 - **Resolved assumptions** — the `assumptions[]` list (what was inferred and from where).
 - **Coverage flags** — any rubric item-9 overlaps ("AC2 looks already covered by …").
-- The exact `## Refined Acceptance Criteria` block (from [`writeback-template.md`](writeback-template.md)) that will be written.
+- The exact `Refined Acceptance Criteria` block that will be written, shown as readable Markdown — say which lozenge each AC carries rather than printing raw ADF, which nobody can review. Structure and node types are in [`writeback-template.md`](writeback-template.md).
 
 Ask: **"Write this back to `<KEY>`? (yes / edit / no)"**
 
 ## 7. Write back (on approval)
 
-- **yes** → apply the idempotent description update via `editJiraIssue`, then the audit comment via `addCommentToJiraIssue` (per [`writeback-template.md`](writeback-template.md)). Per ADR-0013. If a write fails, report the MCP error verbatim and emit the block locally so nothing is lost.
+- **yes** → apply the idempotent description update via `editJiraIssue` with `contentFormat: "adf"`, then the audit comment via `addCommentToJiraIssue` (per [`writeback-template.md`](writeback-template.md)). Per ADR-0013 — both writes go through the MCP, never through `curl` and the REST API, because `allowed-tools` is what makes that boundary real. If a write fails, report the MCP error verbatim and emit the block locally so nothing is lost.
 - **edit** → apply the user's tweaks, return to Step 6.
 - **no** → emit the block in-session for manual paste; make NO Jira calls.
 - **dry-run mode** → never write; print what would be written.
@@ -73,7 +73,7 @@ improvised — **name the file**), and any source you could not reach. Do NOT re
 rubric gaps you already presented in Step 6.
 
 This goes to the user in the terminal only. It is **never** written back to the ticket:
-the write-back is the `## Refined Acceptance Criteria` block alone (ADR-0013). Obstacles
+the write-back is the `Refined Acceptance Criteria` block alone (ADR-0013). Obstacles
 are the agent's own process, not the ticket's content.
 
 ## Error handling (summary)

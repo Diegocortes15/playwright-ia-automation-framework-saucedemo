@@ -4,7 +4,7 @@
 
 ## What it does
 
-It reads the ticket (Atlassian MCP), scores it against a [rubric](../.claude/skills/refine-ticket/references/rubric.md) (real user? explicit pass/fail signal? concrete data? one behavior per AC? written in EARS form? already covered?), and **loops** — closing each gap from what's already automated, from app docs, or by asking you — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket (the reporter's original text is preserved) and posts an audit comment. See [ADR-0013](adr/0013-refine-ticket-jira-writeback.md).
+It reads the ticket (Atlassian MCP), scores it against a [rubric](../.claude/skills/refine-ticket/references/rubric.md) (real user? explicit pass/fail signal? concrete data? one behavior per AC? written in EARS form? already covered?), and **loops** — closing each gap from what's already automated, from app docs, or by asking you — until the ticket is unambiguous. On your approval it writes a `Refined Acceptance Criteria` section back to the ticket (the reporter's original text is preserved above a divider) and posts an audit comment. See [ADR-0013](adr/0013-refine-ticket-jira-writeback.md).
 
 ## Why it exists
 
