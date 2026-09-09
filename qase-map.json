@@ -37,6 +37,8 @@
   "footer › standard_user › Positive › footer LinkedIn link points to its Sauce Labs URL": 30,
   "footer › standard_user › Positive › footer Twitter link points to its Sauce Labs URL": 28,
   "footer › standard_user › Positive › footer shows the Sauce Labs copyright text": 31,
+  "inventory › error_user › Positive › error_user sorts products by name descending": 105,
+  "inventory › error_user › Positive › error_user sorts products by price ascending": 106,
   "inventory › problem_user › Edge › problem_user sees one identical broken image for every product": 32,
   "inventory › problem_user › Positive › problem_user sorts products by name descending": 98,
   "inventory › problem_user › Positive › problem_user sorts products by price ascending": 99,
