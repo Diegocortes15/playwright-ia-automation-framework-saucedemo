@@ -34,9 +34,19 @@ This is the best-defended area, because it is the one that was designed for.
 
 ### "What does a ticket cost in tokens?"
 
-**Unmeasured.** No number is recorded anywhere in this repo, and inventing one would be worse than admitting it.
+**Still unmeasured, and it was checked — the obvious tool does not answer it.**
 
-What would measure it: `/skill-doctor` reports observed per-skill context cost, and it is a Claude Code UI command, so a person has to run it. Until someone does, this question has no answer here.
+`/skill-doctor` moved into Claude Code's Plugins → Stats tab, and it was run on 2026-09-09. It reports three columns, and only one of them is what this question needs:
+
+| Column      | Verdict                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context`   | **Trustworthy.** It is the cost of each skill's one-line description in the system prompt, and it checks out — across all five skills the ratio of description characters to reported tokens lands between 2.6 and 3.0. Total for the five: **~310 tokens per turn**, which is small enough that no skill is worth removing on cost grounds                                                        |
+| `uses`      | **Accurate, but not about what it looks like.** It counts _skill invocations_. `playwright-cli` reads `0 uses / never` while the repository invokes `npx playwright-cli` **13 times** through Bash — by design, since #63 moved everything to that form and `CLAUDE.md` instructs it. The skill is reference documentation, not something invoked                                                  |
+| `7d tokens` | **Cannot be verified from here.** The legend says tokens "attributed to the skill", without saying how. `scaffold-page-object` shows 15.6m against 1 use and `refine-ticket` 3.2m against 1 use — the same invocation count, five times apart. The figures are far too large to be per-invocation. A session-scoped attribution would explain it, but that is a guess and nothing here rests on it |
+
+**So the cost of one ticket is still not known.** Measuring it needs per-run accounting, which no tool in this stack currently exposes.
+
+**One thing the panel gets actively wrong for this repository**, worth recording so nobody follows it: it advises _"1 skill loaded but never invoked… Disable in /skills, or remove from .claude/skills"_, pointing at `playwright-cli`. Removing it would delete the ten reference files the browser workflows depend on, while the CLI itself carried on being used thirteen times. The advice is sound in general and wrong here, because the metric it rests on does not see Bash.
 
 ### "What if Qase goes down, or the team switches TCMS?"
 
