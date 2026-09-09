@@ -23,6 +23,16 @@ A test is smoke-worthy if at least one applies:
 - **Critical regression risk** — historically-broken flows where a bug would be customer-facing
 - **Gateway to the rest of the app** — landing pages, primary navigation that other tests depend on
 
+## Never change an existing test's smoke status
+
+The run assigns smoke to the tests **it generates**, and to nothing else. If reading the existing set reveals that a new test is a more critical version of something already tagged, **say so in the PR body and leave that test alone**:
+
+> ⚠️ **Smoke overlap:** `<new test>` covers the same failure as `<existing test>`, which is currently `@smoke`. Reviewer: consider whether the older one still earns the tag.
+
+Three reasons it reports instead of editing. The tag routes tests into the build gate, so removing one silently changes what verifies a release. ADR-0010 is deliberate about not destroying manual edits, and a `@smoke` a person added is one. And touching tests unrelated to the ticket puts them in the diff, which makes the pull request harder to review for no gain.
+
+Same shape as every other judgment call in this skill: report it, let a person decide.
+
 ## Criteria for `smoke: false`
 
 A test is NOT smoke-worthy if it primarily verifies:
@@ -31,7 +41,7 @@ A test is NOT smoke-worthy if it primarily verifies:
 - **Sort/filter variation** — alternative orderings of the same data
 - **Performance assertion** — load time, render time (these are Edge bucket, not smoke)
 - **Visual regression** — pixel-perfect comparisons (separate concern from build verification)
-- **Secondary error path** — when a more critical version of the same error is already smoke
+- **Secondary error path** — when a more critical version of the same error is already smoke. **This one is relational**: it cannot be judged from the new test alone, which is why Step 6 lists the existing set before classifying. Until that listing exists the criterion is unusable, and a policy that asks a question the run cannot answer promises more precision than it delivers.
 - **Boundary nicety** — whitespace handling, character encoding, locale variations
 - **Configuration variation** — same behavior tested under different valid configs
 
