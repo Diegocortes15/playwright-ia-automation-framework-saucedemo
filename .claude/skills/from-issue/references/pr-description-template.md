@@ -47,6 +47,7 @@ The `/from-issue` skill writes its PR body using this template. Section order is
 - 🔁 **Augment:** this PR **augmented** an existing spec `tests/<feature>/<feature>.spec.ts` (prior contributors: `<KEY-list>`) rather than creating a new file. AC-coverage rows below are marked `added` or `skipped (already covered)`.
 - ➕ **Page Object additions:** appended `<members>` to `<PageObject>` for the new tests (existing members untouched).
 - ⚙️ **Harness grew:** wired the `<user>` project + auth setup (first ticket needing `<user>`) by appending to `tests/users.ts` `AUTH_USERS` (per ADR-0014). Reviewer: confirm. _(Omit when no new user was wired.)_
+- ⚠️ **Smoke overlap:** `<new test>` covers the same failure as `<existing test>`, which is currently `@smoke`. Nothing was changed on the existing test — see `smoke-policy.md`. Reviewer: consider whether the older one still earns the tag.
 - ⚠️ **Page Object modification:** modified existing method `<Method>` on `<PageObject>`. Because other specs may call it, the **full suite** ran locally (see Verification). Reviewer: confirm no dependent spec regressed.
 - ⏭️ **Skipped (duplicate):** AC <id> maps to a test already present (`<existing test>`); not re-added. Reviewer: push back if the existing test doesn't actually cover it.
 - _(Include only the augment notes that apply; omit this whole group for plain CREATE-NEW runs.)_

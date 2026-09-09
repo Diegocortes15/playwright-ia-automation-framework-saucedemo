@@ -225,7 +225,15 @@ Group the `worth_automating=true` AC records into a set of tests. One test may c
 
 Tag selection follows CLAUDE.md "Tag conventions" table. Title format follows [`references/test-template.md`](test-template.md) "Rules". Bucket assignment follows [`references/bucket-classification.md`](bucket-classification.md) — read it before classifying. The bucket lives on the test (not on the AC) because one test can cover multiple ACs; classify by the test's dominant behavior, using the ambiguity rules in bucket-classification.md as the tiebreaker.
 
-Smoke assignment follows [`references/smoke-policy.md`](smoke-policy.md) — read it before classifying. Smoke status is orthogonal to bucket: a Negative test can be smoke (critical regression risk) and a Positive test can be NOT-smoke (peripheral happy path). The default per smoke-policy.md is `false` ("when in doubt, NOT smoke").
+**Read the existing `@smoke` set first.** One of the policy's criteria is relational — a test is *not* smoke when "a more critical version of the same error is already smoke" — and that cannot be evaluated without knowing what already carries the tag:
+
+```bash
+npx playwright test --grep "@smoke" --list 2>/dev/null | grep "›" | grep -v "auth.setup" | sed 's/.*› //' | sort -u
+```
+
+Ignore the `authenticate as <user>` line if it appears: that is the auth-setup pseudo-test, not a smoke case. If the command fails for any reason, assign smoke without it and note in the PR body that the relational criterion went unchecked — do not guess at what is already tagged.
+
+Smoke assignment then follows [`references/smoke-policy.md`](smoke-policy.md) — read it before classifying. Smoke status is orthogonal to bucket: a Negative test can be smoke (critical regression risk) and a Positive test can be NOT-smoke (peripheral happy path). The default per smoke-policy.md is `false` ("when in doubt, NOT smoke").
 
 Data placement follows [`references/data-placement.md`](data-placement.md) — decide, per dataset, whether the test's data is **inline** (the default for small, test-local parameterization) or **externalized** to `data/` (only on a concrete trigger: reused / large / non-engineer-owned / env-specific / named scenario). Most issues keep data inline; if any dataset hits an externalize trigger, note that the spec render (Step 7) and commit (Step 11) must also create + stage the `data/` file(s) and loader.
 
