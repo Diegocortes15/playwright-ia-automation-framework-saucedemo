@@ -663,7 +663,12 @@ de valor.
 19. ~~TL;DR de 3-4 bullets al tope del README~~ — **HECHO (2026-09-08).** Cuatro bullets antes
     de la imagen. **Reemplazan** al párrafo que había debajo, que decía lo mismo más flojo, en
     vez de sumarse a él.
-20. GIF/screencast (~20s) del flujo `/from-issue` SW-11 → PR abierto
+20. **[DESCARTADO]** GIF/screencast (~20s) del flujo `/from-issue` SW-11 → PR abierto
+
+    > **DESCARTADO (2026-09-09)** — probablemente lo de más impacto del bloque, y aun así
+    > se descarta: es una grabación, no trabajo de repositorio. Se hace cuando se haga, no
+    > vive acá como pendiente.
+
 21. ~~Sección "Failure modes & mitigations" en README~~ — **HECHO (2026-09-08), pero en
     `docs/failure-modes.md`, no en el README.** Meterle 85 líneas al README contradiría el
     recorte de #71, que lo bajó justamente porque daba pereza; va enlazado desde el índice.
@@ -696,8 +701,12 @@ de valor.
     para el flujo que orquesta ambos. Incluye lo que **costó**: un MCP es una conexión que se
     cae, y se cayó.
 24. Considerar renombrar repo "ia" → "ai" para consistencia con inglés
-25. Post corto en LinkedIn/dev.to explicando arquitectura
+25. **[DESCARTADO]** Post corto en LinkedIn/dev.to explicando arquitectura
     authoring-vs-runtime para tracción de portfolio
+
+    > **DESCARTADO (2026-09-09)** — puede que se escriba igual, pero **no como planning**.
+    > Un roadmap que lleva la cuenta de tareas personales fuera del repo nunca llega a
+    > cero, y llegar a cero es el objetivo declarado de este documento.
 
 ---
 
