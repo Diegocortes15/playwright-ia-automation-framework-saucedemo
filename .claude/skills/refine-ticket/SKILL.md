@@ -41,4 +41,4 @@ This skill pairs with `/from-issue`: refine first, then generate. It reuses the 
 
 - `docs/refine-ticket.md` — learning guide with a worked example
 - ADR-0008 — why custom skills follow this layout
-- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ai-framework/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.

@@ -2,8 +2,8 @@
 
 Follow two real tickets through the whole pipeline. Every artifact below is in this repository; nothing here is invented for the example.
 
-- **[SW-15](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/53)** — the ordinary path: a ticket becomes two tests and a merged PR.
-- **[SW-13](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/49)** — the interesting path: the application contradicted the ticket, so no PR was opened at all.
+- **[SW-15](https://github.com/Diegocortes15/playwright-ai-framework/pull/53)** — the ordinary path: a ticket becomes two tests and a merged PR.
+- **[SW-13](https://github.com/Diegocortes15/playwright-ai-framework/pull/49)** — the interesting path: the application contradicted the ticket, so no PR was opened at all.
 
 ---
 
@@ -101,7 +101,7 @@ This is the file the runtime reads forever after. It is why the HTML report can 
 
 ### 6. Run them, then open the PR
 
-The tests ran locally and passed, so [**PR #53**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/53) opened with exactly three files changed:
+The tests ran locally and passed, so [**PR #53**](https://github.com/Diegocortes15/playwright-ai-framework/pull/53) opened with exactly three files changed:
 
 ```
 tests/login/login.spec.ts         +45 / -1     the tests
@@ -125,7 +125,7 @@ SW-13 asked that `problem_user` be able to sort products by name and price. The 
 
 **So the run opened nothing.** A run never opens a red pull request: it diagnoses, retries up to three times, and if the failure means the _app_ contradicts the criterion rather than the generated code being wrong, it stops and reports.
 
-What happened next needed a person. A human confirmed the app was wrong, filed **SW-14** as the defect, and only then did [**PR #49**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/49) land the tests — marked `test.fail()`, locked to that defect. Its own description opens:
+What happened next needed a person. A human confirmed the app was wrong, filed **SW-14** as the defect, and only then did [**PR #49**](https://github.com/Diegocortes15/playwright-ai-framework/pull/49) land the tests — marked `test.fail()`, locked to that defect. Its own description opens:
 
 > This PR exists **because** a `/from-issue` run was blocked, not despite it.
 

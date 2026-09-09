@@ -1,6 +1,6 @@
 # Playwright IA Automation Framework — Saucedemo
 
-[![Playwright Tests](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/actions/workflows/test.yml/badge.svg)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/actions/workflows/test.yml)
+[![Playwright Tests](https://github.com/Diegocortes15/playwright-ai-framework/actions/workflows/test.yml/badge.svg)](https://github.com/Diegocortes15/playwright-ai-framework/actions/workflows/test.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.59-2EAD33?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9_strict-3178C6?logo=typescript&logoColor=white)
 ![Node](https://img.shields.io/badge/Node-22.x-339933?logo=nodedotjs&logoColor=white)
@@ -22,8 +22,8 @@
 ## Quick start
 
 ```bash
-git clone https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo.git
-cd playwright-ia-automation-framework-saucedemo
+git clone https://github.com/Diegocortes15/playwright-ai-framework.git
+cd playwright-ai-framework
 npm install
 npx playwright install chromium
 cp .env.example .env          # saucedemo defaults work out of the box
@@ -156,7 +156,7 @@ ADR-0011 says outright that it **scopes** ADR-0007 rather than reversing it, whi
 
 ![refined Jira ticket](docs/images/jira-ticket.png)
 
-> **📋 A real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/pull/25) is an actual `/from-issue` pull request. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, and the **⚠️ Assumptions** the agent flagged for review.
+> **📋 A real example →** [**PR #25 — _automate SW-11 burger menu scenarios_**](https://github.com/Diegocortes15/playwright-ai-framework/pull/25) is an actual `/from-issue` pull request. Its description carries the auto-generated **"What I understood"** summary, the **AC-coverage table**, and the **⚠️ Assumptions** the agent flagged for review.
 
 ![generated-pr](docs/images/from-issue-pr.png)
 

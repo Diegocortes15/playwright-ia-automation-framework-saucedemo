@@ -66,4 +66,4 @@ This skill invokes `/scaffold-page-object` (C.1) when a Page Object inferred fro
 
 - `docs/from-issue.md` — learning guide with worked examples
 - ADR-0008 — why custom skills follow this layout
-- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ia-automation-framework-saucedemo/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
+- [ADR index (origin repo)](https://github.com/Diegocortes15/playwright-ai-framework/tree/main/docs/adr) — rationale for every `ADR-NNNN` cited above. Paths like `docs/…` and `src/…` are relative to that repo, not to this skill.
