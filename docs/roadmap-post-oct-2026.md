@@ -998,8 +998,12 @@ diez minutos y una decisión de diseño no se leen igual.
 
 No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
 
-- **Exit 69 de `typecheck-spec.sh`** nunca disparó. Es el que existe para evitar un PASS no
-  ganado, así que es el que más vale ver.
+- [x] ~~**Exit 69 de `typecheck-spec.sh`**~~ — **sale de la lista (2026-09-09), el guard se
+      queda.** Nunca disparó, y esperar a que dispare no es trabajo: **sí puede** hacerlo —en un
+      clone fresco antes de `npm install`— así que el guard es correcto y no se toca. Lo que no
+      tiene sentido es tenerlo como pendiente, porque no hay nada que hacer hasta que ocurra.
+      Existe para evitar un PASS no ganado: `npx tsc` sin `node_modules` baja `tsc@2.0.4`, un
+      paquete ocupa-nombre que no es el compilador y devolvería un PASS que nadie se ganó.
 - [x] ~~**La sección Obstacles nunca salió `None.`**~~ — **ocurrió el 2026-09-09.** El run de
       SW-16 la reportó vacía por primera vez, así que el estado vacío dejó de ser teórico. Eso es
       exactamente lo que ADR-0022 buscaba al hacerla obligatoria: _"el estado vacío solo significa
@@ -1038,9 +1042,17 @@ No se fuerzan honestamente; se hacen cuando el trabajo real las provoque.
         sonda.** El texto original decía que solo el `alert()` de `error_user` al ordenar lo produce, y ese usuario no está
         en `AUTH_USERS` (ADR-0014, crecimiento por demanda). Se destraba con el primer ticket que lo
         necesite; hasta entonces ningún test real puede dispararlo.
-  - **`page-error`** — una excepción no capturada en la página. Saucedemo no lanza ninguna en sus
-    flujos normales, así que **puede no tener nunca un disparador natural**. La sonda la fabrica
-    a propósito desde un timer.
+  - [x] ~~**`page-error`**~~ — **sale de la lista (2026-09-09).** Es una excepción no capturada en
+        la página, y saucedemo no lanza ninguna en sus flujos normales: **no es que falte un
+        disparador, es que esta app no tiene ninguno.** Un ítem que espera algo que por naturaleza no
+        va a pasar no es un pendiente. El detector se queda —en una app real es de las señales más
+        fuertes de que algo se rompió— y su cobertura sigue viniendo de la sonda, que lo fabrica desde
+        un timer.
+
+    **Y eso cierra también la pregunta de borrar `tests/_framework_validation/`**, que quedaba
+    trabada en estos dos detectores. `dialog` se resolvió al cablear `error_user` (SW-16), y
+    `page-error` no se va a resolver nunca acá. Así que **las sondas se quedan**, y no como deuda:
+    son la única cobertura posible de un detector cuyo disparador esta app no produce.
 
   Esto convierte un ítem difuso ("mantenerlas hasta que `/from-issue` corra una vez") en una
   condición concreta: **son borrables cuando `dialog` y `page-error` tengan cobertura real, y no
