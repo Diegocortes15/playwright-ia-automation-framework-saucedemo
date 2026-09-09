@@ -80,6 +80,43 @@ When the AC isn't automatable in this framework, is out of scope, or is fully co
 - AC: "Both valid AND invalid postal codes are handled correctly"
   → SKIP — duplicates AC1 + AC3 from the MERGE example above
 
+### Read the AC's stance: intended, or observed?
+
+Before deciding what to create, decide what the AC is *claiming*. There are two kinds and they
+lead to opposite outcomes, and the difference is visible in the AC's own grammar.
+
+**An AC stating intended behaviour** describes what the system should do. Nothing in it mentions
+being broken:
+
+> "Given `problem_user` is on the inventory page, when they select "Name (Z to A)", then the
+> products are listed in descending alphabetical order."
+
+Generate the test asserting exactly that. If the application disagrees, **the test has found a
+bug** — the ADR-0020 gate stops the run and reports; landing it as `test.fail()` against a filed
+defect is a separate, human-approved step (ADR-0024). Never soften the assertion to match what
+the app does.
+
+**An AC stating observed behaviour** describes what the system currently does, brokenness
+included. The words give it away — *collapses*, *broken*, *instead of*:
+
+> "For `problem_user`, every product image collapses to the same broken placeholder (sl-404)
+> instead of a distinct image per product."
+
+Generate the test asserting that, and it passes. This is characterization: the ticket asked to
+**document** a behaviour, not to require a different one. There is no defect to file, because
+nobody claimed the app should be otherwise.
+
+**Both of those are real ACs from this repository, and they produced opposite test shapes.**
+
+The rule for this skill: **assert what the AC says.** Whether a ticket *should* have been written
+one way or the other is the author's judgment — `/refine-ticket`'s rubric asks the question
+explicitly so it gets settled before generation. Rewriting an AC's stance here would be
+reinterpreting a requirement, which is the specific thing the fix loop forbids.
+
+**When the AC's stance is genuinely unclear**, treat it as intended behaviour. That path fails
+loudly and routes to a person; the other path produces a test that passes while asserting a bug
+is correct, and nothing ever revisits it.
+
 ## Worked examples (from saucedemo coverage)
 
 ### Example 1: MERGE (3 → 1)
