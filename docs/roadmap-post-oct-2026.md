@@ -700,7 +700,19 @@ de valor.
     buena y autenticada, MCP cuando no la hay y OAuth evita un secreto en el repo, y la skill
     para el flujo que orquesta ambos. Incluye lo que **costó**: un MCP es una conexión que se
     cae, y se cayó.
-24. Considerar renombrar repo "ia" → "ai" para consistencia con inglés
+24. **[HECHO]** Considerar renombrar repo "ia" → "ai" para consistencia con inglés
+
+    > **HECHO (2026-09-09)** — renombrado a **`playwright-ai-framework`**, y se corrigió más
+    > que el typo. El nombre viejo tenía 45 caracteres, repetía el concepto
+    > (`automation-framework` es lo que Playwright ya es) y, sobre todo, **se contradecía con
+    > el propio README**: el repo se vende como plantilla reusable que apunta a otra app sin
+    > tocar código, y el nombre lo ataba a la app de demo.
+    >
+    > GitHub redirige las URLs viejas de forma indefinida, así que los 4 archivos de
+    > `docs/superpowers/` que lo mencionan se dejan intactos — son capa Log y no se
+    > reescriben. Las 6 referencias vivas (README, walkthrough y los cuatro `SKILL.md`) sí
+    > se actualizan.
+
 25. **[DESCARTADO]** Post corto en LinkedIn/dev.to explicando arquitectura
     authoring-vs-runtime para tracción de portfolio
 
