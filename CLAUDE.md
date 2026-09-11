@@ -103,18 +103,19 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 
 ## Where things live
 
-| What                                            | Where                                                                                                                                            |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Page objects                                    | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                                                                   |
-| Components                                      | `src/components/` (`Header.ts`, `Footer.ts`, `CartBadge.ts`, `BurgerMenu.ts`)                                                                    |
-| Fixture (auto-injects pages)                    | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test`                                              |
-| Test data + types + loaders                     | `data/` (use `@data/*` alias)                                                                                                                    |
-| env config                                      | `src/utils/env.ts` (single read point for `process.env`)                                                                                         |
-| Specs                                           | `tests/<feature>/*.spec.ts`                                                                                                                      |
-| Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                                                            |
-| Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                                                           |
-| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); index in `.observations/observations.json`; read it with `npm run observations` |
-| TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`)                               |
+| What                                            | Where                                                                                                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Page objects                                    | `src/pages/` (`LoginPage.ts`, `InventoryPage.ts`, `CartPage.ts`, `checkout/*`)                                                                         |
+| Components                                      | `src/components/` (`Header.ts`, `Footer.ts`, `CartBadge.ts`, `BurgerMenu.ts`)                                                                          |
+| Fixture (auto-injects pages)                    | `src/fixtures/test.ts` — tests import `test`/`expect` from `@fixtures/test`, NOT `@playwright/test`                                                    |
+| Test data + types + loaders                     | `data/` (use `@data/*` alias)                                                                                                                          |
+| env config                                      | `src/utils/env.ts` (single read point for `process.env`)                                                                                               |
+| Specs                                           | `tests/<feature>/*.spec.ts`                                                                                                                            |
+| Auth setup (generates storageState per user)    | `tests/auth.setup.ts`                                                                                                                                  |
+| Playwright config (data-driven from AUTH_USERS) | `playwright.config.ts`                                                                                                                                 |
+| Runtime observations (ADR-0021)                 | `src/observations/` (`types.ts`, `signature.ts`, `reporter.ts`); index in `.observations/observations.json`; read it with `npm run observations`       |
+| Build under test (what a run ran _against_)     | `src/utils/app-build.ts` + `global-setup.ts`; written to `test-results/app-build.json`, shown as the report's `App` chip. Declare one with `APP_BUILD` |
+| TCMS mirror (optional Qase seam)                | `src/tcms/` (`types.ts`, `case-mapper.ts`, `results-reader.ts`, `qase-client.ts`, `suite-sync.ts`, `map-store.ts`)                                     |
 
 ## Path aliases
 

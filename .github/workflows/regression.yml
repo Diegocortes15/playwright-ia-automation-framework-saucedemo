@@ -38,6 +38,14 @@ on:
           - webkit
           - all
         default: chromium
+      # Free text on purpose: a team already has a name for what it is testing, and no
+      # enumeration survives contact with one. Optional — a run that declares nothing still
+      # records the fingerprint the deployment served, which is the half that cannot lie.
+      app_build:
+        description: 'Version under test, e.g. 2.4.0-hotfix.1 (optional)'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -157,6 +165,7 @@ jobs:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
           QASE_PROJECT_CODE: ${{ secrets.QASE_PROJECT_CODE }}
+          APP_BUILD: ${{ inputs.app_build }}
           CI: 'true'
         # One script holds the engine → project mapping, so what CI runs and what a QA runs
         # locally cannot drift. It also exports RUN_ENGINES, which is how the Qase record and
@@ -195,6 +204,14 @@ jobs:
 
           then open the URL it prints.
           TXT
+
+      # Small, and the first thing a triage asks for: which build did this run exercise.
+      - name: Upload the build record (always)
+        if: ${{ !cancelled() && hashFiles('test-results/app-build.json') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-build-${{ needs.gate.outputs.suite }}-${{ needs.gate.outputs.browser }}
+          path: test-results/app-build.json
 
       - name: Upload HTML report (always)
         if: ${{ !cancelled() }}
@@ -256,6 +273,13 @@ jobs:
           [ -n "$counts" ] && body="$body"$'\n'"$counts"
           [ -n "$dur" ] && body="$body"$'\n'":stopwatch-2: Ran in $dur"
           [ -n "$ENV_LINE" ] && body="$body"$'\n'":performing-arts: $ENV_LINE"
+          # What the run was executed AGAINST. When a test breaks, the first question is
+          # whether anything moved on the application's side, and this is the line that
+          # answers it without anyone opening an artifact.
+          if [ -f test-results/app-build.json ]; then
+            build=$(jq -r '"\(.fingerprint)" + (if .declared then " · declared \(.declared)" else "" end)' test-results/app-build.json 2>/dev/null || true)
+            [ -n "$build" ] && body="$body"$'\n'":package: Build under test: $build"
+          fi
           # Custom emoji outside the <url|label> so Slack renders them (emoji inside link text don't render).
           [ -n "$QASE_RUN_URL" ] && body="$body"$'\n'":qase: <$QASE_RUN_URL|Qase run>"
           # Observations: a COUNT plus where to look. Dumping the contents here is how
