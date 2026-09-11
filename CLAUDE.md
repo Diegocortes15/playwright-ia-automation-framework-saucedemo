@@ -143,3 +143,4 @@ Projects are **data-driven from `tests/users.ts` `AUTH_USERS`** (currently `['st
 - Import a raw Locator into a test (tests use Pages and Data only)
 - Use XPath
 - Add a per-user × per-browser matrix, or wire `firefox-problem` / `webkit-error` — cross-browser is standard-user-only and opt-in (ADR-0027, keeping ADR-0004's guardrail)
+- Publish a Playwright trace to an unauthenticated host (GitHub Pages, a public bucket) — a trace records response bodies and live session tokens, so it inherits the confidentiality of the app under test. Ship the artifact, which already inherits the repo's permissions

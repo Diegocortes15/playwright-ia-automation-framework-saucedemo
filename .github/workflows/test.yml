@@ -123,6 +123,30 @@ jobs:
             echo "qase-map.json unchanged — nothing to commit."
           fi
 
+      # Whoever downloads this zip by hand will double-click index.html and find every
+      # trace, video and screenshot missing: the summary is inlined as base64, but those
+      # are fetched from data/, and a browser blocks fetch over file://. Ship the fix
+      # inside the artifact, the way /report-bug's evidence folder carries a README.txt.
+      - name: Explain how to open the report
+        if: ${{ !cancelled() && hashFiles('playwright-report/index.html') != '' }}
+        run: |
+          cat > playwright-report/HOW-TO-OPEN.txt <<'TXT'
+          Do NOT double-click index.html.
+
+          The summary will load, but every trace, video and screenshot will be missing.
+          They are fetched from data/, and a browser blocks fetch over file://.
+
+          Serve the report instead, from the folder this file is in:
+
+              npx playwright show-report .
+
+          Any static HTTP server works too:
+
+              python3 -m http.server
+
+          then open the URL it prints.
+          TXT
+
       - name: Upload HTML report (always)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
