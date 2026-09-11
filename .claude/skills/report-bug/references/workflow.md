@@ -54,8 +54,11 @@ and the message says which is which.
 
 - **The application is wrong** — the test faithfully encodes the AC, and the app does not do it. A defect.
 - **The ticket is wrong** — the app behaves as designed, and the AC describes something it never did. A refinement.
+- **The automation is wrong** — the app and the AC are both fine, and the test encodes an assumption the app never promised to keep. A fix to this repository, and it gets its own ticket like any other work.
 
-They are indistinguishable from the failure alone. A report that asserts "the application has a bug" when the truth was a badly written AC sends someone chasing a ghost, and the credibility of every later report goes with it.
+The build under test, collected as `appBuild`, is the evidence that moves weight between them: an application that changed since the last green run makes the third reading likelier. It **narrows** the question and never closes it, and when no build was recorded say that rather than reasoning as though nothing moved.
+
+They are indistinguishable from the failure alone. A report that asserts "the application has a bug" when the truth was a badly written AC — or a locator of ours that was always too loose — sends someone chasing a ghost, and the credibility of every later report goes with it.
 
 Where the repository documents the behaviour (`docs/app/`), cite it — but **citing it does not
 settle the question**. Documentation records two different things that look identical on the
