@@ -122,6 +122,30 @@ jobs:
           name: observations-${{ needs.gate.outputs.suite }}
           path: .observations/
 
+      # Whoever downloads this zip by hand will double-click index.html and find every
+      # trace, video and screenshot missing: the summary is inlined as base64, but those
+      # are fetched from data/, and a browser blocks fetch over file://. Ship the fix
+      # inside the artifact, the way /report-bug's evidence folder carries a README.txt.
+      - name: Explain how to open the report
+        if: ${{ !cancelled() && hashFiles('playwright-report/index.html') != '' }}
+        run: |
+          cat > playwright-report/HOW-TO-OPEN.txt <<'TXT'
+          Do NOT double-click index.html.
+
+          The summary will load, but every trace, video and screenshot will be missing.
+          They are fetched from data/, and a browser blocks fetch over file://.
+
+          Serve the report instead, from the folder this file is in:
+
+              npx playwright show-report .
+
+          Any static HTTP server works too:
+
+              python3 -m http.server
+
+          then open the URL it prints.
+          TXT
+
       - name: Upload HTML report (always)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -149,6 +173,7 @@ jobs:
           SUITE: ${{ needs.gate.outputs.suite }}
           QASE_RUN_URL: ${{ steps.run.outputs.qase_run_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
           ACTOR: ${{ github.triggering_actor }}
           ENV_LINE: ${{ steps.env.outputs.line }}
@@ -181,4 +206,10 @@ jobs:
             fi
           fi
           body="$body"$'\n'":github: <$RUN_URL|GitHub run & report artifact>"
+          # Getting from that link to an open report is the step people stall on: the
+          # artifact is a zip, and it needs an HTTP server rather than a double-click.
+          # Hand over the exact command with the run id already filled in. It needs the
+          # gh CLI; without gh, download the zip from the run page above and follow the
+          # HOW-TO-OPEN.txt inside it.
+          body="$body"$'\n'":inbox-tray: Open it (needs \`gh\`): \`gh run download $RUN_ID -n playwright-report-$SUITE -D /tmp/pw-$RUN_ID && npx playwright show-report /tmp/pw-$RUN_ID\`"
           jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"
