@@ -54,11 +54,11 @@ Records written before 2026-09-07 predate `Confidence` and `Review by`. **They a
 
 |                                   | Count  |
 | --------------------------------- | ------ |
-| Total records                     | **28** |
-| Superseding / scoping / extending | 10     |
+| Total records                     | **29** |
+| Superseding / scoping / extending | 11     |
 | **Originating decisions**         | **18** |
 
-Eighteen is inside the range; twenty-seven is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-eighth, which is exactly what nobody could do before this file existed. ADR-0027 was the twenty-seventh and ADR-0028 the twenty-eighth; both moved the superseding count rather than the originating one. 0027 replaced a record that had been `Accepted` and false for four months, and 0028 records that ADR-0013's `allowed-tools` guard does not reach a shell script.
+Eighteen is inside the range; twenty-nine is not. Keep the table current when you add one — the point of writing the number down is that the next person sees it before adding the twenty-eighth, which is exactly what nobody could do before this file existed. ADR-0027 was the twenty-seventh and ADR-0028 the twenty-eighth; both moved the superseding count rather than the originating one. 0027 replaced a record that had been `Accepted` and false for four months, and 0028 records that ADR-0013's `allowed-tools` guard does not reach a shell script. ADR-0029 is the twenty-ninth, and it exists because 0027's own `CI is unchanged and stays chromium` had in turn gone false — the same failure, one record later, which is the argument for keeping this table honest rather than the argument for a smaller number.
 
 ## Index
 
@@ -92,6 +92,7 @@ Eighteen is inside the range; twenty-seven is not. Keep the table current when y
 | 0026 | A file-sourced run produces no artifacts                      | scopes 0016 / 0017     |
 | 0027 | Cross-browser is implemented, and opt-in                      | supersedes 0004        |
 | 0028 | Evidence reaches a ticket via a script and an API token       | scopes 0013            |
+| 0029 | Cross-browser is reachable in CI, on demand only              | **supersedes 0027**    |
 
 ---
 

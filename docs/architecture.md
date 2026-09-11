@@ -32,7 +32,7 @@ Phase C+ will layer on the `/from-jira` orchestrator, a code-review skill, and s
 - **ESLint v9 flat config + `eslint-plugin-playwright`** — lint with Playwright-specific safety rules (`no-wait-for-timeout`, `prefer-web-first-assertions`, etc.) that Biome does not yet provide
 - **Prettier 3** (with `endOfLine: 'auto'` for cross-platform CRLF/LF compatibility) — formatter
 - **dotenv** — local env var loading (`.env` → `src/utils/env.ts` single read point)
-- **GitHub Actions on `ubuntu-latest`** — CI; one job, `Playwright matrix`, running the five projects that exist. A second workflow, `regression.yml`, runs on a schedule.
+- **GitHub Actions on `ubuntu-latest`** — CI; one job, `Playwright matrix`, running the five projects that exist. A second workflow, `regression.yml`, runs on a schedule and on manual dispatch, where it also accepts a browser engine (ADR-0029).
 
 ---
 
@@ -302,7 +302,7 @@ The shape ADR-0004 chose, if it is ever built, is chromium across the wired user
 
 ## CI Workflow Overview
 
-Two workflows live in `.github/workflows/`. `test.yml` runs a single job named `Playwright matrix` on `ubuntu-latest` with a `timeout-minutes: 15` cap; `regression.yml` runs the suite on a schedule.
+Two workflows live in `.github/workflows/`. `test.yml` runs a single job named `Playwright matrix` on `ubuntu-latest` with a `timeout-minutes: 15` cap; `regression.yml` runs the suite on two schedules and on manual dispatch. A dispatch chooses the suite (smoke or regression) and the engine (chromium, firefox, webkit or all); the cadences are pinned to chromium, and `scripts/run-suite.sh` holds the engine-to-project mapping for both CI and local runs (ADR-0029).
 
 **Triggers:** `push` and `pull_request` on `[main, e2e-jira-from-issues]`. **A PR targeting any other branch runs no CI at all** — which is how a stacked PR once merged without ever being checked. A `concurrency` block keyed on `${{ github.workflow }}-${{ github.ref }}` cancels any queued or running job for the same workflow+ref when a new run starts, preventing stacked runs from wasting minutes.
 

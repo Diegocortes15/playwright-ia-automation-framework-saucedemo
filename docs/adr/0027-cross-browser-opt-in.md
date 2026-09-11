@@ -1,7 +1,7 @@
 # 0027 — Cross-browser is implemented, and opt-in (supersedes ADR-0004)
 
 **Date:** 2026-09-08
-**Status:** Accepted. Supersedes [ADR-0004](0004-cross-browser-smoke-pattern.md).
+**Status:** Superseded by [ADR-0029](0029-cross-browser-on-demand-in-ci.md) on the CI question only — its _"CI is unchanged and stays chromium"_ consequence is now false, because a manual dispatch may choose an engine. Everything else here stands, including the opt-in mechanism, the standard-user-only guardrail it inherited from ADR-0004, and the `argv` finding. Supersedes [ADR-0004](0004-cross-browser-smoke-pattern.md).
 **Confidence:** High — the suite was run on both engines before this was written. What would change it: an engine difference that only a per-user matrix could catch, which would reopen the guardrail rather than this record.
 **Review by:** — (no shelf life; the trigger below is an event, not a date)
 **Enforced by:** `playwright.config.ts` — the Firefox and WebKit projects are absent from the project list unless `CROSS_BROWSER=1`, so a default run cannot include them, and `npx playwright test --list` proves it in one command.

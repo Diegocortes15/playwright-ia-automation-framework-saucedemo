@@ -4,7 +4,12 @@ import { indexResults, normalizeTitle } from './results-reader';
 import { loadMap } from './map-store';
 import { QaseClient } from './qase-client';
 import { qaseConfig } from '../utils/qase-env';
-import { runEnvironment, formatEnvironmentLine } from '../utils/run-environment';
+import {
+  runEnvironment,
+  formatEnvironmentLine,
+  parseEngines,
+  type Engine,
+} from '../utils/run-environment';
 
 const SEP = ' › '; // matches map-store's logical-key separator
 const QASE_WEB_BASE = 'https://app.qase.io'; // cloud web app (run links); self-hosted differs
@@ -118,7 +123,7 @@ const AMBER = '\x1b[38;5;214m'; // warning
 const RESET = '\x1b[0m';
 const color = (s: string, c: string): string => (process.stdout.isTTY ? `${c}${s}${RESET}` : s);
 
-export async function recordRun(label?: string): Promise<void> {
+export async function recordRun(label?: string, engines?: readonly Engine[]): Promise<void> {
   const cfg = qaseConfig();
   if (!cfg) {
     console.log('TCMS off (QASE_API_TOKEN/QASE_PROJECT_CODE unset) — skipping Qase run.');
@@ -140,7 +145,7 @@ export async function recordRun(label?: string): Promise<void> {
   // Stamp the run with what it executed on + how long it took, so the Qase record
   // stands alone (matches the report metadata + the Slack notification).
   const durationMs = typeof report?.stats?.duration === 'number' ? report.stats.duration : 0;
-  const description = `Environment: ${formatEnvironmentLine(runEnvironment())}\nDuration: ${formatDuration(durationMs)}`;
+  const description = `Environment: ${formatEnvironmentLine(runEnvironment(), engines)}\nDuration: ${formatDuration(durationMs)}`;
   const runId = await new QaseClient(cfg).recordResults(results, {
     jiraKey: '',
     sourceUrl: '',
@@ -161,7 +166,7 @@ export async function recordRun(label?: string): Promise<void> {
 }
 
 if (process.argv[1]?.endsWith('run-report.ts')) {
-  recordRun(process.argv[2]).catch((err) => {
+  recordRun(process.argv[2], parseEngines(process.env.RUN_ENGINES)).catch((err) => {
     console.error(`Qase run failed: ${err}`);
     process.exitCode = 0;
   });
