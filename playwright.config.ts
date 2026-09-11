@@ -43,10 +43,15 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
 
-  // Shown as key/value chips in the HTML report header.
+  // Shown as key/value chips in the HTML report header. The engine chips follow what this
+  // run CAN use, not which --project was filtered to: the config must not read argv (see
+  // the note above `crossBrowserRequested`), so claiming more precision than that would be
+  // a lie a worker process could not back up. A chromium-only run therefore lists Chromium
+  // alone, and any cross-browser run lists all three.
   metadata: {
     OS: env.os,
     Chromium: env.chromium,
+    ...(crossBrowserRequested ? { Firefox: env.firefox, WebKit: env.webkit } : {}),
     Node: env.node,
     Playwright: env.playwright,
   },

@@ -3,7 +3,7 @@ name: Regression & Smoke (scheduled + manual)
 # Names the run in the Actions UI: automated (scheduled, smoke vs regression) vs
 # manual + who triggered it. The smoke cron is '0 5 * * *'; anything else scheduled
 # is the regression cron.
-run-name: ${{ github.event_name == 'schedule' && (github.event.schedule == '0 5 * * *' && 'Automated · smoke' || 'Automated · regression') || format('Manual · {0} — @{1}', inputs.suite, github.triggering_actor) }}
+run-name: ${{ github.event_name == 'schedule' && (github.event.schedule == '0 5 * * *' && 'Automated · smoke · chromium' || 'Automated · regression · chromium') || format('Manual · {0} · {1} — @{2}', inputs.suite, inputs.browser, github.triggering_actor) }}
 
 on:
   # Two scheduled cadences, both gated below (crons are UTC; Bogota = UTC−5):
@@ -25,6 +25,19 @@ on:
           - regression
           - smoke
         default: regression
+      # Scheduled runs are always chromium: the cadences exist to catch regressions in the
+      # app, and re-running them on three engines triples the minutes to re-check the same
+      # application. Engine differences are worth a deliberate look, not a nightly one, so
+      # this is the QA's lever rather than the calendar's (ADR-0027).
+      browser:
+        description: 'Browser engine (scheduled runs are always chromium)'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+          - all
+        default: chromium
 
 permissions:
   contents: read
@@ -36,16 +49,28 @@ jobs:
     outputs:
       run: ${{ steps.check.outputs.run }}
       suite: ${{ steps.check.outputs.suite }}
+      browser: ${{ steps.check.outputs.browser }}
     steps:
       - id: check
         env:
           EVENT: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
           INPUT_SUITE: ${{ inputs.suite }}
+          INPUT_BROWSER: ${{ inputs.browser }}
         run: |
           today=$(date -u -d "$(date -u +%F)" +%s)
+          # Only a manual run may choose an engine. Written as an explicit branch rather
+          # than leaning on a schedule's empty input, so the pin is visible and cannot be
+          # undone by someone giving the input a different default (ADR-0029).
+          # scripts/run-suite.sh refuses the combination too, with exit 66, which is the
+          # gate that holds if this line is ever edited.
           if [ "$EVENT" = "workflow_dispatch" ]; then
-            echo "Manual run — suite=$INPUT_SUITE."
+            echo "browser=${INPUT_BROWSER:-chromium}" >> "$GITHUB_OUTPUT"
+          else
+            echo "browser=chromium" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Manual run — suite=$INPUT_SUITE, browser=${INPUT_BROWSER:-chromium}."
             echo "run=true" >> "$GITHUB_OUTPUT"
             echo "suite=$INPUT_SUITE" >> "$GITHUB_OUTPUT"
           elif [ "$SCHEDULE" = "0 5 * * *" ]; then
@@ -82,7 +107,9 @@ jobs:
     needs: gate
     if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # `all` runs every chromium project plus the four cross-browser ones — 239 tests against
+    # chromium's 83 — and CI retries twice. 20 minutes was sized for chromium alone.
+    timeout-minutes: ${{ needs.gate.outputs.browser == 'all' && 60 || (needs.gate.outputs.browser == 'chromium' && 20 || 40) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -97,21 +124,44 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          # The engine selection is part of the key: with a single key, the first
+          # chromium-only run populates the cache and every later Firefox run gets a cache
+          # HIT and then downloads Firefox anyway, forever, because actions/cache only saves
+          # on a miss.
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ needs.gate.outputs.browser }}
 
-      # Chromium only — the suite never uses firefox/webkit (see the main CI workflow).
-      - run: npx playwright install --with-deps chromium
+      # Chromium is installed unconditionally, even for a Firefox or WebKit run: the
+      # `setup-<user>` projects declare no `use`, so they authenticate on Playwright's
+      # default engine, and `firefox-standard` depends on `setup-standard`. A WebKit run
+      # that installed only WebKit dies in its dependency.
+      - name: Install browsers (${{ needs.gate.outputs.browser }})
+        env:
+          BROWSER: ${{ needs.gate.outputs.browser }}
+        run: |
+          case "$BROWSER" in
+            chromium) engines="chromium" ;;
+            firefox) engines="chromium firefox" ;;
+            webkit) engines="chromium webkit" ;;
+            all) engines="chromium firefox webkit" ;;
+            *) echo "Unknown browser '$BROWSER'." >&2; exit 1 ;;
+          esac
+          echo "Installing: $engines"
+          # shellcheck disable=SC2086 # deliberate word-splitting into separate arguments
+          npx playwright install --with-deps $engines
 
       # Runs the chosen suite AND records a labeled Qase run ("REGRESSION …" / "SMOKE …");
       # the Qase run URL is printed in this step's log.
-      - name: Run ${{ needs.gate.outputs.suite }} + record a Qase run
+      - name: Run ${{ needs.gate.outputs.suite }} on ${{ needs.gate.outputs.browser }} + record a Qase run
         id: run
         env:
           SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
           QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
           QASE_PROJECT_CODE: ${{ secrets.QASE_PROJECT_CODE }}
           CI: 'true'
-        run: npm run qase:${{ needs.gate.outputs.suite }}
+        # One script holds the engine → project mapping, so what CI runs and what a QA runs
+        # locally cannot drift. It also exports RUN_ENGINES, which is how the Qase record and
+        # the Slack line name the real engine instead of assuming Chromium.
+        run: bash scripts/run-suite.sh "${{ needs.gate.outputs.suite }}" "${{ needs.gate.outputs.browser }}"
 
       # Runtime observations (ADR-0021) — things the app did that no test asserted on.
       # Uploaded, never committed: a nightly commit-back would churn main every day.
@@ -119,7 +169,7 @@ jobs:
         if: ${{ !cancelled() && hashFiles('.observations/*.json') != '' }}
         uses: actions/upload-artifact@v7
         with:
-          name: observations-${{ needs.gate.outputs.suite }}
+          name: observations-${{ needs.gate.outputs.suite }}-${{ needs.gate.outputs.browser }}
           path: .observations/
 
       # Whoever downloads this zip by hand will double-click index.html and find every
@@ -150,7 +200,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-${{ needs.gate.outputs.suite }}
+          name: playwright-report-${{ needs.gate.outputs.suite }}-${{ needs.gate.outputs.browser }}
           path: playwright-report/
           retention-days: 14
           if-no-files-found: ignore
@@ -160,7 +210,15 @@ jobs:
       - name: Capture environment
         id: env
         if: ${{ !cancelled() }}
-        run: echo "line=$(npx tsx src/utils/run-environment.ts)" >> "$GITHUB_OUTPUT"
+        env:
+          BROWSER: ${{ needs.gate.outputs.browser }}
+        run: |
+          case "$BROWSER" in
+            all) engines="chromium firefox webkit" ;;
+            *) engines="$BROWSER" ;;
+          esac
+          # shellcheck disable=SC2086 # deliberate word-splitting into separate arguments
+          echo "line=$(npx tsx src/utils/run-environment.ts $engines)" >> "$GITHUB_OUTPUT"
 
       # Post the outcome to Slack: pass/fail + counts, run duration, the environment,
       # the Qase run link, the GitHub run link (→ report artifact), and the
@@ -171,6 +229,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           RESULT: ${{ steps.run.outcome }}
           SUITE: ${{ needs.gate.outputs.suite }}
+          BROWSER: ${{ needs.gate.outputs.browser }}
           QASE_RUN_URL: ${{ steps.run.outputs.qase_run_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           RUN_ID: ${{ github.run_id }}
@@ -190,6 +249,9 @@ jobs:
           if [ "$RESULT" = "success" ]; then icon="✅"; mark=":check-mark-button:"; verb="passed"; else icon="❌"; mark=":cross-mark:"; verb="FAILED"; fi
           if [ "$EVENT_NAME" = "schedule" ]; then who=":robot: Automated (scheduled)"; else who=":scientist-2: Manual by @$ACTOR"; fi
           suite_uc=$(printf '%s' "$SUITE" | tr '[:lower:]' '[:upper:]')
+          # The engine belongs in the headline, not buried in the environment line: someone
+          # scanning the channel needs to know at a glance that the failure is WebKit-only.
+          [ "$BROWSER" != 'chromium' ] && suite_uc="$suite_uc ($BROWSER)"
           body="*$mark $suite_uc $verb*"$'\n'"$who"
           [ -n "$counts" ] && body="$body"$'\n'"$counts"
           [ -n "$dur" ] && body="$body"$'\n'":stopwatch-2: Ran in $dur"
@@ -211,5 +273,5 @@ jobs:
           # Hand over the exact command with the run id already filled in. It needs the
           # gh CLI; without gh, download the zip from the run page above and follow the
           # HOW-TO-OPEN.txt inside it.
-          body="$body"$'\n'":inbox-tray: Open it (needs \`gh\`): \`gh run download $RUN_ID -n playwright-report-$SUITE -D /tmp/pw-$RUN_ID && npx playwright show-report /tmp/pw-$RUN_ID\`"
+          body="$body"$'\n'":inbox-tray: Open it (needs \`gh\`): \`gh run download $RUN_ID -n playwright-report-$SUITE-$BROWSER -D /tmp/pw-$RUN_ID && npx playwright show-report /tmp/pw-$RUN_ID\`"
           jq -n --arg t "$icon $suite_uc $verb" --arg b "$body" '{text: $t, blocks: [{type: "section", text: {type: "mrkdwn", text: $b}}]}' | curl -sS -X POST -H 'Content-type: application/json' -d @- "$SLACK_WEBHOOK_URL"
