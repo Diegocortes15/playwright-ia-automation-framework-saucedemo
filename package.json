@@ -31,8 +31,9 @@
     "format:check": "prettier --check .",
     "tcms:sync": "tsx src/tcms/suite-sync.ts",
     "tcms:run": "tsx src/tcms/run-report.ts",
-    "qase:smoke": "tsx src/tcms/run-and-report.ts SMOKE --grep @smoke",
-    "qase:regression": "tsx src/tcms/run-and-report.ts REGRESSION"
+    "suite": "bash scripts/run-suite.sh",
+    "qase:smoke": "bash scripts/run-suite.sh smoke chromium",
+    "qase:regression": "bash scripts/run-suite.sh regression chromium"
   },
   "devDependencies": {
     "@playwright/cli": "^0.1.13",
