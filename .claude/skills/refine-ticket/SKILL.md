@@ -6,7 +6,7 @@ allowed-tools: Read Glob Grep mcp__atlassian__getAccessibleAtlassianResources mc
 
 # refine-ticket
 
-Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, scores it against the refinement rubric, and loops — auto-resolving gaps from existing automation + docs and asking you (or a source you point it at) for the rest — until the ticket is unambiguous. On your approval it writes a `## Refined Acceptance Criteria` block back to the ticket. It does NOT generate tests; run `/from-issue` after. See ADR-0013.
+Given a Jira issue key (e.g. `SW-123`), this skill reads the ticket via the Atlassian MCP, scores it against the refinement rubric, and loops — auto-resolving gaps from existing automation + docs and asking you (or a source you point it at) for the rest — until the ticket is unambiguous. On your approval it writes a `Refined Acceptance Criteria` section back to the ticket, using Jira's own rich formatting — a divider, an info panel marking the section machine-owned, and a `status` lozenge per acceptance criterion. It does NOT generate tests; run `/from-issue` after. See ADR-0013.
 
 ## How to use it
 
@@ -31,7 +31,7 @@ The full procedural workflow is in [`references/workflow.md`](references/workflo
 - [`references/workflow.md`](references/workflow.md) — the procedural loop
 - [`references/rubric.md`](references/rubric.md) — the "bulletproof" checklist (definition of done)
 - [`references/sources.md`](references/sources.md) — source catalog + user-supplied-source protocol
-- [`references/writeback-template.md`](references/writeback-template.md) — the `## Refined Acceptance Criteria` block + idempotent-update rule
+- [`references/writeback-template.md`](references/writeback-template.md) — the `Refined Acceptance Criteria` block as ADF nodes, the lozenge mapping, and the idempotent-update rule
 
 ## Composition
 
