@@ -8,7 +8,7 @@ allowed-tools: Bash(node:*) Bash(ls:*) Bash(zip:*) Read Glob Grep
 
 Given the last failed run, this skill assembles a bug report you can paste into a tracker: repro steps, the acceptance criterion the test traces to, expected versus actual, any runtime observations recorded during that test, and the paths to the screenshot, video and trace.
 
-**It files nothing.** You invoke it, you read the draft, you decide. That division is the point: the tedious part is transcription, and the part that needs judgment — is this a defect in the application, or a ticket that describes behaviour the application never had? — stays with a person.
+**It files nothing.** You invoke it, you read the draft, you decide. That division is the point: the tedious part is transcription, and the part that needs judgment — is this a defect in the application, a ticket describing behaviour the application never had, or a test of ours encoding an assumption the application never promised to keep? — stays with a person.
 
 ## How to use it
 

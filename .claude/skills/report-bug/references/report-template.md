@@ -10,6 +10,10 @@ reports should find the same thing in the same place every time.
 
 **Environment:** <project, e.g. chromium-problem> · <feature> · found by automated test
 
+**Build under test:** <appBuild.fingerprint, plus "(declared X)" when one was declared> — or
+"not recorded for this run" when `appBuild.missing` is set. Never omit the line: a reader who
+sees nothing cannot tell whether the app was unchanged or simply unmeasured.
+
 ## Steps to reproduce
 
 1. <reproSteps[0]>
@@ -28,7 +32,9 @@ reports should find the same thing in the same place every time.
 
 - **If the application:** <one sentence>
 - **If the ticket:** <one sentence>
+- **If the automation:** <one sentence — the app is fine and the test encodes a stale or over-loose assumption about it>
 - <the repository's own documentation, cited, when it covers this — say whether it specifies intended behaviour or records a known defect; the second does not make the behaviour correct>
+- <when the build under test differs from the last known-good one, say so here and say only that: a moved application makes the third reading likelier, and settles nothing>
 
 ## Evidence
 
@@ -46,6 +52,14 @@ it with the command that step prints.
 
 ## Rules
 
+- **There are three readings, not two, and the third is the one that gets forgotten.** The
+  application can be wrong, the ticket can be wrong, and **the automation can be wrong** — a
+  locator that was always too loose, an assumption about markup that the app never promised
+  to keep. On 2026-09-11 two tests broke because a product card's links gained
+  `role="button"` and an unfiltered `getByRole('button')` started matching three elements.
+  Nothing was wrong with the app's behaviour and nothing was wrong with the ticket. A draft
+  offering only the first two readings forces a reader toward a defect report that does not
+  exist, which is the same failure as asserting one.
 - **`Which is wrong?` is never omitted, and never resolved unilaterally — not even by documentation.** Cite `docs/app/` when it covers the behaviour, and say which kind of record it is: a **specification** ("the system shall do X" — then not doing X is a defect) or a **defect log** ("X is broken for this user" — which proves the bug is *known*, not that it is *correct*). Both readings still stand afterwards. A file describing something as "broken" is the strongest possible evidence that someone considered it a bug.
 - **Steps are the `test.step` titles verbatim.** They describe what actually ran. Rewriting them into prettier prose breaks the guarantee that following the steps reproduces the failure.
 - **Expected Result and Actual Result are always two headings, never one.** They are different kinds of claim: Expected is a **requirement somebody agreed to**, Actual is an **observation of what happened**. Merging them into "Expected vs actual" reads tidier and costs the distinction the whole report turns on — the `Which is wrong?` section exists precisely because either one can be the thing that is wrong, and SW-15 is the case where it was the Expected. Two headings also mean each can be cited on its own: "the Expected in SW-14 is wrong" is a sentence someone needs to be able to say.
