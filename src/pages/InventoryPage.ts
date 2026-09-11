@@ -167,8 +167,21 @@ export class InventoryPage {
 
   // Query — the label of a product card's cart button ("Add to cart" → "Remove"
   // after it's added; saucedemo caps quantity at 1 per product).
+  //
+  // The name filter is NOT optional. A card holds three elements with role=button: the
+  // image link and the title link are `<a href="#" role="button">`, and only the third is
+  // the real `<button>`. An unfiltered `getByRole('button')` matched one of them for
+  // months and then resolved to three the day the app added those role attributes,
+  // failing two tests in strict mode. Anchored, and covering both labels the button
+  // takes, because the label is the thing being read.
   async getProductButtonLabel(productName: string): Promise<string> {
-    return (await this.productCard(productName).getByRole('button').textContent())?.trim() ?? '';
+    return (
+      (
+        await this.productCard(productName)
+          .getByRole('button', { name: /^(Add to cart|Remove)$/i })
+          .textContent()
+      )?.trim() ?? ''
+    );
   }
 
   // Query — cart count from the header badge; 0 when the badge is absent.
